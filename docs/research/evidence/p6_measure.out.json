@@ -1,0 +1,143 @@
+{
+ "scan_small": {
+  "full_scan_pages_min_med_max": [
+   9,
+   14.0,
+   19
+  ],
+  "fx_pages_share_mean": 0.567,
+  "ledger_rows_min_max": [
+   149,
+   222
+  ],
+  "fx_rows_min_max": [
+   180,
+   546
+  ],
+  "pointer_vocab_min_med_max": [
+   477,
+   717.5,
+   931
+  ]
+ },
+ "scan_medium": {
+  "full_scan_pages_min_med_max": [
+   12,
+   18.0,
+   22
+  ],
+  "fx_pages_share_mean": 0.444,
+  "ledger_rows_min_max": [
+   235,
+   344
+  ],
+  "fx_rows_min_max": [
+   180,
+   546
+  ],
+  "pointer_vocab_min_med_max": [
+   659,
+   947.5,
+   1178
+  ]
+ },
+ "scan_large": {
+  "full_scan_pages_min_med_max": [
+   17,
+   22.0,
+   26
+  ],
+  "fx_pages_share_mean": 0.379,
+  "ledger_rows_min_max": [
+   357,
+   455
+  ],
+  "fx_rows_min_max": [
+   180,
+   546
+  ],
+  "pointer_vocab_min_med_max": [
+   918,
+   1180.0,
+   1417
+  ]
+ },
+ "obs_bytes": {
+  "reset": 7585,
+  "full_scan_by_table": {
+   "ledger": 67486,
+   "invoices": 40808,
+   "payments": 16591,
+   "fx": 17986
+  },
+  "full_scan_total": 150456
+ },
+ "silent_policy_official_suite": {
+  "mean_return": -0.5,
+  "by_category": {
+   "clean": 1.0,
+   "interacting": -1.0,
+   "mixed": -1.0
+  }
+ },
+ "official_suite_issue_counts": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  2,
+  2,
+  4,
+  4,
+  4,
+  2,
+  3,
+  4,
+  3,
+  3,
+  4,
+  4,
+  5,
+  5,
+  12
+ ],
+ "min_evidence_set_size_by_type": {
+  "duplicate_invoice:3": 11,
+  "fx_rate:3": 20,
+  "payment_allocation:3": 9,
+  "payment_allocation:4": 6,
+  "payment_allocation:5": 4,
+  "period_attribution:2": 11
+ },
+ "evidence_union_per_episode": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  7,
+  5,
+  12,
+  12,
+  11,
+  5,
+  10,
+  12,
+  6,
+  9,
+  11,
+  12,
+  15,
+  13,
+  34
+ ],
+ "reference_auditor_steps_official": [
+  15,
+  20.5,
+  26
+ ],
+ "random_explorer_dirty_returns_unique": [
+  -1.0
+ ]
+}

@@ -1,0 +1,137 @@
+[
+  {
+    "id": "train-01-clean-retail",
+    "category": "clean",
+    "seed": 1001,
+    "config": {
+      "profile": "retail",
+      "size": "small",
+      "distractors": "normal"
+    },
+    "episode_id": "EP-E23C88503192",
+    "issues": 0
+  },
+  {
+    "id": "train-02-duplicates",
+    "category": "mixed",
+    "seed": 1002,
+    "config": {
+      "profile": "software",
+      "errors": {
+        "duplicate_invoice": 2
+      }
+    },
+    "episode_id": "EP-4E958D774EE5",
+    "issues": 2
+  },
+  {
+    "id": "train-03-allocation",
+    "category": "mixed",
+    "seed": 1003,
+    "config": {
+      "profile": "trading",
+      "errors": {
+        "payment_allocation": 2
+      }
+    },
+    "episode_id": "EP-574FA80797BF",
+    "issues": 2
+  },
+  {
+    "id": "train-04-fx",
+    "category": "mixed",
+    "seed": 1004,
+    "config": {
+      "profile": "manufacturing",
+      "errors": {
+        "fx_rate": 2
+      }
+    },
+    "episode_id": "EP-C58ACE2DDA42",
+    "issues": 2
+  },
+  {
+    "id": "train-05-period",
+    "category": "mixed",
+    "seed": 1005,
+    "config": {
+      "profile": "logistics",
+      "errors": {
+        "period_attribution": 2
+      }
+    },
+    "episode_id": "EP-A922F32F9A0F",
+    "issues": 2
+  },
+  {
+    "id": "train-06-all-four",
+    "category": "mixed",
+    "seed": 1006,
+    "config": {
+      "profile": "consulting",
+      "errors": {
+        "duplicate_invoice": 1,
+        "payment_allocation": 1,
+        "fx_rate": 1,
+        "period_attribution": 1
+      }
+    },
+    "episode_id": "EP-B93B0DEF0B44",
+    "issues": 4
+  },
+  {
+    "id": "train-07-s1-boundary-partial-payment",
+    "category": "interacting",
+    "seed": 1007,
+    "config": {
+      "scenarios": {
+        "fx_partial_payment_boundary": 1
+      }
+    },
+    "episode_id": "EP-661E89702686",
+    "issues": 2
+  },
+  {
+    "id": "train-08-s2-fx-invoice-unapplied",
+    "category": "interacting",
+    "seed": 1008,
+    "config": {
+      "scenarios": {
+        "fx_invoice_unapplied_payment": 1
+      }
+    },
+    "episode_id": "EP-67DB3E6EE773",
+    "issues": 2
+  },
+  {
+    "id": "train-09-clean-trading-large",
+    "category": "clean",
+    "seed": 1009,
+    "config": {
+      "profile": "trading",
+      "size": "large",
+      "distractors": "high"
+    },
+    "episode_id": "EP-6ABE794BAE8D",
+    "issues": 0
+  },
+  {
+    "id": "train-10-dense",
+    "category": "interacting",
+    "seed": 1010,
+    "config": {
+      "size": "large",
+      "errors": {
+        "duplicate_invoice": 2,
+        "payment_allocation": 2,
+        "fx_rate": 2,
+        "period_attribution": 2
+      },
+      "scenarios": {
+        "fx_partial_payment_boundary": 1
+      }
+    },
+    "episode_id": "EP-9C24DB7331FB",
+    "issues": 10
+  }
+]

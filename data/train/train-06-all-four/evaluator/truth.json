@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0",
+  "episode_id": "EP-B93B0DEF0B44",
+  "base_currency": "EUR",
+  "tolerance_minor": 1,
+  "issues": [
+    {
+      "issue_id": "ISS-24RBGN87A3",
+      "type": "payment_allocation",
+      "affected_ids": [
+        "INV-HPRXVPEF",
+        "PAY-NRP5VZ5P"
+      ],
+      "expected_amount_minor": 392584,
+      "currency": "EUR",
+      "allowed_evidence_sets": [
+        [
+          "2025-11-01:GBP:EUR",
+          "DOC-2L4QLE4J2R",
+          "DOC-QV7XNXMA52",
+          "GL-Q3RDX89EL"
+        ]
+      ],
+      "scenario": "single"
+    },
+    {
+      "issue_id": "ISS-6FYQVMGWFH",
+      "type": "fx_rate",
+      "affected_ids": [
+        "INV-T837MSZZ"
+      ],
+      "expected_amount_minor": 5872,
+      "currency": "EUR",
+      "allowed_evidence_sets": [
+        [
+          "2025-11-24:GBP:EUR",
+          "DOC-TDYW9RCBYU",
+          "GL-CZPW5Q6PJ"
+        ],
+        [
+          "2025-11-24:GBP:EUR",
+          "DOC-TDYW9RCBYU",
+          "GL-2F28MBKCL"
+        ]
+      ],
+      "scenario": "single"
+    },
+    {
+      "issue_id": "ISS-STDBA25JBR",
+      "type": "duplicate_invoice",
+      "affected_ids": [
+        "INV-7LYM2DMU",
+        "INV-TQHATK2Y"
+      ],
+      "expected_amount_minor": 9594,
+      "currency": "EUR",
+      "allowed_evidence_sets": [
+        [
+          "DOC-6C8P28S38E",
+          "DOC-QA4SKAGKKK",
+          "GL-GP2RUNBSH"
+        ],
+        [
+          "DOC-6C8P28S38E",
+          "DOC-QA4SKAGKKK",
+          "GL-S5CRV9WLA"
+        ],
+        [
+          "DOC-6C8P28S38E",
+          "DOC-QA4SKAGKKK",
+          "GL-LL4ZFX8RL"
+        ],
+        [
+          "DOC-6C8P28S38E",
+          "DOC-QA4SKAGKKK",
+          "GL-MNLZY6SF3"
+        ]
+      ],
+      "scenario": "single"
+    },
+    {
+      "issue_id": "ISS-XPWTDZ8XFR",
+      "type": "period_attribution",
+      "affected_ids": [
+        "INV-2FHL2E92"
+      ],
+      "expected_amount_minor": 266032,
+      "currency": "EUR",
+      "allowed_evidence_sets": [
+        [
+          "DOC-43NRKYY4BX",
+          "GL-TMP2M67QX"
+        ],
+        [
+          "DOC-43NRKYY4BX",
+          "GL-GW9FZDCKJ"
+        ]
+      ],
+      "scenario": "single"
+    }
+  ]
+}

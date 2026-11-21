@@ -1,0 +1,38 @@
+{
+  "suite_version": "1.0",
+  "config_version": "1.0",
+  "split": "eval",
+  "description": "Closed evaluation structure: 20 episodes (5 clean, 5 interacting, 10 mixed) run by all four baseline policies, plus 20 metamorphic pairs that change record order, every id, names and timestamp representation. Seeds are NOT stored here: they are derived from a seed base supplied at run time (--seed-base), and closed runs additionally key generation with a secret (OPHANIM_EVAL_SECRET). Parameter combinations are new relative to the train and dev suites; no new error types are introduced.",
+  "seed_derivation": "seed_i = int(sha256(f'{seed_base}|{split}|{i}').hexdigest()[:15], 16)",
+  "episodes": [
+    {"id": "eval-01-clean", "category": "clean", "config": {"profile": "retail", "distractors": "high"}},
+    {"id": "eval-02-clean", "category": "clean", "config": {"profile": "trading", "size": "large"}},
+    {"id": "eval-03-clean", "category": "clean", "config": {"profile": "software", "size": "small", "distractors": "high", "presentation": {"order": "shuffled"}}},
+    {"id": "eval-04-clean", "category": "clean", "config": {"profile": "manufacturing", "presentation": {"timestamp_offset": "company"}}},
+    {"id": "eval-05-clean", "category": "clean", "config": {"profile": "consulting", "size": "large", "distractors": "high"}},
+
+    {"id": "eval-06-s1", "category": "interacting", "config": {"profile": "logistics", "scenarios": {"fx_partial_payment_boundary": 1}}},
+    {"id": "eval-07-s2", "category": "interacting", "config": {"profile": "consulting", "scenarios": {"fx_invoice_unapplied_payment": 1}}},
+    {"id": "eval-08-s1-s2", "category": "interacting", "config": {"profile": "trading", "size": "large", "scenarios": {"fx_partial_payment_boundary": 1, "fx_invoice_unapplied_payment": 1}}},
+    {"id": "eval-09-s1-fx-period", "category": "interacting", "config": {"profile": "manufacturing", "scenarios": {"fx_partial_payment_boundary": 1}, "errors": {"fx_rate": 1, "period_attribution": 1}}},
+    {"id": "eval-10-s2-dup-alloc", "category": "interacting", "config": {"profile": "retail", "size": "large", "scenarios": {"fx_invoice_unapplied_payment": 1}, "errors": {"duplicate_invoice": 1, "payment_allocation": 1}}},
+
+    {"id": "eval-11-dup-period", "category": "mixed", "config": {"profile": "software", "size": "small", "errors": {"duplicate_invoice": 1, "period_attribution": 1}}},
+    {"id": "eval-12-alloc-fx", "category": "mixed", "config": {"profile": "logistics", "errors": {"payment_allocation": 2, "fx_rate": 1}}},
+    {"id": "eval-13-dup-fx", "category": "mixed", "config": {"profile": "consulting", "size": "large", "errors": {"duplicate_invoice": 2, "fx_rate": 2}}},
+    {"id": "eval-14-period-3", "category": "mixed", "config": {"profile": "trading", "errors": {"period_attribution": 3}, "presentation": {"order": "shuffled"}}},
+    {"id": "eval-15-alloc-period-fx", "category": "mixed", "config": {"profile": "manufacturing", "errors": {"payment_allocation": 1, "period_attribution": 1, "fx_rate": 1}}},
+    {"id": "eval-16-all-four", "category": "mixed", "config": {"profile": "retail", "errors": {"duplicate_invoice": 1, "payment_allocation": 1, "fx_rate": 1, "period_attribution": 1}, "presentation": {"timestamp_offset": "company"}}},
+    {"id": "eval-17-fx-4", "category": "mixed", "config": {"profile": "trading", "size": "large", "errors": {"fx_rate": 4}}},
+    {"id": "eval-18-dup-alloc", "category": "mixed", "config": {"profile": "software", "size": "large", "errors": {"duplicate_invoice": 3, "payment_allocation": 2}}},
+    {"id": "eval-19-period-alloc-dup", "category": "mixed", "config": {"profile": "logistics", "size": "large", "distractors": "high", "errors": {"period_attribution": 2, "payment_allocation": 2, "duplicate_invoice": 1}}},
+    {"id": "eval-20-twelve", "category": "mixed", "config": {"profile": "consulting", "size": "large", "errors": {"duplicate_invoice": 2, "payment_allocation": 2, "fx_rate": 2, "period_attribution": 2}, "scenarios": {"fx_partial_payment_boundary": 1, "fx_invoice_unapplied_payment": 1}}}
+  ],
+  "metamorphic": {
+    "description": "Each of the 20 episode configs above, with an independently derived seed (split 'metamorphic'), is paired with a variant that changes record order and every public id, plus names and/or timestamp representation.",
+    "variants": [
+      {"id_salt": "mm-ids-a", "name_salt": "default", "order": "shuffled", "timestamp_offset": "utc"},
+      {"id_salt": "mm-ids-b", "name_salt": "mm-names-b", "order": "shuffled", "timestamp_offset": "company"}
+    ]
+  }
+}

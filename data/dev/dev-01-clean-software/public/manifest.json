@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0",
+  "env_version": "0.1.0",
+  "episode_id": "EP-4DAD2832F8D8",
+  "company_name": "Selarvale Digital Co.",
+  "company_profile": "Software services company",
+  "base_currency": "USD",
+  "period_start": "2026-09-01",
+  "period_end": "2026-09-30",
+  "timezone": "-05:00",
+  "record_counts": {
+    "ledger": 299,
+    "invoices": 79,
+    "payments": 70,
+    "fx": 360
+  },
+  "document_count": 149,
+  "rounding": {
+    "mode": "ROUND_HALF_UP",
+    "currency_exponents": {
+      "EUR": 2,
+      "GBP": 2,
+      "JPY": 0,
+      "SGD": 2,
+      "USD": 2
+    },
+    "fx_rate_format": "decimal string",
+    "money_format": "integer minor units"
+  },
+  "files": {
+    "ledger": "ledger.csv",
+    "invoices": "invoices.jsonl",
+    "payments": "payments.jsonl",
+    "fx": "fx.csv",
+    "policy": "policy.json"
+  }
+}

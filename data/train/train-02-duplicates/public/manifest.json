@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0",
+  "env_version": "0.1.0",
+  "episode_id": "EP-4E958D774EE5",
+  "company_name": "Norenwen Group AG",
+  "company_profile": "Software services company",
+  "base_currency": "GBP",
+  "period_start": "2025-05-01",
+  "period_end": "2025-05-31",
+  "timezone": "+01:00",
+  "record_counts": {
+    "ledger": 298,
+    "invoices": 77,
+    "payments": 64,
+    "fx": 364
+  },
+  "document_count": 141,
+  "rounding": {
+    "mode": "ROUND_HALF_UP",
+    "currency_exponents": {
+      "EUR": 2,
+      "GBP": 2,
+      "JPY": 0,
+      "SGD": 2,
+      "USD": 2
+    },
+    "fx_rate_format": "decimal string",
+    "money_format": "integer minor units"
+  },
+  "files": {
+    "ledger": "ledger.csv",
+    "invoices": "invoices.jsonl",
+    "payments": "payments.jsonl",
+    "fx": "fx.csv",
+    "policy": "policy.json"
+  }
+}

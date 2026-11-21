@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0",
+  "episode_id": "EP-C58ACE2DDA42",
+  "base_currency": "KZT",
+  "tolerance_minor": 1,
+  "issues": [
+    {
+      "issue_id": "ISS-369QQ79BFU",
+      "type": "fx_rate",
+      "affected_ids": [
+        "INV-FV2HLHYM"
+      ],
+      "expected_amount_minor": 29599792,
+      "currency": "KZT",
+      "allowed_evidence_sets": [
+        [
+          "2025-04-26:JPY:KZT",
+          "DOC-HYWVUSVZSL",
+          "GL-CM8YXZ4AX"
+        ],
+        [
+          "2025-04-26:JPY:KZT",
+          "DOC-HYWVUSVZSL",
+          "GL-P78JRFV3F"
+        ]
+      ],
+      "scenario": "single"
+    },
+    {
+      "issue_id": "ISS-AJ89WEQJSA",
+      "type": "fx_rate",
+      "affected_ids": [
+        "INV-Q9SWU59U"
+      ],
+      "expected_amount_minor": 49315921,
+      "currency": "KZT",
+      "allowed_evidence_sets": [
+        [
+          "2025-04-05:CHF:KZT",
+          "DOC-3CPGHZ4HQS",
+          "GL-RMXXP7ZC6"
+        ],
+        [
+          "2025-04-05:CHF:KZT",
+          "DOC-3CPGHZ4HQS",
+          "GL-92HYQGD4T"
+        ]
+      ],
+      "scenario": "single"
+    }
+  ]
+}

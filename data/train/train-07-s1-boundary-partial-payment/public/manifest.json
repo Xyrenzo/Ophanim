@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0",
+  "env_version": "0.1.0",
+  "episode_id": "EP-661E89702686",
+  "company_name": "Celidex Trading House Inc.",
+  "company_profile": "International trading company",
+  "base_currency": "EUR",
+  "period_start": "2026-09-01",
+  "period_end": "2026-09-30",
+  "timezone": "+06:00",
+  "record_counts": {
+    "ledger": 281,
+    "invoices": 76,
+    "payments": 56,
+    "fx": 450
+  },
+  "document_count": 132,
+  "rounding": {
+    "mode": "ROUND_HALF_UP",
+    "currency_exponents": {
+      "AED": 2,
+      "CNY": 2,
+      "EUR": 2,
+      "GBP": 2,
+      "JPY": 0,
+      "USD": 2
+    },
+    "fx_rate_format": "decimal string",
+    "money_format": "integer minor units"
+  },
+  "files": {
+    "ledger": "ledger.csv",
+    "invoices": "invoices.jsonl",
+    "payments": "payments.jsonl",
+    "fx": "fx.csv",
+    "policy": "policy.json"
+  }
+}

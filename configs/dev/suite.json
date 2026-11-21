@@ -1,0 +1,30 @@
+{
+  "suite_version": "1.0",
+  "config_version": "1.0",
+  "split": "dev",
+  "description": "Open development episodes. Explicit public seeds 2001-2010; parameter combinations differ from train.",
+  "episodes": [
+    {"id": "dev-01-clean-software", "category": "clean", "seed": 2001,
+     "config": {"profile": "software", "distractors": "low"}},
+    {"id": "dev-02-dup-fx-small", "category": "mixed", "seed": 2002,
+     "config": {"profile": "retail", "size": "small", "errors": {"duplicate_invoice": 1, "fx_rate": 1}}},
+    {"id": "dev-03-allocation-3", "category": "mixed", "seed": 2003,
+     "config": {"profile": "consulting", "errors": {"payment_allocation": 3}}},
+    {"id": "dev-04-period-fx-large", "category": "mixed", "seed": 2004,
+     "config": {"profile": "trading", "size": "large", "errors": {"period_attribution": 1, "fx_rate": 1}}},
+    {"id": "dev-05-s1-s2", "category": "interacting", "seed": 2005,
+     "config": {"profile": "manufacturing", "scenarios": {"fx_partial_payment_boundary": 1, "fx_invoice_unapplied_payment": 1}}},
+    {"id": "dev-06-clean-logistics", "category": "clean", "seed": 2006,
+     "config": {"profile": "logistics", "distractors": "high"}},
+    {"id": "dev-07-shuffled", "category": "mixed", "seed": 2007,
+     "config": {"errors": {"duplicate_invoice": 1, "payment_allocation": 1, "period_attribution": 1},
+                "presentation": {"order": "shuffled"}}},
+    {"id": "dev-08-fx-3-large", "category": "mixed", "seed": 2008,
+     "config": {"profile": "software", "size": "large", "errors": {"fx_rate": 3}}},
+    {"id": "dev-09-s2-period", "category": "interacting", "seed": 2009,
+     "config": {"profile": "retail", "scenarios": {"fx_invoice_unapplied_payment": 1}, "errors": {"period_attribution": 2}}},
+    {"id": "dev-10-all-plus-s1", "category": "interacting", "seed": 2010,
+     "config": {"profile": "logistics", "size": "large", "errors": {"duplicate_invoice": 1, "payment_allocation": 1, "fx_rate": 1, "period_attribution": 1},
+                "scenarios": {"fx_partial_payment_boundary": 1}}}
+  ]
+}

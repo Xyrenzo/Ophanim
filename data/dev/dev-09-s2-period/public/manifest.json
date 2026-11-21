@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0",
+  "env_version": "0.1.0",
+  "episode_id": "EP-61BFEF14C901",
+  "company_name": "Istilan Group Ltd",
+  "company_profile": "Small retail company",
+  "base_currency": "USD",
+  "period_start": "2025-10-01",
+  "period_end": "2025-10-31",
+  "timezone": "-03:00",
+  "record_counts": {
+    "ledger": 288,
+    "invoices": 76,
+    "payments": 64,
+    "fx": 182
+  },
+  "document_count": 140,
+  "rounding": {
+    "mode": "ROUND_HALF_UP",
+    "currency_exponents": {
+      "CNY": 2,
+      "EUR": 2,
+      "USD": 2
+    },
+    "fx_rate_format": "decimal string",
+    "money_format": "integer minor units"
+  },
+  "files": {
+    "ledger": "ledger.csv",
+    "invoices": "invoices.jsonl",
+    "payments": "payments.jsonl",
+    "fx": "fx.csv",
+    "policy": "policy.json"
+  }
+}

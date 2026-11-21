@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0",
+  "base_currency": "EUR",
+  "timezone": "+06:00",
+  "currency_exponents": {
+    "AED": 2,
+    "CNY": 2,
+    "EUR": 2,
+    "GBP": 2,
+    "JPY": 0,
+    "USD": 2
+  },
+  "accounting_date": "The local calendar date, in the company timezone above, of the source document: invoice.issued_at for invoices, payment.timestamp for payments.",
+  "reporting_period": {
+    "start": "2026-09-01",
+    "end": "2026-09-30",
+    "inclusive": true,
+    "rule": "A posting belongs to this period if and only if the accounting date of its source document falls between start and end inclusive. Ledger timestamps are stored in UTC."
+  },
+  "fx": {
+    "source": "fx.csv",
+    "quote": "1 unit of source_currency = rate units of target_currency (the base currency).",
+    "rate_date": "Use the rate dated on the document's accounting date.",
+    "settlement": "AP is cleared at the invoice's rate; Bank is credited at the payment's rate; the difference is posted to account 7900."
+  },
+  "rounding": {
+    "mode": "ROUND_HALF_UP",
+    "rule": "convert(amount_minor) = round_half_up(amount_minor / 10**exp(source) * rate, exp(target)) expressed in target minor units. Each document amount (or remittance line) is converted once, as a whole."
+  },
+  "accounts": {
+    "1000": "Bank",
+    "2000": "Accounts payable",
+    "2090": "Suspense - payments awaiting identification",
+    "5100": "Expense - goods",
+    "6200": "Expense - freight",
+    "6500": "Expense - services",
+    "6600": "Expense - insurance",
+    "7900": "Realised FX gain/loss"
+  },
+  "posting_rules": {
+    "invoice": "Dr expense / Cr 2000 AP, base amount of the invoice total.",
+    "payment_with_remittance": "One Dr 2000 AP row per remittance line (invoice_id set) at the invoice's rate; Cr 1000 Bank at the payment's rate; difference to 7900.",
+    "payment_without_remittance": "Dr 2090 Suspense / Cr 1000 Bank at the payment's rate. This is correct treatment.",
+    "reversal": "Mirror image of the original invoice rows; an invoice reversed in full has no net effect."
+  },
+  "allocation": "Every remittance line (invoice_refs) of a payment must be applied in full to the referenced invoice's AP. Suspense is only for payments without remittance information.",
+  "duplicates": "A supplier invoice is identified by (entity_id, vendor_ref). It may be recorded at most once, net of reversals. Equal amounts or equal vendor_ref across different suppliers are not duplicates.",
+  "tolerance_minor": 1
+}

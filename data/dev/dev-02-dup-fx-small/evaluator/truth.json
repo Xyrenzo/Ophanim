@@ -1,0 +1,63 @@
+{
+  "schema_version": "1.0",
+  "episode_id": "EP-ED2085DAA240",
+  "base_currency": "USD",
+  "tolerance_minor": 1,
+  "issues": [
+    {
+      "issue_id": "ISS-4448XMMZR8",
+      "type": "duplicate_invoice",
+      "affected_ids": [
+        "INV-JHG4B6AR",
+        "INV-SG6U3VP8"
+      ],
+      "expected_amount_minor": 161894,
+      "currency": "USD",
+      "allowed_evidence_sets": [
+        [
+          "DOC-E48YFWDNRG",
+          "DOC-PE8VLZZVNJ",
+          "GL-HVQN34PNK"
+        ],
+        [
+          "DOC-E48YFWDNRG",
+          "DOC-PE8VLZZVNJ",
+          "GL-ERYLKLUAR"
+        ],
+        [
+          "DOC-E48YFWDNRG",
+          "DOC-PE8VLZZVNJ",
+          "GL-VLHC5AM4L"
+        ],
+        [
+          "DOC-E48YFWDNRG",
+          "DOC-PE8VLZZVNJ",
+          "GL-3PCZ6CRFG"
+        ]
+      ],
+      "scenario": "single"
+    },
+    {
+      "issue_id": "ISS-QZCG7KCNAF",
+      "type": "fx_rate",
+      "affected_ids": [
+        "INV-S9T6CGX5"
+      ],
+      "expected_amount_minor": 1639,
+      "currency": "USD",
+      "allowed_evidence_sets": [
+        [
+          "2026-12-25:CNY:USD",
+          "DOC-AFCLY43GSK",
+          "GL-566PNWJNB"
+        ],
+        [
+          "2026-12-25:CNY:USD",
+          "DOC-AFCLY43GSK",
+          "GL-U4HXZ2BP2"
+        ]
+      ],
+      "scenario": "single"
+    }
+  ]
+}

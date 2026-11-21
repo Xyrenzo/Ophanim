@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0",
+  "episode_id": "EP-661E89702686",
+  "base_currency": "EUR",
+  "tolerance_minor": 1,
+  "issues": [
+    {
+      "issue_id": "ISS-24PMBGWMQR",
+      "type": "fx_rate",
+      "affected_ids": [
+        "PAY-Z9YWVNEF"
+      ],
+      "expected_amount_minor": 1131,
+      "currency": "EUR",
+      "allowed_evidence_sets": [
+        [
+          "2026-09-01:GBP:EUR",
+          "DOC-9NPGXLGDU8",
+          "GL-22EZFTPCE"
+        ]
+      ],
+      "scenario": "fx_partial_payment_boundary"
+    },
+    {
+      "issue_id": "ISS-9LQKC4FRMC",
+      "type": "payment_allocation",
+      "affected_ids": [
+        "INV-CZTEUSG5",
+        "PAY-Z9YWVNEF"
+      ],
+      "expected_amount_minor": 289228,
+      "currency": "EUR",
+      "allowed_evidence_sets": [
+        [
+          "2026-08-18:GBP:EUR",
+          "DOC-8HPSB2RCNJ",
+          "DOC-9NPGXLGDU8",
+          "GL-6TMVJ83WQ",
+          "GL-ZD5XZLGCP"
+        ]
+      ],
+      "scenario": "fx_partial_payment_boundary"
+    }
+  ]
+}

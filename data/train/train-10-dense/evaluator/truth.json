@@ -1,0 +1,226 @@
+{
+  "schema_version": "1.0",
+  "episode_id": "EP-9C24DB7331FB",
+  "base_currency": "GBP",
+  "tolerance_minor": 1,
+  "issues": [
+    {
+      "issue_id": "ISS-4KCSZG7CFT",
+      "type": "fx_rate",
+      "affected_ids": [
+        "PAY-4EMSE49M"
+      ],
+      "expected_amount_minor": 6335,
+      "currency": "GBP",
+      "allowed_evidence_sets": [
+        [
+          "2025-08-01:EUR:GBP",
+          "DOC-VLRMPQYBBV",
+          "GL-2SEQ79R9N"
+        ]
+      ],
+      "scenario": "fx_partial_payment_boundary"
+    },
+    {
+      "issue_id": "ISS-5NTFGPWEU5",
+      "type": "fx_rate",
+      "affected_ids": [
+        "PAY-SHPSSEJY"
+      ],
+      "expected_amount_minor": 5595,
+      "currency": "GBP",
+      "allowed_evidence_sets": [
+        [
+          "2025-08-30:EUR:GBP",
+          "DOC-LWEC4G4PQA",
+          "GL-FX3LPNMU5"
+        ]
+      ],
+      "scenario": "single"
+    },
+    {
+      "issue_id": "ISS-5TG6E3YYAY",
+      "type": "fx_rate",
+      "affected_ids": [
+        "INV-XRP65GLL"
+      ],
+      "expected_amount_minor": 5286,
+      "currency": "GBP",
+      "allowed_evidence_sets": [
+        [
+          "2025-08-01:EUR:GBP",
+          "DOC-Y2NUBD498L",
+          "GL-P2UGDTGPV"
+        ],
+        [
+          "2025-08-01:EUR:GBP",
+          "DOC-Y2NUBD498L",
+          "GL-8R73WGME5"
+        ]
+      ],
+      "scenario": "single"
+    },
+    {
+      "issue_id": "ISS-82FRQ9PBV9",
+      "type": "period_attribution",
+      "affected_ids": [
+        "INV-EYMLL82B"
+      ],
+      "expected_amount_minor": 887323,
+      "currency": "GBP",
+      "allowed_evidence_sets": [
+        [
+          "DOC-URX64ALMQA",
+          "GL-XXDV7R8DX"
+        ],
+        [
+          "DOC-URX64ALMQA",
+          "GL-B5TRJ262H"
+        ]
+      ],
+      "scenario": "single"
+    },
+    {
+      "issue_id": "ISS-9BWH5T4MDE",
+      "type": "duplicate_invoice",
+      "affected_ids": [
+        "INV-HEVHULDB",
+        "INV-WTF6H4FR"
+      ],
+      "expected_amount_minor": 217737,
+      "currency": "GBP",
+      "allowed_evidence_sets": [
+        [
+          "DOC-994Z5CZLKS",
+          "DOC-Z9NYUGWNH8",
+          "GL-MPL28FVUB"
+        ],
+        [
+          "DOC-994Z5CZLKS",
+          "DOC-Z9NYUGWNH8",
+          "GL-VDXLXP67L"
+        ],
+        [
+          "DOC-994Z5CZLKS",
+          "DOC-Z9NYUGWNH8",
+          "GL-LVUCWHENA"
+        ],
+        [
+          "DOC-994Z5CZLKS",
+          "DOC-Z9NYUGWNH8",
+          "GL-NCR9MXU4W"
+        ]
+      ],
+      "scenario": "single"
+    },
+    {
+      "issue_id": "ISS-CLDXNF2WFQ",
+      "type": "payment_allocation",
+      "affected_ids": [
+        "INV-X2QTYVKB",
+        "PAY-4EMSE49M"
+      ],
+      "expected_amount_minor": 1904926,
+      "currency": "GBP",
+      "allowed_evidence_sets": [
+        [
+          "2025-07-21:EUR:GBP",
+          "DOC-GY4ZEZV72B",
+          "DOC-VLRMPQYBBV",
+          "GL-PFVSHMGUH",
+          "GL-XSGXCN79F"
+        ]
+      ],
+      "scenario": "fx_partial_payment_boundary"
+    },
+    {
+      "issue_id": "ISS-HYUJR4QXE3",
+      "type": "payment_allocation",
+      "affected_ids": [
+        "INV-LZ9NWW25",
+        "PAY-U2AEV6HL"
+      ],
+      "expected_amount_minor": 56861,
+      "currency": "GBP",
+      "allowed_evidence_sets": [
+        [
+          "DOC-EEQ6AWPWQ3",
+          "DOC-GYEVKSTT9X",
+          "GL-6TX2FGKC3"
+        ]
+      ],
+      "scenario": "single"
+    },
+    {
+      "issue_id": "ISS-LR9A3YPFYU",
+      "type": "duplicate_invoice",
+      "affected_ids": [
+        "INV-C6GT52JU",
+        "INV-ZK9YNS5Y"
+      ],
+      "expected_amount_minor": 447232,
+      "currency": "GBP",
+      "allowed_evidence_sets": [
+        [
+          "DOC-RPT2M4UMY6",
+          "DOC-WBRWA687YF",
+          "GL-7HQL9E6FD"
+        ],
+        [
+          "DOC-RPT2M4UMY6",
+          "DOC-WBRWA687YF",
+          "GL-PUD3LYUQV"
+        ],
+        [
+          "DOC-RPT2M4UMY6",
+          "DOC-WBRWA687YF",
+          "GL-DK84E7LVE"
+        ],
+        [
+          "DOC-RPT2M4UMY6",
+          "DOC-WBRWA687YF",
+          "GL-5R4743X7X"
+        ]
+      ],
+      "scenario": "single"
+    },
+    {
+      "issue_id": "ISS-X6XEA9JUAR",
+      "type": "period_attribution",
+      "affected_ids": [
+        "INV-S5A2XK8G"
+      ],
+      "expected_amount_minor": 2002987,
+      "currency": "GBP",
+      "allowed_evidence_sets": [
+        [
+          "DOC-H75VECQVWQ",
+          "GL-LUYDX5CLK"
+        ],
+        [
+          "DOC-H75VECQVWQ",
+          "GL-DS7BXE86M"
+        ]
+      ],
+      "scenario": "single"
+    },
+    {
+      "issue_id": "ISS-XA5NCBJPGH",
+      "type": "payment_allocation",
+      "affected_ids": [
+        "INV-GYNM4NT6",
+        "PAY-6ZJBALK2"
+      ],
+      "expected_amount_minor": 85240,
+      "currency": "GBP",
+      "allowed_evidence_sets": [
+        [
+          "DOC-6RHY9HYDQV",
+          "DOC-T7L5DCKEXV",
+          "GL-VBTG4XYJN"
+        ]
+      ],
+      "scenario": "single"
+    }
+  ]
+}

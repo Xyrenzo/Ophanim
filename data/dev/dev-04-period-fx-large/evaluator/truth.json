@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0",
+  "episode_id": "EP-36FABED50EFE",
+  "base_currency": "USD",
+  "tolerance_minor": 1,
+  "issues": [
+    {
+      "issue_id": "ISS-6DM3SSGX4K",
+      "type": "fx_rate",
+      "affected_ids": [
+        "PAY-P9J9P5UV"
+      ],
+      "expected_amount_minor": 558,
+      "currency": "USD",
+      "allowed_evidence_sets": [
+        [
+          "2026-12-26:AED:USD",
+          "DOC-FPYBB2EDHW",
+          "GL-K3MA2PQUF"
+        ]
+      ],
+      "scenario": "single"
+    },
+    {
+      "issue_id": "ISS-QDTEJ9JP3A",
+      "type": "period_attribution",
+      "affected_ids": [
+        "INV-PBLN8XFP"
+      ],
+      "expected_amount_minor": 11674140,
+      "currency": "USD",
+      "allowed_evidence_sets": [
+        [
+          "DOC-YUVU4GK8WD",
+          "GL-PP8NLLXF5"
+        ],
+        [
+          "DOC-YUVU4GK8WD",
+          "GL-PZ3UL2RE7"
+        ]
+      ],
+      "scenario": "single"
+    }
+  ]
+}

@@ -1,0 +1,148 @@
+[
+  {
+    "id": "dev-01-clean-software",
+    "category": "clean",
+    "seed": 2001,
+    "config": {
+      "profile": "software",
+      "distractors": "low"
+    },
+    "episode_id": "EP-4DAD2832F8D8",
+    "issues": 0
+  },
+  {
+    "id": "dev-02-dup-fx-small",
+    "category": "mixed",
+    "seed": 2002,
+    "config": {
+      "profile": "retail",
+      "size": "small",
+      "errors": {
+        "duplicate_invoice": 1,
+        "fx_rate": 1
+      }
+    },
+    "episode_id": "EP-ED2085DAA240",
+    "issues": 2
+  },
+  {
+    "id": "dev-03-allocation-3",
+    "category": "mixed",
+    "seed": 2003,
+    "config": {
+      "profile": "consulting",
+      "errors": {
+        "payment_allocation": 3
+      }
+    },
+    "episode_id": "EP-A89F92652F58",
+    "issues": 3
+  },
+  {
+    "id": "dev-04-period-fx-large",
+    "category": "mixed",
+    "seed": 2004,
+    "config": {
+      "profile": "trading",
+      "size": "large",
+      "errors": {
+        "period_attribution": 1,
+        "fx_rate": 1
+      }
+    },
+    "episode_id": "EP-36FABED50EFE",
+    "issues": 2
+  },
+  {
+    "id": "dev-05-s1-s2",
+    "category": "interacting",
+    "seed": 2005,
+    "config": {
+      "profile": "manufacturing",
+      "scenarios": {
+        "fx_partial_payment_boundary": 1,
+        "fx_invoice_unapplied_payment": 1
+      }
+    },
+    "episode_id": "EP-8103D14F4488",
+    "issues": 4
+  },
+  {
+    "id": "dev-06-clean-logistics",
+    "category": "clean",
+    "seed": 2006,
+    "config": {
+      "profile": "logistics",
+      "distractors": "high"
+    },
+    "episode_id": "EP-9E0141236406",
+    "issues": 0
+  },
+  {
+    "id": "dev-07-shuffled",
+    "category": "mixed",
+    "seed": 2007,
+    "config": {
+      "errors": {
+        "duplicate_invoice": 1,
+        "payment_allocation": 1,
+        "period_attribution": 1
+      },
+      "presentation": {
+        "order": "shuffled"
+      }
+    },
+    "episode_id": "EP-654AE038F5D9",
+    "issues": 3
+  },
+  {
+    "id": "dev-08-fx-3-large",
+    "category": "mixed",
+    "seed": 2008,
+    "config": {
+      "profile": "software",
+      "size": "large",
+      "errors": {
+        "fx_rate": 3
+      }
+    },
+    "episode_id": "EP-FEF8113A6B4D",
+    "issues": 3
+  },
+  {
+    "id": "dev-09-s2-period",
+    "category": "interacting",
+    "seed": 2009,
+    "config": {
+      "profile": "retail",
+      "scenarios": {
+        "fx_invoice_unapplied_payment": 1
+      },
+      "errors": {
+        "period_attribution": 2
+      }
+    },
+    "episode_id": "EP-61BFEF14C901",
+    "issues": 4
+  },
+  {
+    "id": "dev-10-all-plus-s1",
+    "category": "interacting",
+    "seed": 2010,
+    "config": {
+      "profile": "logistics",
+      "size": "large",
+      "errors": {
+        "duplicate_invoice": 1,
+        "payment_allocation": 1,
+        "fx_rate": 1,
+        "period_attribution": 1
+      },
+      "scenarios": {
+        "fx_partial_payment_boundary": 1
+      }
+    },
+    "episode_id": "EP-01D37A2560AB",
+    "issues": 6
+  }
+]

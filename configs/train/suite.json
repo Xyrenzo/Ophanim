@@ -1,0 +1,29 @@
+{
+  "suite_version": "1.0",
+  "config_version": "1.0",
+  "split": "train",
+  "description": "Open training episodes. Explicit public seeds 1001-1010 (disjoint from dev and from derived evaluation seeds).",
+  "episodes": [
+    {"id": "train-01-clean-retail", "category": "clean", "seed": 1001,
+     "config": {"profile": "retail", "size": "small", "distractors": "normal"}},
+    {"id": "train-02-duplicates", "category": "mixed", "seed": 1002,
+     "config": {"profile": "software", "errors": {"duplicate_invoice": 2}}},
+    {"id": "train-03-allocation", "category": "mixed", "seed": 1003,
+     "config": {"profile": "trading", "errors": {"payment_allocation": 2}}},
+    {"id": "train-04-fx", "category": "mixed", "seed": 1004,
+     "config": {"profile": "manufacturing", "errors": {"fx_rate": 2}}},
+    {"id": "train-05-period", "category": "mixed", "seed": 1005,
+     "config": {"profile": "logistics", "errors": {"period_attribution": 2}}},
+    {"id": "train-06-all-four", "category": "mixed", "seed": 1006,
+     "config": {"profile": "consulting", "errors": {"duplicate_invoice": 1, "payment_allocation": 1, "fx_rate": 1, "period_attribution": 1}}},
+    {"id": "train-07-s1-boundary-partial-payment", "category": "interacting", "seed": 1007,
+     "config": {"scenarios": {"fx_partial_payment_boundary": 1}}},
+    {"id": "train-08-s2-fx-invoice-unapplied", "category": "interacting", "seed": 1008,
+     "config": {"scenarios": {"fx_invoice_unapplied_payment": 1}}},
+    {"id": "train-09-clean-trading-large", "category": "clean", "seed": 1009,
+     "config": {"profile": "trading", "size": "large", "distractors": "high"}},
+    {"id": "train-10-dense", "category": "interacting", "seed": 1010,
+     "config": {"size": "large", "errors": {"duplicate_invoice": 2, "payment_allocation": 2, "fx_rate": 2, "period_attribution": 2},
+                "scenarios": {"fx_partial_payment_boundary": 1}}}
+  ]
+}

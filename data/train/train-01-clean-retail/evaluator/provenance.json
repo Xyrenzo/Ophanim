@@ -1,0 +1,5885 @@
+{
+  "schema_version": "1.0",
+  "env_version": "0.1.0",
+  "episode_id": "EP-E23C88503192",
+  "generation": {
+    "seed": 1001,
+    "secret_used": false,
+    "config": {
+      "config_version": "1.0",
+      "profile": "retail",
+      "size": "small",
+      "errors": {
+        "duplicate_invoice": 0,
+        "payment_allocation": 0,
+        "fx_rate": 0,
+        "period_attribution": 0
+      },
+      "scenarios": {
+        "fx_partial_payment_boundary": 0,
+        "fx_invoice_unapplied_payment": 0
+      },
+      "distractors": "normal",
+      "presentation": {
+        "id_salt": "default",
+        "name_salt": "default",
+        "order": "natural",
+        "timestamp_offset": "utc"
+      }
+    }
+  },
+  "company": {
+    "profile": "retail",
+    "base_currency": "EUR",
+    "offset_minutes": -300,
+    "period": [
+      "2025-03-01",
+      "2025-03-31"
+    ]
+  },
+  "id_map": {
+    "S01": "SUP-YWTZE6",
+    "S02": "SUP-Z43RCW",
+    "S03": "SUP-NWDQ33",
+    "S04": "SUP-AKZAGW",
+    "S05": "SUP-AQL5ZL",
+    "S06": "SUP-PDZN5V",
+    "S07": "SUP-2FK8S2",
+    "S08": "SUP-YZZ6R3",
+    "I0001": "INV-GSR3BDYR",
+    "I0002": "INV-ZLX2TADM",
+    "I0003": "INV-QAXFFCZ4",
+    "I0004": "INV-V6VJTDWA",
+    "I0005": "INV-WBSGFA46",
+    "I0006": "INV-NLCP5VC5",
+    "I0007": "INV-WQYBM42J",
+    "I0008": "INV-FZ4BJJ3L",
+    "I0009": "INV-87899KC5",
+    "I0010": "INV-9572YXUR",
+    "I0011": "INV-5CB2U6GS",
+    "I0012": "INV-9YNL2N92",
+    "I0013": "INV-UTUYKKYH",
+    "I0014": "INV-TTPSZALV",
+    "I0015": "INV-UC3KN835",
+    "I0016": "INV-RX5NXR3D",
+    "I0017": "INV-YZFJURPD",
+    "I0018": "INV-2FHPE2D9",
+    "I0019": "INV-SFCMR7QN",
+    "I0020": "INV-GT4B9PF4",
+    "I0021": "INV-MUFCLZ36",
+    "I0022": "INV-4Z6GLTPM",
+    "I0023": "INV-DKKA2LNZ",
+    "I0024": "INV-NZ6YA57B",
+    "I0025": "INV-SCHPVAGL",
+    "I0026": "INV-MMYD4UFW",
+    "I0027": "INV-8TPYR2CS",
+    "I0028": "INV-XNSSQET7",
+    "I0029": "INV-4Y8L8WLY",
+    "I0030": "INV-C2YGP7MD",
+    "I0031": "INV-NFZF2TVJ",
+    "I0032": "INV-YT9WKJ76",
+    "I0033": "INV-Q5KGPPZ9",
+    "I0034": "INV-FK9HSSL4",
+    "I0035": "INV-GKLKCPLE",
+    "I0036": "INV-AU844KW2",
+    "I0037": "INV-ZP4M64Y4",
+    "I0038": "INV-8C5D3HYH",
+    "I0039": "INV-B9WNUEY2",
+    "I0040": "INV-QXARHLZF",
+    "I0041": "INV-K68ASUKN",
+    "I0042": "INV-LNAZNF9Y",
+    "I0043": "INV-D54H6Y2X",
+    "I0044": "INV-KAJRF4QV",
+    "I0045": "INV-WNZFUC47",
+    "I0046": "INV-VD293YSB",
+    "I0047": "INV-VATGWFPZ",
+    "I0048": "INV-XYB4756P",
+    "I0049": "INV-XYEEGTD2",
+    "I0050": "INV-U7DTGJ7C",
+    "I0051": "INV-Y9QJVP8Q",
+    "I0052": "INV-3KWA8UT3",
+    "I0053": "INV-ARFDYQQW",
+    "P0001": "PAY-BRXSYLJA",
+    "P0002": "PAY-E8MLFXFC",
+    "P0003": "PAY-JP3P7LE3",
+    "P0004": "PAY-RUM24QBX",
+    "P0005": "PAY-WE5LV9YN",
+    "P0006": "PAY-3AXW7GEX",
+    "P0007": "PAY-3VBKA865",
+    "P0008": "PAY-GPRW89CL",
+    "P0009": "PAY-CXSL9LS2",
+    "P0010": "PAY-XMTX63DJ",
+    "P0011": "PAY-CE53UKH6",
+    "P0012": "PAY-4JQN9U8G",
+    "P0013": "PAY-EDH2EZKZ",
+    "P0014": "PAY-AX3YPG7W",
+    "P0015": "PAY-T69QWU6J",
+    "P0016": "PAY-QLTAGMQ4",
+    "P0017": "PAY-7GG27T9G",
+    "P0018": "PAY-B3FNNSHD",
+    "P0019": "PAY-QYWGQH9T",
+    "P0020": "PAY-6QR4WGV5",
+    "P0021": "PAY-72SAQ3T4",
+    "P0022": "PAY-48KZQVSA",
+    "P0023": "PAY-GNFWZS75",
+    "P0024": "PAY-U2DB5KFG",
+    "P0025": "PAY-Q3LE4FE6",
+    "P0026": "PAY-LZ6U2SKF",
+    "P0027": "PAY-S9ZKCYYT",
+    "P0028": "PAY-V6J9XDSC",
+    "P0029": "PAY-YK99WM2P",
+    "P0030": "PAY-WHARMW8V",
+    "P0031": "PAY-Z82GQG5X",
+    "P0032": "PAY-JDB4NRES",
+    "P0033": "PAY-6FMNS5UZ",
+    "P0034": "PAY-DFPT66L8",
+    "P0035": "PAY-UUPGHM3W",
+    "P0036": "PAY-Q6Q33R68",
+    "P0037": "PAY-N3GYW2XD",
+    "P0038": "PAY-S676T9JL",
+    "P0039": "PAY-V4JK9VT8",
+    "R00001": "GL-LH28HQXZM",
+    "R00002": "GL-WPY775T32",
+    "R00003": "GL-P6SSSFWGS",
+    "R00004": "GL-UVUHVPE7Y",
+    "R00005": "GL-RB5C2JH8E",
+    "R00006": "GL-SF4FR5BGE",
+    "R00007": "GL-CNSS9WBKP",
+    "R00008": "GL-7VTU99S4Q",
+    "R00009": "GL-JC89KKCUB",
+    "R00010": "GL-WF7ETLZGC",
+    "R00011": "GL-TARTFZEVN",
+    "R00012": "GL-R8M9G7DA5",
+    "R00013": "GL-2M5S73CRV",
+    "R00014": "GL-G5GBJNXUW",
+    "R00015": "GL-R242SKPPB",
+    "R00016": "GL-7CWQKSBJY",
+    "R00017": "GL-9YEPUD8YK",
+    "R00018": "GL-7NEGUQYMW",
+    "R00019": "GL-CA9Q9NY88",
+    "R00020": "GL-VZ4PBJZCR",
+    "R00021": "GL-8A6GDC6GF",
+    "R00022": "GL-X9MDAWVBP",
+    "R00023": "GL-7YWAUBBXE",
+    "R00024": "GL-Z8TE7ZR9E",
+    "R00025": "GL-CQPZT2APD",
+    "R00026": "GL-F95V7HJYE",
+    "R00027": "GL-Q6MEEP798",
+    "R00028": "GL-G9X2R2H7F",
+    "R00029": "GL-HMEPN5BVU",
+    "R00030": "GL-GUHND4KQ9",
+    "R00031": "GL-QU67UEMTH",
+    "R00032": "GL-4W9NPTQ9A",
+    "R00033": "GL-DD28MV4UP",
+    "R00034": "GL-H9LRURYWS",
+    "R00035": "GL-YH2AS5F9P",
+    "R00036": "GL-6Y3659LZB",
+    "R00037": "GL-SY433MJJR",
+    "R00038": "GL-YQ3PHXEC2",
+    "R00039": "GL-LWQ3Z2PQE",
+    "R00040": "GL-PEP79EZVV",
+    "R00041": "GL-W8WBA4YKG",
+    "R00042": "GL-6U7P2AXZE",
+    "R00043": "GL-X5YP9MP7A",
+    "R00044": "GL-M5U6ALADB",
+    "R00045": "GL-SDNGQ8DMN",
+    "R00046": "GL-VZ3B5AP95",
+    "R00047": "GL-33QPZ3TRX",
+    "R00048": "GL-FSPR3XPZ8",
+    "R00049": "GL-QR9SJ6UR3",
+    "R00050": "GL-EFEEHCCB9",
+    "R00051": "GL-BXMDM78XA",
+    "R00052": "GL-KB49GV3RC",
+    "R00053": "GL-RXYVTEC57",
+    "R00054": "GL-LA5YBR6ST",
+    "R00055": "GL-RZT8FP4M7",
+    "R00056": "GL-JPHEQA5AG",
+    "R00057": "GL-P4NW2CT7J",
+    "R00058": "GL-JPQRXDE6B",
+    "R00059": "GL-8RQCZVQ99",
+    "R00060": "GL-B89L87B8H",
+    "R00061": "GL-MP39L46YN",
+    "R00062": "GL-EJH6U95BG",
+    "R00063": "GL-S9MFZXTXE",
+    "R00064": "GL-XF64GKUZD",
+    "R00065": "GL-2X2RRKAV2",
+    "R00066": "GL-LB8S94EH3",
+    "R00067": "GL-U32SAUXDU",
+    "R00068": "GL-W4MRV4ZTT",
+    "R00069": "GL-WB6DZZPWL",
+    "R00070": "GL-ZWNALDVJC",
+    "R00071": "GL-JHYPGSB3K",
+    "R00072": "GL-7XTPUUZ5W",
+    "R00073": "GL-SUYB3FQL5",
+    "R00074": "GL-BG4KCQEPS",
+    "R00075": "GL-X6MTDQPKC",
+    "R00076": "GL-9GARAPEYV",
+    "R00077": "GL-KFCX429ZN",
+    "R00078": "GL-MTAER5DS6",
+    "R00079": "GL-J55H3ETP8",
+    "R00080": "GL-GFD79SLCA",
+    "R00081": "GL-PCTDLRAR4",
+    "R00082": "GL-GSSA93W97",
+    "R00083": "GL-3D45RRS5E",
+    "R00084": "GL-PRPMTXBS4",
+    "R00085": "GL-LWEFJVZUW",
+    "R00086": "GL-DEVRESNWR",
+    "R00087": "GL-ZMGQDALAR",
+    "R00088": "GL-FG284H2J9",
+    "R00089": "GL-4ZVLW8T5W",
+    "R00090": "GL-ZQFSCCFL2",
+    "R00091": "GL-7FLXD7MF6",
+    "R00092": "GL-4ZJMVPRDD",
+    "R00093": "GL-K2DRKGV9N",
+    "R00094": "GL-D9ZFN4PLV",
+    "R00095": "GL-FT4PHKBCM",
+    "R00096": "GL-JNWX4WCPF",
+    "R00097": "GL-H33YH9BUE",
+    "R00098": "GL-VVG4CBSLX",
+    "R00099": "GL-AL67533YP",
+    "R00100": "GL-T52TVLR8A",
+    "R00101": "GL-S3ZWBDDX9",
+    "R00102": "GL-85EXV7DEL",
+    "R00103": "GL-T86AZZXSV",
+    "R00104": "GL-SX63DKVEY",
+    "R00105": "GL-CTZ32TUDV",
+    "R00106": "GL-JVWQH8MKM",
+    "R00107": "GL-RZMNSMWKS",
+    "R00108": "GL-Y6AG4EXNH",
+    "R00109": "GL-PWYR74ZMQ",
+    "R00110": "GL-235HLA4YC",
+    "R00111": "GL-87N39NLUZ",
+    "R00112": "GL-FTCSH4TTS",
+    "R00113": "GL-9F4DE2D3Q",
+    "R00114": "GL-438G3KWHV",
+    "R00115": "GL-8WAA3TT6D",
+    "R00116": "GL-LKMFTE7Q4",
+    "R00117": "GL-F248MBSPA",
+    "R00118": "GL-QJHJTPYPX",
+    "R00119": "GL-P79T8WMFD",
+    "R00120": "GL-APKC784NS",
+    "R00121": "GL-HVHS8RSYC",
+    "R00122": "GL-D2BX94QJP",
+    "R00123": "GL-HT5WKS9NQ",
+    "R00124": "GL-Y3KX8L5E2",
+    "R00125": "GL-8JYKZ8EGZ",
+    "R00126": "GL-D6JGG2WQD",
+    "R00127": "GL-Z49SLRERP",
+    "R00128": "GL-EGRWYMR65",
+    "R00129": "GL-Q8YGADVVJ",
+    "R00130": "GL-3CZ7WSWL6",
+    "R00131": "GL-6PP6UQZAL",
+    "R00132": "GL-MABHKKRUG",
+    "R00133": "GL-LGND4ZT9Y",
+    "R00134": "GL-J7HPSVVKS",
+    "R00135": "GL-5RBN82KHY",
+    "R00136": "GL-VX8VVHF6W",
+    "R00137": "GL-NVJ3DLXUM",
+    "R00138": "GL-CGSPUAVEK",
+    "R00139": "GL-6U2JX3UU8",
+    "R00140": "GL-F54RY3DWQ",
+    "R00141": "GL-DEC3YMRQL",
+    "R00142": "GL-PQ6FX7CVX",
+    "R00143": "GL-S89H4SZWC",
+    "R00144": "GL-LMWTFD7SV",
+    "R00145": "GL-D22USXR7W",
+    "R00146": "GL-N784FN6AS",
+    "R00147": "GL-MWJNA5BJW",
+    "R00148": "GL-K78HGLF9K",
+    "R00149": "GL-EGG6B4B9H",
+    "R00150": "GL-X7AVZCGB8",
+    "R00151": "GL-SCKUDUSJR",
+    "R00152": "GL-T4ZGAKJZT",
+    "R00153": "GL-BEB5JA3AF",
+    "R00154": "GL-6ECWNPD8P",
+    "R00155": "GL-675ZES9Y3",
+    "R00156": "GL-EC824RNTJ",
+    "R00157": "GL-6NP4DTRBJ",
+    "R00158": "GL-45V9V3MUS",
+    "R00159": "GL-5JLHJW4KM",
+    "R00160": "GL-35B3GFTCC",
+    "R00161": "GL-YZE82PGP8",
+    "R00162": "GL-BS6ZXDAGM",
+    "R00163": "GL-GUZ6AY886",
+    "R00164": "GL-SUV24LDJ9",
+    "R00165": "GL-GLUQZLUGL",
+    "R00166": "GL-SX86BXAA6",
+    "R00167": "GL-4TC6CJSM8",
+    "R00168": "GL-G5Y3CWRUE",
+    "R00169": "GL-G9HU7EF7E",
+    "R00170": "GL-4ERQ2725J",
+    "R00171": "GL-HQWMK8TWR",
+    "R00172": "GL-4KRWNZVGA",
+    "R00173": "GL-5GYDB9CPV",
+    "R00174": "GL-XA6FK82KW",
+    "R00175": "GL-LFW23M4NQ",
+    "R00176": "GL-9Z6C2MKEM",
+    "R00177": "GL-VTUV5AGR2",
+    "R00178": "GL-AT7RLG9FC",
+    "R00179": "GL-383TQWC6Z",
+    "R00180": "GL-3T2GLT5MC",
+    "R00181": "GL-AUE6RTNBW",
+    "R00182": "GL-QSGZ6QXBM",
+    "R00183": "GL-U4PB8L35G",
+    "R00184": "GL-7BXW8KM9M",
+    "R00185": "GL-LBWWTRUE4",
+    "R00186": "GL-8L5L448GJ",
+    "R00187": "GL-MUN25JAMX",
+    "R00188": "GL-MR27XA7K6",
+    "R00189": "GL-W84S4B8UW",
+    "R00190": "GL-SJ3DQW7BT",
+    "R00191": "GL-8WEX365YU",
+    "R00192": "GL-F4DCFPJJ2",
+    "R00193": "GL-W8RTAGR5L",
+    "doc:I0001": "DOC-H7NTD9TUNQ",
+    "doc:I0002": "DOC-MQCPQWSGGH",
+    "doc:I0003": "DOC-USLBL6WFV7",
+    "doc:I0004": "DOC-7LZ5U9M7LL",
+    "doc:I0005": "DOC-HPNHAR8QML",
+    "doc:I0006": "DOC-DCRN7M8CDM",
+    "doc:I0007": "DOC-5AZT4XDNNF",
+    "doc:I0008": "DOC-6TCRFLMXGX",
+    "doc:I0009": "DOC-SMD3GJU6SM",
+    "doc:I0010": "DOC-YEY9RU7TLH",
+    "doc:I0011": "DOC-83P75KB8XF",
+    "doc:I0012": "DOC-4JQD2ENC4X",
+    "doc:I0013": "DOC-X7J47EVKBG",
+    "doc:I0014": "DOC-XM3E7UV3M5",
+    "doc:I0015": "DOC-M9F8XUA57X",
+    "doc:I0016": "DOC-EQVN3C3A3B",
+    "doc:I0017": "DOC-XCJSQPFUDF",
+    "doc:I0018": "DOC-ZWBAMZZ3WB",
+    "doc:I0019": "DOC-6YDPVWLFRC",
+    "doc:I0020": "DOC-BDC9MYJ535",
+    "doc:I0021": "DOC-BXRJ5437N2",
+    "doc:I0022": "DOC-DYWR6P3CC2",
+    "doc:I0023": "DOC-986C69UZQ3",
+    "doc:I0024": "DOC-YHS53GDH7F",
+    "doc:I0025": "DOC-Z9J3SQNKWE",
+    "doc:I0026": "DOC-DV9MGTTDFW",
+    "doc:I0027": "DOC-SGB5W9STXR",
+    "doc:I0028": "DOC-PZSP3PYPG8",
+    "doc:I0029": "DOC-FNPWW85UX2",
+    "doc:I0030": "DOC-5Q28WYKQHY",
+    "doc:I0031": "DOC-L7GT9QZ4NC",
+    "doc:I0032": "DOC-JYLVUNWAC7",
+    "doc:I0033": "DOC-94TDV3GRXL",
+    "doc:I0034": "DOC-F49J3BZ8PV",
+    "doc:I0035": "DOC-2XLD2PKJYX",
+    "doc:I0036": "DOC-98Q443Y9TC",
+    "doc:I0037": "DOC-QGXPXDBBQJ",
+    "doc:I0038": "DOC-WS4H8JEYVM",
+    "doc:I0039": "DOC-7XMEGUNHEK",
+    "doc:I0040": "DOC-G8E6KMMFV4",
+    "doc:I0041": "DOC-6LAQNBUFMT",
+    "doc:I0042": "DOC-C5L42ST3WY",
+    "doc:I0043": "DOC-KZQUEAW6HT",
+    "doc:I0044": "DOC-3RLB6M6F6K",
+    "doc:I0045": "DOC-YQZZ2YTRPY",
+    "doc:I0046": "DOC-59TZ3SCVJA",
+    "doc:I0047": "DOC-D2WR67DABU",
+    "doc:I0048": "DOC-ZUN4HMMSM8",
+    "doc:I0049": "DOC-U8FHK9CWEQ",
+    "doc:I0050": "DOC-NFJLH4H35L",
+    "doc:I0051": "DOC-878CLJQ4HX",
+    "doc:I0052": "DOC-4L5LF6GGWG",
+    "doc:I0053": "DOC-ZRNV2UKTQW",
+    "doc:P0001": "DOC-LY87FEGAXR",
+    "doc:P0002": "DOC-KFZ85WWDXR",
+    "doc:P0003": "DOC-UDM2KSB53P",
+    "doc:P0004": "DOC-L5JJ467PS5",
+    "doc:P0005": "DOC-63P9VF3A25",
+    "doc:P0006": "DOC-28TZ9NB2GX",
+    "doc:P0007": "DOC-S2AQGATLC8",
+    "doc:P0008": "DOC-X8D8L7YD4U",
+    "doc:P0009": "DOC-CRCU8YJNR6",
+    "doc:P0010": "DOC-UR59F7RHF5",
+    "doc:P0011": "DOC-T3XVE58E7J",
+    "doc:P0012": "DOC-PVGX9MUFPS",
+    "doc:P0013": "DOC-66BPG5WGW9",
+    "doc:P0014": "DOC-2VYLCM9Z8Z",
+    "doc:P0015": "DOC-6L2UM7ASKB",
+    "doc:P0016": "DOC-9PTX7D8HAW",
+    "doc:P0017": "DOC-ZX7458EGMU",
+    "doc:P0018": "DOC-ZH9NBCJ3JR",
+    "doc:P0019": "DOC-D9Y9V6BL8R",
+    "doc:P0020": "DOC-PRMZS7P3GN",
+    "doc:P0021": "DOC-ZMB5VNP3GV",
+    "doc:P0022": "DOC-C5E3KMLML9",
+    "doc:P0023": "DOC-CXLUMBB3H4",
+    "doc:P0024": "DOC-34UAZ5NS89",
+    "doc:P0025": "DOC-7QVPTEUF9D",
+    "doc:P0026": "DOC-ACLT8JV54X",
+    "doc:P0027": "DOC-2A26FWKN3E",
+    "doc:P0028": "DOC-9H6325KYTF",
+    "doc:P0029": "DOC-6VDT5J4W7L",
+    "doc:P0030": "DOC-W2EM6XVLF4",
+    "doc:P0031": "DOC-HZMP9LE4X5",
+    "doc:P0032": "DOC-LKKRFXGW8H",
+    "doc:P0033": "DOC-ZVDB9YK3S8",
+    "doc:P0034": "DOC-QVLUHQCA5H",
+    "doc:P0035": "DOC-5THZT254NK",
+    "doc:P0036": "DOC-A76DQMXZKB",
+    "doc:P0037": "DOC-QL4GVJSZLM",
+    "doc:P0038": "DOC-A8DBM2TYZC",
+    "doc:P0039": "DOC-PM3FFQEEB6"
+  },
+  "distractors": [
+    {
+      "kind": "recurring_same_amount",
+      "invoices": [
+        "I0002",
+        "I0001"
+      ],
+      "note": "Monthly recurring invoice: same supplier, lines and amount; different vendor_ref and service period."
+    },
+    {
+      "kind": "boundary_utc_date",
+      "invoices": [
+        "I0043"
+      ],
+      "note": "Issued inside the period in company time; its UTC date falls in the adjacent month."
+    },
+    {
+      "kind": "split_payment",
+      "invoices": [
+        "I0008"
+      ],
+      "payments": [
+        "P0004",
+        "P0005"
+      ],
+      "note": "One invoice settled by two payments; both fully applied."
+    },
+    {
+      "kind": "split_payment",
+      "invoices": [
+        "I0015"
+      ],
+      "payments": [
+        "P0007",
+        "P0008"
+      ],
+      "note": "One invoice settled by two payments; both fully applied."
+    },
+    {
+      "kind": "partial_payment",
+      "invoices": [
+        "I0016"
+      ],
+      "payments": [
+        "P0009"
+      ],
+      "note": "Payment covers part of the invoice; fully applied; remainder legitimately open."
+    },
+    {
+      "kind": "partial_payment",
+      "invoices": [
+        "I0030"
+      ],
+      "payments": [
+        "P0016"
+      ],
+      "note": "Payment covers part of the invoice; fully applied; remainder legitimately open."
+    },
+    {
+      "kind": "split_payment",
+      "invoices": [
+        "I0033"
+      ],
+      "payments": [
+        "P0018",
+        "P0019"
+      ],
+      "note": "One invoice settled by two payments; both fully applied."
+    },
+    {
+      "kind": "split_payment",
+      "invoices": [
+        "I0036"
+      ],
+      "payments": [
+        "P0021",
+        "P0022"
+      ],
+      "note": "One invoice settled by two payments; both fully applied."
+    },
+    {
+      "kind": "split_payment",
+      "invoices": [
+        "I0046"
+      ],
+      "payments": [
+        "P0026",
+        "P0027"
+      ],
+      "note": "One invoice settled by two payments; both fully applied."
+    },
+    {
+      "kind": "partial_payment",
+      "invoices": [
+        "I0048"
+      ],
+      "payments": [
+        "P0029"
+      ],
+      "note": "Payment covers part of the invoice; fully applied; remainder legitimately open."
+    },
+    {
+      "kind": "batch_payment",
+      "invoices": [
+        "I0009",
+        "I0022"
+      ],
+      "payments": [
+        "P0033"
+      ],
+      "note": "One payment settles several invoices; every remittance line applied."
+    },
+    {
+      "kind": "batch_payment",
+      "invoices": [
+        "I0003",
+        "I0010",
+        "I0013"
+      ],
+      "payments": [
+        "P0036"
+      ],
+      "note": "One payment settles several invoices; every remittance line applied."
+    },
+    {
+      "kind": "unidentified_payment",
+      "payments": [
+        "P0039"
+      ],
+      "note": "No remittance information; correctly posted to Suspense pending identification."
+    },
+    {
+      "kind": "repeat_order_same_amount",
+      "invoices": [
+        "I0043",
+        "I0052"
+      ],
+      "note": "Same supplier and amount, different vendor_ref and date: two genuine orders."
+    },
+    {
+      "kind": "vendor_ref_collision",
+      "invoices": [
+        "I0035",
+        "I0022"
+      ],
+      "note": "Two different suppliers happen to use the same invoice number."
+    },
+    {
+      "kind": "reversed_duplicate",
+      "invoices": [
+        "I0017",
+        "I0053"
+      ],
+      "note": "Captured twice, then the second capture was reversed in the same period."
+    }
+  ],
+  "injections": [],
+  "pre_mutation": {
+    "validation_problems": [],
+    "tables": {
+      "ledger": [
+        {
+          "row_id": "GL-7XTPUUZ5W",
+          "timestamp": "2025-03-01T16:53:47+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 464757,
+          "currency": "EUR",
+          "entity_id": "SUP-NWDQ33",
+          "invoice_id": "INV-ZP4M64Y4",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-JHYPGSB3K",
+          "timestamp": "2025-03-01T16:53:47+00:00",
+          "account": "5100",
+          "debit_minor": 464757,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-NWDQ33",
+          "invoice_id": "INV-ZP4M64Y4",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-2X2RRKAV2",
+          "timestamp": "2025-03-01T19:15:29+00:00",
+          "account": "5100",
+          "debit_minor": 39180,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-YZZ6R3",
+          "invoice_id": "INV-FK9HSSL4",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-LB8S94EH3",
+          "timestamp": "2025-03-01T19:15:29+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 39180,
+          "currency": "EUR",
+          "entity_id": "SUP-YZZ6R3",
+          "invoice_id": "INV-FK9HSSL4",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-EGG6B4B9H",
+          "timestamp": "2025-03-01T20:57:22+00:00",
+          "account": "2000",
+          "debit_minor": 625991,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-NWDQ33",
+          "invoice_id": "INV-KAJRF4QV",
+          "payment_id": "PAY-U2DB5KFG"
+        },
+        {
+          "row_id": "GL-SCKUDUSJR",
+          "timestamp": "2025-03-01T20:57:22+00:00",
+          "account": "7900",
+          "debit_minor": 17999,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-NWDQ33",
+          "invoice_id": null,
+          "payment_id": "PAY-U2DB5KFG"
+        },
+        {
+          "row_id": "GL-X7AVZCGB8",
+          "timestamp": "2025-03-01T20:57:22+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 643990,
+          "currency": "EUR",
+          "entity_id": "SUP-NWDQ33",
+          "invoice_id": null,
+          "payment_id": "PAY-U2DB5KFG"
+        },
+        {
+          "row_id": "GL-M5U6ALADB",
+          "timestamp": "2025-03-01T22:28:12+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 381104,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": "INV-DKKA2LNZ",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-X5YP9MP7A",
+          "timestamp": "2025-03-01T22:28:12+00:00",
+          "account": "5100",
+          "debit_minor": 381104,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": "INV-DKKA2LNZ",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-4TC6CJSM8",
+          "timestamp": "2025-03-02T14:26:05+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 51528,
+          "currency": "EUR",
+          "entity_id": "SUP-YZZ6R3",
+          "invoice_id": null,
+          "payment_id": "PAY-WHARMW8V"
+        },
+        {
+          "row_id": "GL-SX86BXAA6",
+          "timestamp": "2025-03-02T14:26:05+00:00",
+          "account": "2000",
+          "debit_minor": 51528,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-YZZ6R3",
+          "invoice_id": "INV-XYEEGTD2",
+          "payment_id": "PAY-WHARMW8V"
+        },
+        {
+          "row_id": "GL-33QPZ3TRX",
+          "timestamp": "2025-03-02T19:16:22+00:00",
+          "account": "5100",
+          "debit_minor": 561338,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-NWDQ33",
+          "invoice_id": "INV-SCHPVAGL",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-FSPR3XPZ8",
+          "timestamp": "2025-03-02T19:16:22+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 561338,
+          "currency": "EUR",
+          "entity_id": "SUP-NWDQ33",
+          "invoice_id": "INV-SCHPVAGL",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-LH28HQXZM",
+          "timestamp": "2025-03-02T23:14:31+00:00",
+          "account": "6300",
+          "debit_minor": 29019,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-Z43RCW",
+          "invoice_id": "INV-GSR3BDYR",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-WPY775T32",
+          "timestamp": "2025-03-02T23:14:31+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 29019,
+          "currency": "EUR",
+          "entity_id": "SUP-Z43RCW",
+          "invoice_id": "INV-GSR3BDYR",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-DEC3YMRQL",
+          "timestamp": "2025-03-02T23:31:23+00:00",
+          "account": "2000",
+          "debit_minor": 39180,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-YZZ6R3",
+          "invoice_id": "INV-FK9HSSL4",
+          "payment_id": "PAY-6QR4WGV5"
+        },
+        {
+          "row_id": "GL-PQ6FX7CVX",
+          "timestamp": "2025-03-02T23:31:23+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 39180,
+          "currency": "EUR",
+          "entity_id": "SUP-YZZ6R3",
+          "invoice_id": null,
+          "payment_id": "PAY-6QR4WGV5"
+        },
+        {
+          "row_id": "GL-EFEEHCCB9",
+          "timestamp": "2025-03-03T14:54:54+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 301172,
+          "currency": "EUR",
+          "entity_id": "SUP-NWDQ33",
+          "invoice_id": "INV-MMYD4UFW",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-QR9SJ6UR3",
+          "timestamp": "2025-03-03T14:54:54+00:00",
+          "account": "5100",
+          "debit_minor": 301172,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-NWDQ33",
+          "invoice_id": "INV-MMYD4UFW",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-2M5S73CRV",
+          "timestamp": "2025-03-06T18:12:21+00:00",
+          "account": "6400",
+          "debit_minor": 312529,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-PDZN5V",
+          "invoice_id": "INV-FZ4BJJ3L",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-G5GBJNXUW",
+          "timestamp": "2025-03-06T18:12:21+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 312529,
+          "currency": "EUR",
+          "entity_id": "SUP-PDZN5V",
+          "invoice_id": "INV-FZ4BJJ3L",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-JC89KKCUB",
+          "timestamp": "2025-03-06T19:11:48+00:00",
+          "account": "6400",
+          "debit_minor": 384057,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-PDZN5V",
+          "invoice_id": "INV-NLCP5VC5",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-WF7ETLZGC",
+          "timestamp": "2025-03-06T19:11:48+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 384057,
+          "currency": "EUR",
+          "entity_id": "SUP-PDZN5V",
+          "invoice_id": "INV-NLCP5VC5",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-CQPZT2APD",
+          "timestamp": "2025-03-07T13:24:38+00:00",
+          "account": "5100",
+          "debit_minor": 157336,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": "INV-TTPSZALV",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-F95V7HJYE",
+          "timestamp": "2025-03-07T13:24:38+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 157336,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": "INV-TTPSZALV",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-BG4KCQEPS",
+          "timestamp": "2025-03-08T19:12:56+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 188781,
+          "currency": "EUR",
+          "entity_id": "SUP-NWDQ33",
+          "invoice_id": "INV-8C5D3HYH",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-SUYB3FQL5",
+          "timestamp": "2025-03-08T19:12:56+00:00",
+          "account": "5100",
+          "debit_minor": 188781,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-NWDQ33",
+          "invoice_id": "INV-8C5D3HYH",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-6U7P2AXZE",
+          "timestamp": "2025-03-10T04:08:28+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 75115,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": "INV-4Z6GLTPM",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-W8WBA4YKG",
+          "timestamp": "2025-03-10T04:08:28+00:00",
+          "account": "6500",
+          "debit_minor": 75115,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": "INV-4Z6GLTPM",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-BXMDM78XA",
+          "timestamp": "2025-03-10T17:15:08+00:00",
+          "account": "6500",
+          "debit_minor": 94113,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": "INV-8TPYR2CS",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-KB49GV3RC",
+          "timestamp": "2025-03-10T17:15:08+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 94113,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": "INV-8TPYR2CS",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-U32SAUXDU",
+          "timestamp": "2025-03-11T13:29:55+00:00",
+          "account": "5100",
+          "debit_minor": 321159,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-YZZ6R3",
+          "invoice_id": "INV-GKLKCPLE",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-W4MRV4ZTT",
+          "timestamp": "2025-03-11T13:29:55+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 321159,
+          "currency": "EUR",
+          "entity_id": "SUP-YZZ6R3",
+          "invoice_id": "INV-GKLKCPLE",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-7NEGUQYMW",
+          "timestamp": "2025-03-11T15:18:39+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 494290,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": "INV-9572YXUR",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-9YEPUD8YK",
+          "timestamp": "2025-03-11T15:18:39+00:00",
+          "account": "5100",
+          "debit_minor": 494290,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": "INV-9572YXUR",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-9Z6C2MKEM",
+          "timestamp": "2025-03-11T16:10:44+00:00",
+          "account": "2000",
+          "debit_minor": 188781,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-NWDQ33",
+          "invoice_id": "INV-8C5D3HYH",
+          "payment_id": "PAY-DFPT66L8"
+        },
+        {
+          "row_id": "GL-AT7RLG9FC",
+          "timestamp": "2025-03-11T16:10:44+00:00",
+          "account": "7900",
+          "debit_minor": 281,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-NWDQ33",
+          "invoice_id": null,
+          "payment_id": "PAY-DFPT66L8"
+        },
+        {
+          "row_id": "GL-VTUV5AGR2",
+          "timestamp": "2025-03-11T16:10:44+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 189062,
+          "currency": "EUR",
+          "entity_id": "SUP-NWDQ33",
+          "invoice_id": null,
+          "payment_id": "PAY-DFPT66L8"
+        },
+        {
+          "row_id": "GL-GUHND4KQ9",
+          "timestamp": "2025-03-11T19:25:24+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 363466,
+          "currency": "EUR",
+          "entity_id": "SUP-PDZN5V",
+          "invoice_id": "INV-RX5NXR3D",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-HMEPN5BVU",
+          "timestamp": "2025-03-11T19:25:24+00:00",
+          "account": "6400",
+          "debit_minor": 363466,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-PDZN5V",
+          "invoice_id": "INV-RX5NXR3D",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-SDNGQ8DMN",
+          "timestamp": "2025-03-11T21:10:58+00:00",
+          "account": "6500",
+          "debit_minor": 90367,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": "INV-NZ6YA57B",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-VZ3B5AP95",
+          "timestamp": "2025-03-11T21:10:58+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 90367,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": "INV-NZ6YA57B",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-BS6ZXDAGM",
+          "timestamp": "2025-03-13T16:19:04+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 160843,
+          "currency": "EUR",
+          "entity_id": "SUP-NWDQ33",
+          "invoice_id": null,
+          "payment_id": "PAY-V6J9XDSC"
+        },
+        {
+          "row_id": "GL-GUZ6AY886",
+          "timestamp": "2025-03-13T16:19:04+00:00",
+          "account": "7900",
+          "debit_minor": 10441,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-NWDQ33",
+          "invoice_id": null,
+          "payment_id": "PAY-V6J9XDSC"
+        },
+        {
+          "row_id": "GL-YZE82PGP8",
+          "timestamp": "2025-03-13T16:19:04+00:00",
+          "account": "2000",
+          "debit_minor": 150402,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-NWDQ33",
+          "invoice_id": "INV-VATGWFPZ",
+          "payment_id": "PAY-V6J9XDSC"
+        },
+        {
+          "row_id": "GL-7YWAUBBXE",
+          "timestamp": "2025-03-13T19:09:21+00:00",
+          "account": "5100",
+          "debit_minor": 93939,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": "INV-UTUYKKYH",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-Z8TE7ZR9E",
+          "timestamp": "2025-03-13T19:09:21+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 93939,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": "INV-UTUYKKYH",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-S9MFZXTXE",
+          "timestamp": "2025-03-14T04:16:08+00:00",
+          "account": "6400",
+          "debit_minor": 284312,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-PDZN5V",
+          "invoice_id": "INV-Q5KGPPZ9",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-XF64GKUZD",
+          "timestamp": "2025-03-14T04:16:08+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 284312,
+          "currency": "EUR",
+          "entity_id": "SUP-PDZN5V",
+          "invoice_id": "INV-Q5KGPPZ9",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-F248MBSPA",
+          "timestamp": "2025-03-14T13:23:57+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 381104,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": null,
+          "payment_id": "PAY-CE53UKH6"
+        },
+        {
+          "row_id": "GL-LKMFTE7Q4",
+          "timestamp": "2025-03-14T13:23:57+00:00",
+          "account": "2000",
+          "debit_minor": 381104,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": "INV-DKKA2LNZ",
+          "payment_id": "PAY-CE53UKH6"
+        },
+        {
+          "row_id": "GL-87N39NLUZ",
+          "timestamp": "2025-03-14T15:57:26+00:00",
+          "account": "2000",
+          "debit_minor": 163560,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-PDZN5V",
+          "invoice_id": "INV-RX5NXR3D",
+          "payment_id": "PAY-CXSL9LS2"
+        },
+        {
+          "row_id": "GL-9F4DE2D3Q",
+          "timestamp": "2025-03-14T15:57:26+00:00",
+          "account": "7900",
+          "debit_minor": 947,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-PDZN5V",
+          "invoice_id": null,
+          "payment_id": "PAY-CXSL9LS2"
+        },
+        {
+          "row_id": "GL-FTCSH4TTS",
+          "timestamp": "2025-03-14T15:57:26+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 164507,
+          "currency": "EUR",
+          "entity_id": "SUP-PDZN5V",
+          "invoice_id": null,
+          "payment_id": "PAY-CXSL9LS2"
+        },
+        {
+          "row_id": "GL-MR27XA7K6",
+          "timestamp": "2025-03-15T16:01:09+00:00",
+          "account": "2000",
+          "debit_minor": 321159,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-YZZ6R3",
+          "invoice_id": "INV-GKLKCPLE",
+          "payment_id": "PAY-S676T9JL"
+        },
+        {
+          "row_id": "GL-W84S4B8UW",
+          "timestamp": "2025-03-15T16:01:09+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 321159,
+          "currency": "EUR",
+          "entity_id": "SUP-YZZ6R3",
+          "invoice_id": null,
+          "payment_id": "PAY-S676T9JL"
+        },
+        {
+          "row_id": "GL-G9X2R2H7F",
+          "timestamp": "2025-03-16T15:06:07+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 133196,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": "INV-UC3KN835",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-Q6MEEP798",
+          "timestamp": "2025-03-16T15:06:07+00:00",
+          "account": "6500",
+          "debit_minor": 133196,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": "INV-UC3KN835",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-AL67533YP",
+          "timestamp": "2025-03-16T17:17:08+00:00",
+          "account": "7900",
+          "debit_minor": 423,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-PDZN5V",
+          "invoice_id": null,
+          "payment_id": "PAY-RUM24QBX"
+        },
+        {
+          "row_id": "GL-H33YH9BUE",
+          "timestamp": "2025-03-16T17:17:08+00:00",
+          "account": "2000",
+          "debit_minor": 143763,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-PDZN5V",
+          "invoice_id": "INV-FZ4BJJ3L",
+          "payment_id": "PAY-RUM24QBX"
+        },
+        {
+          "row_id": "GL-VVG4CBSLX",
+          "timestamp": "2025-03-16T17:17:08+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 144186,
+          "currency": "EUR",
+          "entity_id": "SUP-PDZN5V",
+          "invoice_id": null,
+          "payment_id": "PAY-RUM24QBX"
+        },
+        {
+          "row_id": "GL-5RBN82KHY",
+          "timestamp": "2025-03-16T21:19:07+00:00",
+          "account": "2000",
+          "debit_minor": 93823,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-PDZN5V",
+          "invoice_id": "INV-Q5KGPPZ9",
+          "payment_id": "PAY-B3FNNSHD"
+        },
+        {
+          "row_id": "GL-NVJ3DLXUM",
+          "timestamp": "2025-03-16T21:19:07+00:00",
+          "account": "7900",
+          "debit_minor": 140,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-PDZN5V",
+          "invoice_id": null,
+          "payment_id": "PAY-B3FNNSHD"
+        },
+        {
+          "row_id": "GL-VX8VVHF6W",
+          "timestamp": "2025-03-16T21:19:07+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 93963,
+          "currency": "EUR",
+          "entity_id": "SUP-PDZN5V",
+          "invoice_id": null,
+          "payment_id": "PAY-B3FNNSHD"
+        },
+        {
+          "row_id": "GL-WB6DZZPWL",
+          "timestamp": "2025-03-17T15:27:18+00:00",
+          "account": "5100",
+          "debit_minor": 17202,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": "INV-AU844KW2",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-ZWNALDVJC",
+          "timestamp": "2025-03-17T15:27:18+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 17202,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": "INV-AU844KW2",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-7CWQKSBJY",
+          "timestamp": "2025-03-17T19:00:17+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 152012,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": "INV-87899KC5",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-R242SKPPB",
+          "timestamp": "2025-03-17T19:00:17+00:00",
+          "account": "6500",
+          "debit_minor": 152012,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": "INV-87899KC5",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-KFCX429ZN",
+          "timestamp": "2025-03-17T20:14:59+00:00",
+          "account": "5100",
+          "debit_minor": 90369,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-NWDQ33",
+          "invoice_id": "INV-QXARHLZF",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-MTAER5DS6",
+          "timestamp": "2025-03-17T20:14:59+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 90369,
+          "currency": "EUR",
+          "entity_id": "SUP-NWDQ33",
+          "invoice_id": "INV-QXARHLZF",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-JPHEQA5AG",
+          "timestamp": "2025-03-18T16:34:25+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 83562,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": "INV-4Y8L8WLY",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-RZT8FP4M7",
+          "timestamp": "2025-03-18T16:34:25+00:00",
+          "account": "6500",
+          "debit_minor": 83562,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": "INV-4Y8L8WLY",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-GLUQZLUGL",
+          "timestamp": "2025-03-18T19:09:02+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 88392,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": null,
+          "payment_id": "PAY-YK99WM2P"
+        },
+        {
+          "row_id": "GL-SUV24LDJ9",
+          "timestamp": "2025-03-18T19:09:02+00:00",
+          "account": "2000",
+          "debit_minor": 88392,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": "INV-XYB4756P",
+          "payment_id": "PAY-YK99WM2P"
+        },
+        {
+          "row_id": "GL-G5Y3CWRUE",
+          "timestamp": "2025-03-19T13:19:09+00:00",
+          "account": "2000",
+          "debit_minor": 56368,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": "INV-U7DTGJ7C",
+          "payment_id": "PAY-Z82GQG5X"
+        },
+        {
+          "row_id": "GL-G9HU7EF7E",
+          "timestamp": "2025-03-19T13:19:09+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 56368,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": null,
+          "payment_id": "PAY-Z82GQG5X"
+        },
+        {
+          "row_id": "GL-6U2JX3UU8",
+          "timestamp": "2025-03-19T15:54:32+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 191570,
+          "currency": "EUR",
+          "entity_id": "SUP-PDZN5V",
+          "invoice_id": null,
+          "payment_id": "PAY-QYWGQH9T"
+        },
+        {
+          "row_id": "GL-CGSPUAVEK",
+          "timestamp": "2025-03-19T15:54:32+00:00",
+          "account": "2000",
+          "debit_minor": 190489,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-PDZN5V",
+          "invoice_id": "INV-Q5KGPPZ9",
+          "payment_id": "PAY-QYWGQH9T"
+        },
+        {
+          "row_id": "GL-F54RY3DWQ",
+          "timestamp": "2025-03-19T15:54:32+00:00",
+          "account": "7900",
+          "debit_minor": 1081,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-PDZN5V",
+          "invoice_id": null,
+          "payment_id": "PAY-QYWGQH9T"
+        },
+        {
+          "row_id": "GL-SX63DKVEY",
+          "timestamp": "2025-03-19T16:14:19+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 157336,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": null,
+          "payment_id": "PAY-3AXW7GEX"
+        },
+        {
+          "row_id": "GL-T86AZZXSV",
+          "timestamp": "2025-03-19T16:14:19+00:00",
+          "account": "2000",
+          "debit_minor": 157336,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": "INV-TTPSZALV",
+          "payment_id": "PAY-3AXW7GEX"
+        },
+        {
+          "row_id": "GL-P6SSSFWGS",
+          "timestamp": "2025-03-19T17:50:02+00:00",
+          "account": "5100",
+          "debit_minor": 297440,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": "INV-QAXFFCZ4",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-UVUHVPE7Y",
+          "timestamp": "2025-03-19T17:50:02+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 297440,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": "INV-QAXFFCZ4",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-JPQRXDE6B",
+          "timestamp": "2025-03-19T19:32:34+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 86700,
+          "currency": "EUR",
+          "entity_id": "SUP-NWDQ33",
+          "invoice_id": "INV-C2YGP7MD",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-P4NW2CT7J",
+          "timestamp": "2025-03-19T19:32:34+00:00",
+          "account": "5100",
+          "debit_minor": 86700,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-NWDQ33",
+          "invoice_id": "INV-C2YGP7MD",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-4KRWNZVGA",
+          "timestamp": "2025-03-19T19:38:08+00:00",
+          "account": "2000",
+          "debit_minor": 152012,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": "INV-87899KC5",
+          "payment_id": "PAY-6FMNS5UZ"
+        },
+        {
+          "row_id": "GL-5GYDB9CPV",
+          "timestamp": "2025-03-19T19:38:08+00:00",
+          "account": "2000",
+          "debit_minor": 75115,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": "INV-4Z6GLTPM",
+          "payment_id": "PAY-6FMNS5UZ"
+        },
+        {
+          "row_id": "GL-LFW23M4NQ",
+          "timestamp": "2025-03-19T19:38:08+00:00",
+          "account": "7900",
+          "debit_minor": 538,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": null,
+          "payment_id": "PAY-6FMNS5UZ"
+        },
+        {
+          "row_id": "GL-XA6FK82KW",
+          "timestamp": "2025-03-19T19:38:08+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 227665,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": null,
+          "payment_id": "PAY-6FMNS5UZ"
+        },
+        {
+          "row_id": "GL-9GARAPEYV",
+          "timestamp": "2025-03-20T19:00:27+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 365314,
+          "currency": "EUR",
+          "entity_id": "SUP-PDZN5V",
+          "invoice_id": "INV-B9WNUEY2",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-X6MTDQPKC",
+          "timestamp": "2025-03-20T19:00:27+00:00",
+          "account": "6400",
+          "debit_minor": 365314,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-PDZN5V",
+          "invoice_id": "INV-B9WNUEY2",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-LWQ3Z2PQE",
+          "timestamp": "2025-03-20T22:28:00+00:00",
+          "account": "5100",
+          "debit_minor": 128865,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-AKZAGW",
+          "invoice_id": "INV-MUFCLZ36",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-PEP79EZVV",
+          "timestamp": "2025-03-20T22:28:00+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 128865,
+          "currency": "EUR",
+          "entity_id": "SUP-AKZAGW",
+          "invoice_id": "INV-MUFCLZ36",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-D6JGG2WQD",
+          "timestamp": "2025-03-21T13:06:32+00:00",
+          "account": "2000",
+          "debit_minor": 83562,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": "INV-4Y8L8WLY",
+          "payment_id": "PAY-T69QWU6J"
+        },
+        {
+          "row_id": "GL-EGRWYMR65",
+          "timestamp": "2025-03-21T13:06:32+00:00",
+          "account": "7900",
+          "debit_minor": 0,
+          "credit_minor": 94,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": null,
+          "payment_id": "PAY-T69QWU6J"
+        },
+        {
+          "row_id": "GL-Z49SLRERP",
+          "timestamp": "2025-03-21T13:06:32+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 83468,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": null,
+          "payment_id": "PAY-T69QWU6J"
+        },
+        {
+          "row_id": "GL-D2BX94QJP",
+          "timestamp": "2025-03-21T14:59:33+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 95273,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": null,
+          "payment_id": "PAY-EDH2EZKZ"
+        },
+        {
+          "row_id": "GL-HT5WKS9NQ",
+          "timestamp": "2025-03-21T14:59:33+00:00",
+          "account": "7900",
+          "debit_minor": 1160,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": null,
+          "payment_id": "PAY-EDH2EZKZ"
+        },
+        {
+          "row_id": "GL-HVHS8RSYC",
+          "timestamp": "2025-03-21T14:59:33+00:00",
+          "account": "2000",
+          "debit_minor": 94113,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": "INV-8TPYR2CS",
+          "payment_id": "PAY-EDH2EZKZ"
+        },
+        {
+          "row_id": "GL-GSSA93W97",
+          "timestamp": "2025-03-21T19:29:09+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 386550,
+          "currency": "EUR",
+          "entity_id": "SUP-2FK8S2",
+          "invoice_id": "INV-LNAZNF9Y",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-PCTDLRAR4",
+          "timestamp": "2025-03-21T19:29:09+00:00",
+          "account": "6400",
+          "debit_minor": 386550,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-2FK8S2",
+          "invoice_id": "INV-LNAZNF9Y",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-8L5L448GJ",
+          "timestamp": "2025-03-21T20:48:25+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 364182,
+          "currency": "EUR",
+          "entity_id": "SUP-PDZN5V",
+          "invoice_id": null,
+          "payment_id": "PAY-N3GYW2XD"
+        },
+        {
+          "row_id": "GL-LBWWTRUE4",
+          "timestamp": "2025-03-21T20:48:25+00:00",
+          "account": "2000",
+          "debit_minor": 365314,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-PDZN5V",
+          "invoice_id": "INV-B9WNUEY2",
+          "payment_id": "PAY-N3GYW2XD"
+        },
+        {
+          "row_id": "GL-MUN25JAMX",
+          "timestamp": "2025-03-21T20:48:25+00:00",
+          "account": "7900",
+          "debit_minor": 0,
+          "credit_minor": 1132,
+          "currency": "EUR",
+          "entity_id": "SUP-PDZN5V",
+          "invoice_id": null,
+          "payment_id": "PAY-N3GYW2XD"
+        },
+        {
+          "row_id": "GL-R8M9G7DA5",
+          "timestamp": "2025-03-21T21:11:33+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 404080,
+          "currency": "EUR",
+          "entity_id": "SUP-YZZ6R3",
+          "invoice_id": "INV-WQYBM42J",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-TARTFZEVN",
+          "timestamp": "2025-03-21T21:11:33+00:00",
+          "account": "5100",
+          "debit_minor": 404080,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-YZZ6R3",
+          "invoice_id": "INV-WQYBM42J",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-7BXW8KM9M",
+          "timestamp": "2025-03-22T04:24:31+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 885669,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": null,
+          "payment_id": "PAY-Q6Q33R68"
+        },
+        {
+          "row_id": "GL-AUE6RTNBW",
+          "timestamp": "2025-03-22T04:24:31+00:00",
+          "account": "2000",
+          "debit_minor": 297440,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": "INV-QAXFFCZ4",
+          "payment_id": "PAY-Q6Q33R68"
+        },
+        {
+          "row_id": "GL-QSGZ6QXBM",
+          "timestamp": "2025-03-22T04:24:31+00:00",
+          "account": "2000",
+          "debit_minor": 494290,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": "INV-9572YXUR",
+          "payment_id": "PAY-Q6Q33R68"
+        },
+        {
+          "row_id": "GL-U4PB8L35G",
+          "timestamp": "2025-03-22T04:24:31+00:00",
+          "account": "2000",
+          "debit_minor": 93939,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": "INV-UTUYKKYH",
+          "payment_id": "PAY-Q6Q33R68"
+        },
+        {
+          "row_id": "GL-675ZES9Y3",
+          "timestamp": "2025-03-22T04:49:55+00:00",
+          "account": "2000",
+          "debit_minor": 40364,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": "INV-VD293YSB",
+          "payment_id": "PAY-LZ6U2SKF"
+        },
+        {
+          "row_id": "GL-6NP4DTRBJ",
+          "timestamp": "2025-03-22T04:49:55+00:00",
+          "account": "7900",
+          "debit_minor": 0,
+          "credit_minor": 594,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": null,
+          "payment_id": "PAY-LZ6U2SKF"
+        },
+        {
+          "row_id": "GL-EC824RNTJ",
+          "timestamp": "2025-03-22T04:49:55+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 39770,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": null,
+          "payment_id": "PAY-LZ6U2SKF"
+        },
+        {
+          "row_id": "GL-APKC784NS",
+          "timestamp": "2025-03-22T19:04:18+00:00",
+          "account": "7900",
+          "debit_minor": 1489,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": null,
+          "payment_id": "PAY-4JQN9U8G"
+        },
+        {
+          "row_id": "GL-P79T8WMFD",
+          "timestamp": "2025-03-22T19:04:18+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 91856,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": null,
+          "payment_id": "PAY-4JQN9U8G"
+        },
+        {
+          "row_id": "GL-QJHJTPYPX",
+          "timestamp": "2025-03-22T19:04:18+00:00",
+          "account": "2000",
+          "debit_minor": 90367,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": "INV-NZ6YA57B",
+          "payment_id": "PAY-4JQN9U8G"
+        },
+        {
+          "row_id": "GL-EJH6U95BG",
+          "timestamp": "2025-03-22T22:42:31+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 127495,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": "INV-YT9WKJ76",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-MP39L46YN",
+          "timestamp": "2025-03-22T22:42:31+00:00",
+          "account": "6500",
+          "debit_minor": 127495,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": "INV-YT9WKJ76",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-4W9NPTQ9A",
+          "timestamp": "2025-03-23T00:37:14+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 48849,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": "INV-YZFJURPD",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-FG284H2J9",
+          "timestamp": "2025-03-23T00:37:14+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 48849,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": "INV-ARFDYQQW",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-QU67UEMTH",
+          "timestamp": "2025-03-23T00:37:14+00:00",
+          "account": "5100",
+          "debit_minor": 48849,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": "INV-YZFJURPD",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-ZMGQDALAR",
+          "timestamp": "2025-03-23T00:37:14+00:00",
+          "account": "5100",
+          "debit_minor": 48849,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": "INV-ARFDYQQW",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-F4DCFPJJ2",
+          "timestamp": "2025-03-23T14:42:36+00:00",
+          "account": "2000",
+          "debit_minor": 48849,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": "INV-ARFDYQQW",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-W8RTAGR5L",
+          "timestamp": "2025-03-23T14:42:36+00:00",
+          "account": "5100",
+          "debit_minor": 0,
+          "credit_minor": 48849,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": "INV-ARFDYQQW",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-GFD79SLCA",
+          "timestamp": "2025-03-23T22:38:13+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 17358,
+          "currency": "EUR",
+          "entity_id": "SUP-AKZAGW",
+          "invoice_id": "INV-K68ASUKN",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-J55H3ETP8",
+          "timestamp": "2025-03-23T22:38:13+00:00",
+          "account": "5100",
+          "debit_minor": 17358,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-AKZAGW",
+          "invoice_id": "INV-K68ASUKN",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-CTZ32TUDV",
+          "timestamp": "2025-03-23T23:47:57+00:00",
+          "account": "2000",
+          "debit_minor": 71926,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": "INV-UC3KN835",
+          "payment_id": "PAY-3VBKA865"
+        },
+        {
+          "row_id": "GL-JVWQH8MKM",
+          "timestamp": "2025-03-23T23:47:57+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 72602,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": null,
+          "payment_id": "PAY-3VBKA865"
+        },
+        {
+          "row_id": "GL-RZMNSMWKS",
+          "timestamp": "2025-03-23T23:47:57+00:00",
+          "account": "7900",
+          "debit_minor": 676,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": null,
+          "payment_id": "PAY-3VBKA865"
+        },
+        {
+          "row_id": "GL-35B3GFTCC",
+          "timestamp": "2025-03-24T21:52:04+00:00",
+          "account": "7900",
+          "debit_minor": 0,
+          "credit_minor": 238,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": null,
+          "payment_id": "PAY-S9ZKCYYT"
+        },
+        {
+          "row_id": "GL-45V9V3MUS",
+          "timestamp": "2025-03-24T21:52:04+00:00",
+          "account": "2000",
+          "debit_minor": 17299,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": "INV-VD293YSB",
+          "payment_id": "PAY-S9ZKCYYT"
+        },
+        {
+          "row_id": "GL-5JLHJW4KM",
+          "timestamp": "2025-03-24T21:52:04+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 17061,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": null,
+          "payment_id": "PAY-S9ZKCYYT"
+        },
+        {
+          "row_id": "GL-4ZJMVPRDD",
+          "timestamp": "2025-03-24T22:03:00+00:00",
+          "account": "2000",
+          "debit_minor": 28304,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-Z43RCW",
+          "invoice_id": "INV-ZLX2TADM",
+          "payment_id": "PAY-E8MLFXFC"
+        },
+        {
+          "row_id": "GL-D9ZFN4PLV",
+          "timestamp": "2025-03-24T22:03:00+00:00",
+          "account": "7900",
+          "debit_minor": 1337,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-Z43RCW",
+          "invoice_id": null,
+          "payment_id": "PAY-E8MLFXFC"
+        },
+        {
+          "row_id": "GL-K2DRKGV9N",
+          "timestamp": "2025-03-24T22:03:00+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 29641,
+          "currency": "EUR",
+          "entity_id": "SUP-Z43RCW",
+          "invoice_id": null,
+          "payment_id": "PAY-E8MLFXFC"
+        },
+        {
+          "row_id": "GL-235HLA4YC",
+          "timestamp": "2025-03-25T13:24:00+00:00",
+          "account": "7900",
+          "debit_minor": 496,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": null,
+          "payment_id": "PAY-GPRW89CL"
+        },
+        {
+          "row_id": "GL-PWYR74ZMQ",
+          "timestamp": "2025-03-25T13:24:00+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 61766,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": null,
+          "payment_id": "PAY-GPRW89CL"
+        },
+        {
+          "row_id": "GL-Y6AG4EXNH",
+          "timestamp": "2025-03-25T13:24:00+00:00",
+          "account": "2000",
+          "debit_minor": 61270,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": "INV-UC3KN835",
+          "payment_id": "PAY-GPRW89CL"
+        },
+        {
+          "row_id": "GL-LMWTFD7SV",
+          "timestamp": "2025-03-25T15:25:20+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 7568,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": null,
+          "payment_id": "PAY-72SAQ3T4"
+        },
+        {
+          "row_id": "GL-S89H4SZWC",
+          "timestamp": "2025-03-25T15:25:20+00:00",
+          "account": "2000",
+          "debit_minor": 7568,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": "INV-AU844KW2",
+          "payment_id": "PAY-72SAQ3T4"
+        },
+        {
+          "row_id": "GL-SY433MJJR",
+          "timestamp": "2025-03-25T23:03:08+00:00",
+          "account": "5100",
+          "debit_minor": 298473,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-AKZAGW",
+          "invoice_id": "INV-GT4B9PF4",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-YQ3PHXEC2",
+          "timestamp": "2025-03-25T23:03:08+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 298473,
+          "currency": "EUR",
+          "entity_id": "SUP-AKZAGW",
+          "invoice_id": "INV-GT4B9PF4",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-3CZ7WSWL6",
+          "timestamp": "2025-03-26T13:41:23+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 25956,
+          "currency": "EUR",
+          "entity_id": "SUP-NWDQ33",
+          "invoice_id": null,
+          "payment_id": "PAY-QLTAGMQ4"
+        },
+        {
+          "row_id": "GL-6PP6UQZAL",
+          "timestamp": "2025-03-26T13:41:23+00:00",
+          "account": "7900",
+          "debit_minor": 0,
+          "credit_minor": 54,
+          "currency": "EUR",
+          "entity_id": "SUP-NWDQ33",
+          "invoice_id": null,
+          "payment_id": "PAY-QLTAGMQ4"
+        },
+        {
+          "row_id": "GL-Q8YGADVVJ",
+          "timestamp": "2025-03-26T13:41:23+00:00",
+          "account": "2000",
+          "debit_minor": 26010,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-NWDQ33",
+          "invoice_id": "INV-C2YGP7MD",
+          "payment_id": "PAY-QLTAGMQ4"
+        },
+        {
+          "row_id": "GL-6Y3659LZB",
+          "timestamp": "2025-03-26T16:19:28+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 246102,
+          "currency": "EUR",
+          "entity_id": "SUP-YZZ6R3",
+          "invoice_id": "INV-SFCMR7QN",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-YH2AS5F9P",
+          "timestamp": "2025-03-26T16:19:28+00:00",
+          "account": "5100",
+          "debit_minor": 246102,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-YZZ6R3",
+          "invoice_id": "INV-SFCMR7QN",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-85EXV7DEL",
+          "timestamp": "2025-03-26T23:42:15+00:00",
+          "account": "7900",
+          "debit_minor": 854,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-PDZN5V",
+          "invoice_id": null,
+          "payment_id": "PAY-WE5LV9YN"
+        },
+        {
+          "row_id": "GL-S3ZWBDDX9",
+          "timestamp": "2025-03-26T23:42:15+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 169620,
+          "currency": "EUR",
+          "entity_id": "SUP-PDZN5V",
+          "invoice_id": null,
+          "payment_id": "PAY-WE5LV9YN"
+        },
+        {
+          "row_id": "GL-T52TVLR8A",
+          "timestamp": "2025-03-26T23:42:15+00:00",
+          "account": "2000",
+          "debit_minor": 168766,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-PDZN5V",
+          "invoice_id": "INV-FZ4BJJ3L",
+          "payment_id": "PAY-WE5LV9YN"
+        },
+        {
+          "row_id": "GL-D22USXR7W",
+          "timestamp": "2025-03-27T00:37:32+00:00",
+          "account": "2000",
+          "debit_minor": 9634,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": "INV-AU844KW2",
+          "payment_id": "PAY-48KZQVSA"
+        },
+        {
+          "row_id": "GL-N784FN6AS",
+          "timestamp": "2025-03-27T00:37:32+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 9634,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": null,
+          "payment_id": "PAY-48KZQVSA"
+        },
+        {
+          "row_id": "GL-FT4PHKBCM",
+          "timestamp": "2025-03-27T13:28:59+00:00",
+          "account": "2000",
+          "debit_minor": 404080,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-YZZ6R3",
+          "invoice_id": "INV-WQYBM42J",
+          "payment_id": "PAY-JP3P7LE3"
+        },
+        {
+          "row_id": "GL-JNWX4WCPF",
+          "timestamp": "2025-03-27T13:28:59+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 404080,
+          "currency": "EUR",
+          "entity_id": "SUP-YZZ6R3",
+          "invoice_id": null,
+          "payment_id": "PAY-JP3P7LE3"
+        },
+        {
+          "row_id": "GL-LA5YBR6ST",
+          "timestamp": "2025-03-27T13:49:54+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 103500,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": "INV-XNSSQET7",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-RXYVTEC57",
+          "timestamp": "2025-03-27T13:49:54+00:00",
+          "account": "5100",
+          "debit_minor": 103500,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": "INV-XNSSQET7",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-7VTU99S4Q",
+          "timestamp": "2025-03-27T19:59:56+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 417767,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": "INV-WBSGFA46",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-CNSS9WBKP",
+          "timestamp": "2025-03-27T19:59:56+00:00",
+          "account": "5100",
+          "debit_minor": 417767,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": "INV-WBSGFA46",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-4ZVLW8T5W",
+          "timestamp": "2025-03-27T20:34:40+00:00",
+          "account": "2000",
+          "debit_minor": 29019,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-Z43RCW",
+          "invoice_id": "INV-GSR3BDYR",
+          "payment_id": "PAY-BRXSYLJA"
+        },
+        {
+          "row_id": "GL-7FLXD7MF6",
+          "timestamp": "2025-03-27T20:34:40+00:00",
+          "account": "7900",
+          "debit_minor": 438,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-Z43RCW",
+          "invoice_id": null,
+          "payment_id": "PAY-BRXSYLJA"
+        },
+        {
+          "row_id": "GL-ZQFSCCFL2",
+          "timestamp": "2025-03-27T20:34:40+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 29457,
+          "currency": "EUR",
+          "entity_id": "SUP-Z43RCW",
+          "invoice_id": null,
+          "payment_id": "PAY-BRXSYLJA"
+        },
+        {
+          "row_id": "GL-438G3KWHV",
+          "timestamp": "2025-03-27T21:10:49+00:00",
+          "account": "2000",
+          "debit_minor": 246102,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-YZZ6R3",
+          "invoice_id": "INV-SFCMR7QN",
+          "payment_id": "PAY-XMTX63DJ"
+        },
+        {
+          "row_id": "GL-8WAA3TT6D",
+          "timestamp": "2025-03-27T21:10:49+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 246102,
+          "currency": "EUR",
+          "entity_id": "SUP-YZZ6R3",
+          "invoice_id": null,
+          "payment_id": "PAY-XMTX63DJ"
+        },
+        {
+          "row_id": "GL-J7HPSVVKS",
+          "timestamp": "2025-03-28T13:57:31+00:00",
+          "account": "7900",
+          "debit_minor": 0,
+          "credit_minor": 243,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": null,
+          "payment_id": "PAY-7GG27T9G"
+        },
+        {
+          "row_id": "GL-LGND4ZT9Y",
+          "timestamp": "2025-03-28T13:57:31+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 127252,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": null,
+          "payment_id": "PAY-7GG27T9G"
+        },
+        {
+          "row_id": "GL-MABHKKRUG",
+          "timestamp": "2025-03-28T13:57:31+00:00",
+          "account": "2000",
+          "debit_minor": 127495,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": "INV-YT9WKJ76",
+          "payment_id": "PAY-7GG27T9G"
+        },
+        {
+          "row_id": "GL-6ECWNPD8P",
+          "timestamp": "2025-03-29T16:15:08+00:00",
+          "account": "7900",
+          "debit_minor": 327,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-NWDQ33",
+          "invoice_id": null,
+          "payment_id": "PAY-Q3LE4FE6"
+        },
+        {
+          "row_id": "GL-BEB5JA3AF",
+          "timestamp": "2025-03-29T16:15:08+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 8169,
+          "currency": "EUR",
+          "entity_id": "SUP-NWDQ33",
+          "invoice_id": null,
+          "payment_id": "PAY-Q3LE4FE6"
+        },
+        {
+          "row_id": "GL-T4ZGAKJZT",
+          "timestamp": "2025-03-29T16:15:08+00:00",
+          "account": "2000",
+          "debit_minor": 7842,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-NWDQ33",
+          "invoice_id": "INV-WNZFUC47",
+          "payment_id": "PAY-Q3LE4FE6"
+        },
+        {
+          "row_id": "GL-CA9Q9NY88",
+          "timestamp": "2025-03-29T17:15:18+00:00",
+          "account": "5100",
+          "debit_minor": 310266,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": "INV-5CB2U6GS",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-VZ4PBJZCR",
+          "timestamp": "2025-03-29T17:15:18+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 310266,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": "INV-5CB2U6GS",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-DD28MV4UP",
+          "timestamp": "2025-03-29T19:24:59+00:00",
+          "account": "6500",
+          "debit_minor": 72194,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": "INV-2FHPE2D9",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-H9LRURYWS",
+          "timestamp": "2025-03-29T19:24:59+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 72194,
+          "currency": "EUR",
+          "entity_id": "SUP-YWTZE6",
+          "invoice_id": "INV-2FHPE2D9",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-8A6GDC6GF",
+          "timestamp": "2025-03-29T21:11:27+00:00",
+          "account": "5100",
+          "debit_minor": 250807,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-NWDQ33",
+          "invoice_id": "INV-9YNL2N92",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-X9MDAWVBP",
+          "timestamp": "2025-03-29T21:11:27+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 250807,
+          "currency": "EUR",
+          "entity_id": "SUP-NWDQ33",
+          "invoice_id": "INV-9YNL2N92",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-4ERQ2725J",
+          "timestamp": "2025-03-30T14:31:00+00:00",
+          "account": "2000",
+          "debit_minor": 239801,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-AKZAGW",
+          "invoice_id": "INV-Y9QJVP8Q",
+          "payment_id": "PAY-JDB4NRES"
+        },
+        {
+          "row_id": "GL-HQWMK8TWR",
+          "timestamp": "2025-03-30T14:31:00+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 239801,
+          "currency": "EUR",
+          "entity_id": "SUP-AKZAGW",
+          "invoice_id": null,
+          "payment_id": "PAY-JDB4NRES"
+        },
+        {
+          "row_id": "GL-383TQWC6Z",
+          "timestamp": "2025-03-30T16:26:24+00:00",
+          "account": "2000",
+          "debit_minor": 128865,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-AKZAGW",
+          "invoice_id": "INV-MUFCLZ36",
+          "payment_id": "PAY-UUPGHM3W"
+        },
+        {
+          "row_id": "GL-3T2GLT5MC",
+          "timestamp": "2025-03-30T16:26:24+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 128865,
+          "currency": "EUR",
+          "entity_id": "SUP-AKZAGW",
+          "invoice_id": null,
+          "payment_id": "PAY-UUPGHM3W"
+        },
+        {
+          "row_id": "GL-8JYKZ8EGZ",
+          "timestamp": "2025-03-30T16:30:54+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 103500,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": null,
+          "payment_id": "PAY-AX3YPG7W"
+        },
+        {
+          "row_id": "GL-Y3KX8L5E2",
+          "timestamp": "2025-03-30T16:30:54+00:00",
+          "account": "2000",
+          "debit_minor": 103500,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-AQL5ZL",
+          "invoice_id": "INV-XNSSQET7",
+          "payment_id": "PAY-AX3YPG7W"
+        },
+        {
+          "row_id": "GL-K78HGLF9K",
+          "timestamp": "2025-03-30T23:24:29+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 17358,
+          "currency": "EUR",
+          "entity_id": "SUP-AKZAGW",
+          "invoice_id": null,
+          "payment_id": "PAY-GNFWZS75"
+        },
+        {
+          "row_id": "GL-MWJNA5BJW",
+          "timestamp": "2025-03-30T23:24:29+00:00",
+          "account": "2000",
+          "debit_minor": 17358,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-AKZAGW",
+          "invoice_id": "INV-K68ASUKN",
+          "payment_id": "PAY-GNFWZS75"
+        },
+        {
+          "row_id": "GL-RB5C2JH8E",
+          "timestamp": "2025-03-31T15:40:10+00:00",
+          "account": "5100",
+          "debit_minor": 195842,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-YZZ6R3",
+          "invoice_id": "INV-V6VJTDWA",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-SF4FR5BGE",
+          "timestamp": "2025-03-31T15:40:10+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 195842,
+          "currency": "EUR",
+          "entity_id": "SUP-YZZ6R3",
+          "invoice_id": "INV-V6VJTDWA",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-DEVRESNWR",
+          "timestamp": "2025-03-31T18:47:22+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 286974,
+          "currency": "EUR",
+          "entity_id": "SUP-PDZN5V",
+          "invoice_id": "INV-3KWA8UT3",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-LWEFJVZUW",
+          "timestamp": "2025-03-31T18:47:22+00:00",
+          "account": "6400",
+          "debit_minor": 286974,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-PDZN5V",
+          "invoice_id": "INV-3KWA8UT3",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-8RQCZVQ99",
+          "timestamp": "2025-03-31T20:19:54+00:00",
+          "account": "5100",
+          "debit_minor": 232853,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-AKZAGW",
+          "invoice_id": "INV-NFZF2TVJ",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-B89L87B8H",
+          "timestamp": "2025-03-31T20:19:54+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 232853,
+          "currency": "EUR",
+          "entity_id": "SUP-AKZAGW",
+          "invoice_id": "INV-NFZF2TVJ",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-8WEX365YU",
+          "timestamp": "2025-04-01T00:18:55+00:00",
+          "account": "1000",
+          "debit_minor": 0,
+          "credit_minor": 23487,
+          "currency": "EUR",
+          "entity_id": "SUP-PDZN5V",
+          "invoice_id": null,
+          "payment_id": "PAY-V4JK9VT8"
+        },
+        {
+          "row_id": "GL-SJ3DQW7BT",
+          "timestamp": "2025-04-01T00:18:55+00:00",
+          "account": "2090",
+          "debit_minor": 23487,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-PDZN5V",
+          "invoice_id": null,
+          "payment_id": "PAY-V4JK9VT8"
+        },
+        {
+          "row_id": "GL-3D45RRS5E",
+          "timestamp": "2025-04-01T03:25:26+00:00",
+          "account": "6400",
+          "debit_minor": 286974,
+          "credit_minor": 0,
+          "currency": "EUR",
+          "entity_id": "SUP-PDZN5V",
+          "invoice_id": "INV-D54H6Y2X",
+          "payment_id": null
+        },
+        {
+          "row_id": "GL-PRPMTXBS4",
+          "timestamp": "2025-04-01T03:25:26+00:00",
+          "account": "2000",
+          "debit_minor": 0,
+          "credit_minor": 286974,
+          "currency": "EUR",
+          "entity_id": "SUP-PDZN5V",
+          "invoice_id": "INV-D54H6Y2X",
+          "payment_id": null
+        }
+      ],
+      "invoices": [
+        {
+          "doc_id": "DOC-D2WR67DABU",
+          "invoice_id": "INV-VATGWFPZ",
+          "entity_id": "SUP-NWDQ33",
+          "issued_at": "2025-01-16T01:59:42+02:00",
+          "due_at": "2025-01-30T01:59:42+02:00",
+          "currency": "CNY",
+          "total_minor": 1159708,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Assorted merchandise",
+              "quantity": 44,
+              "unit_price_minor": 26357,
+              "amount_minor": 1159708,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "SI3846",
+          "entity_name": "Galudar Partners GmbH"
+        },
+        {
+          "doc_id": "DOC-59TZ3SCVJA",
+          "invoice_id": "INV-VD293YSB",
+          "entity_id": "SUP-YWTZE6",
+          "issued_at": "2025-01-31T15:54:14-05:00",
+          "due_at": "2025-03-02T15:54:14-05:00",
+          "currency": "USD",
+          "total_minor": 60766,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "POS maintenance",
+              "quantity": 2,
+              "unit_price_minor": 30383,
+              "amount_minor": 60766,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "F3484",
+          "entity_name": "Wynaelis Services Ltd"
+        },
+        {
+          "doc_id": "DOC-MQCPQWSGGH",
+          "invoice_id": "INV-ZLX2TADM",
+          "entity_id": "SUP-Z43RCW",
+          "issued_at": "2025-02-02T20:40:07+02:00",
+          "due_at": "2025-02-16T20:40:07+02:00",
+          "currency": "CNY",
+          "total_minor": 212757,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Water and heating",
+              "quantity": 1,
+              "unit_price_minor": 212757,
+              "amount_minor": 212757,
+              "service_period": "2025-02"
+            }
+          ],
+          "vendor_ref": "No.5807",
+          "entity_name": "Wynenrath Trading GmbH"
+        },
+        {
+          "doc_id": "DOC-ZUN4HMMSM8",
+          "invoice_id": "INV-XYB4756P",
+          "entity_id": "SUP-AQL5ZL",
+          "issued_at": "2025-02-03T18:23:49-05:00",
+          "due_at": "2025-02-17T18:23:49-05:00",
+          "currency": "EUR",
+          "total_minor": 276226,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Shelf goods",
+              "quantity": 57,
+              "unit_price_minor": 4121,
+              "amount_minor": 234897,
+              "service_period": null
+            },
+            {
+              "line_no": 2,
+              "description": "Seasonal stock",
+              "quantity": 37,
+              "unit_price_minor": 1117,
+              "amount_minor": 41329,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "SI9034",
+          "entity_name": "Heliorix Systems AG"
+        },
+        {
+          "doc_id": "DOC-3RLB6M6F6K",
+          "invoice_id": "INV-KAJRF4QV",
+          "entity_id": "SUP-NWDQ33",
+          "issued_at": "2025-02-05T01:58:45+02:00",
+          "due_at": "2025-02-19T01:58:45+02:00",
+          "currency": "CNY",
+          "total_minor": 4735247,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Shelf goods",
+              "quantity": 43,
+              "unit_price_minor": 9293,
+              "amount_minor": 399599,
+              "service_period": null
+            },
+            {
+              "line_no": 2,
+              "description": "Shelf goods",
+              "quantity": 59,
+              "unit_price_minor": 42136,
+              "amount_minor": 2486024,
+              "service_period": null
+            },
+            {
+              "line_no": 3,
+              "description": "Shelf goods",
+              "quantity": 56,
+              "unit_price_minor": 33029,
+              "amount_minor": 1849624,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "SI3839",
+          "entity_name": "Galudar Partners GmbH"
+        },
+        {
+          "doc_id": "DOC-YQZZ2YTRPY",
+          "invoice_id": "INV-WNZFUC47",
+          "entity_id": "SUP-NWDQ33",
+          "issued_at": "2025-02-05T22:02:08+02:00",
+          "due_at": "2025-02-19T22:02:08+02:00",
+          "currency": "CNY",
+          "total_minor": 59022,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Packaging materials",
+              "quantity": 18,
+              "unit_price_minor": 3279,
+              "amount_minor": 59022,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "SI3840",
+          "entity_name": "Galudar Partners GmbH"
+        },
+        {
+          "doc_id": "DOC-NFJLH4H35L",
+          "invoice_id": "INV-U7DTGJ7C",
+          "entity_id": "SUP-AQL5ZL",
+          "issued_at": "2025-02-15T17:02:55-05:00",
+          "due_at": "2025-03-01T17:02:55-05:00",
+          "currency": "EUR",
+          "total_minor": 56368,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Packaging materials",
+              "quantity": 26,
+              "unit_price_minor": 2168,
+              "amount_minor": 56368,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "SI9041",
+          "entity_name": "Heliorix Systems AG"
+        },
+        {
+          "doc_id": "DOC-878CLJQ4HX",
+          "invoice_id": "INV-Y9QJVP8Q",
+          "entity_id": "SUP-AKZAGW",
+          "issued_at": "2025-02-15T17:58:43-05:00",
+          "due_at": "2025-03-01T17:58:43-05:00",
+          "currency": "EUR",
+          "total_minor": 239801,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Shelf goods",
+              "quantity": 59,
+              "unit_price_minor": 3779,
+              "amount_minor": 222961,
+              "service_period": null
+            },
+            {
+              "line_no": 2,
+              "description": "Packaging materials",
+              "quantity": 40,
+              "unit_price_minor": 421,
+              "amount_minor": 16840,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "No.1336",
+          "entity_name": "Istarmont Trading Ltd"
+        },
+        {
+          "doc_id": "DOC-U8FHK9CWEQ",
+          "invoice_id": "INV-XYEEGTD2",
+          "entity_id": "SUP-YZZ6R3",
+          "issued_at": "2025-02-15T18:42:31-05:00",
+          "due_at": "2025-03-01T18:42:31-05:00",
+          "currency": "EUR",
+          "total_minor": 51528,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Packaging materials",
+              "quantity": 30,
+              "unit_price_minor": 1579,
+              "amount_minor": 47370,
+              "service_period": null
+            },
+            {
+              "line_no": 2,
+              "description": "Packaging materials",
+              "quantity": 7,
+              "unit_price_minor": 594,
+              "amount_minor": 4158,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "SI2893",
+          "entity_name": "Ulendex Works GmbH"
+        },
+        {
+          "doc_id": "DOC-QGXPXDBBQJ",
+          "invoice_id": "INV-ZP4M64Y4",
+          "entity_id": "SUP-NWDQ33",
+          "issued_at": "2025-03-01T18:53:47+02:00",
+          "due_at": "2025-03-15T18:53:47+02:00",
+          "currency": "CNY",
+          "total_minor": 3417352,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Seasonal stock",
+              "quantity": 51,
+              "unit_price_minor": 42671,
+              "amount_minor": 2176221,
+              "service_period": null
+            },
+            {
+              "line_no": 2,
+              "description": "Assorted merchandise",
+              "quantity": 46,
+              "unit_price_minor": 2371,
+              "amount_minor": 109066,
+              "service_period": null
+            },
+            {
+              "line_no": 3,
+              "description": "Shelf goods",
+              "quantity": 45,
+              "unit_price_minor": 25157,
+              "amount_minor": 1132065,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "SI3829",
+          "entity_name": "Galudar Partners GmbH"
+        },
+        {
+          "doc_id": "DOC-F49J3BZ8PV",
+          "invoice_id": "INV-FK9HSSL4",
+          "entity_id": "SUP-YZZ6R3",
+          "issued_at": "2025-03-01T14:15:29-05:00",
+          "due_at": "2025-03-15T14:15:29-05:00",
+          "currency": "EUR",
+          "total_minor": 39180,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Packaging materials",
+              "quantity": 10,
+              "unit_price_minor": 1025,
+              "amount_minor": 10250,
+              "service_period": null
+            },
+            {
+              "line_no": 2,
+              "description": "Packaging materials",
+              "quantity": 6,
+              "unit_price_minor": 1619,
+              "amount_minor": 9714,
+              "service_period": null
+            },
+            {
+              "line_no": 3,
+              "description": "Assorted merchandise",
+              "quantity": 16,
+              "unit_price_minor": 1201,
+              "amount_minor": 19216,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "SI2880",
+          "entity_name": "Ulendex Works GmbH"
+        },
+        {
+          "doc_id": "DOC-986C69UZQ3",
+          "invoice_id": "INV-DKKA2LNZ",
+          "entity_id": "SUP-AQL5ZL",
+          "issued_at": "2025-03-01T17:28:12-05:00",
+          "due_at": "2025-03-15T17:28:12-05:00",
+          "currency": "EUR",
+          "total_minor": 381104,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Seasonal stock",
+              "quantity": 50,
+              "unit_price_minor": 4754,
+              "amount_minor": 237700,
+              "service_period": null
+            },
+            {
+              "line_no": 2,
+              "description": "Assorted merchandise",
+              "quantity": 12,
+              "unit_price_minor": 5025,
+              "amount_minor": 60300,
+              "service_period": null
+            },
+            {
+              "line_no": 3,
+              "description": "Shelf goods",
+              "quantity": 16,
+              "unit_price_minor": 5194,
+              "amount_minor": 83104,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "SI9020",
+          "entity_name": "Heliorix Systems AG"
+        },
+        {
+          "doc_id": "DOC-Z9J3SQNKWE",
+          "invoice_id": "INV-SCHPVAGL",
+          "entity_id": "SUP-NWDQ33",
+          "issued_at": "2025-03-02T21:16:22+02:00",
+          "due_at": "2025-03-16T21:16:22+02:00",
+          "currency": "CNY",
+          "total_minor": 4115570,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Assorted merchandise",
+              "quantity": 50,
+              "unit_price_minor": 31843,
+              "amount_minor": 1592150,
+              "service_period": null
+            },
+            {
+              "line_no": 2,
+              "description": "Assorted merchandise",
+              "quantity": 60,
+              "unit_price_minor": 42057,
+              "amount_minor": 2523420,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "SI3815",
+          "entity_name": "Galudar Partners GmbH"
+        },
+        {
+          "doc_id": "DOC-H7NTD9TUNQ",
+          "invoice_id": "INV-GSR3BDYR",
+          "entity_id": "SUP-Z43RCW",
+          "issued_at": "2025-03-03T01:14:31+02:00",
+          "due_at": "2025-03-17T01:14:31+02:00",
+          "currency": "CNY",
+          "total_minor": 212757,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Water and heating",
+              "quantity": 1,
+              "unit_price_minor": 212757,
+              "amount_minor": 212757,
+              "service_period": "2025-03"
+            }
+          ],
+          "vendor_ref": "No.5800",
+          "entity_name": "Wynenrath Trading GmbH"
+        },
+        {
+          "doc_id": "DOC-DV9MGTTDFW",
+          "invoice_id": "INV-MMYD4UFW",
+          "entity_id": "SUP-NWDQ33",
+          "issued_at": "2025-03-03T16:54:54+02:00",
+          "due_at": "2025-03-17T16:54:54+02:00",
+          "currency": "CNY",
+          "total_minor": 2196470,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Shelf goods",
+              "quantity": 13,
+              "unit_price_minor": 26579,
+              "amount_minor": 345527,
+              "service_period": null
+            },
+            {
+              "line_no": 2,
+              "description": "Shelf goods",
+              "quantity": 51,
+              "unit_price_minor": 36293,
+              "amount_minor": 1850943,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "SI3821",
+          "entity_name": "Galudar Partners GmbH"
+        },
+        {
+          "doc_id": "DOC-6TCRFLMXGX",
+          "invoice_id": "INV-FZ4BJJ3L",
+          "entity_id": "SUP-PDZN5V",
+          "issued_at": "2025-03-06T13:12:21-05:00",
+          "due_at": "2025-04-05T13:12:21-05:00",
+          "currency": "CNY",
+          "total_minor": 2256657,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Store rent",
+              "quantity": 1,
+              "unit_price_minor": 2256657,
+              "amount_minor": 2256657,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "BILL-5767",
+          "entity_name": "Joremont Services GmbH"
+        },
+        {
+          "doc_id": "DOC-DCRN7M8CDM",
+          "invoice_id": "INV-NLCP5VC5",
+          "entity_id": "SUP-PDZN5V",
+          "issued_at": "2025-03-06T14:11:48-05:00",
+          "due_at": "2025-04-05T14:11:48-05:00",
+          "currency": "CNY",
+          "total_minor": 2773129,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Store rent",
+              "quantity": 1,
+              "unit_price_minor": 2773129,
+              "amount_minor": 2773129,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "BILL-5762",
+          "entity_name": "Joremont Services GmbH"
+        },
+        {
+          "doc_id": "DOC-XM3E7UV3M5",
+          "invoice_id": "INV-TTPSZALV",
+          "entity_id": "SUP-AQL5ZL",
+          "issued_at": "2025-03-07T08:24:38-05:00",
+          "due_at": "2025-03-21T08:24:38-05:00",
+          "currency": "EUR",
+          "total_minor": 157336,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Packaging materials",
+              "quantity": 24,
+              "unit_price_minor": 3131,
+              "amount_minor": 75144,
+              "service_period": null
+            },
+            {
+              "line_no": 2,
+              "description": "Seasonal stock",
+              "quantity": 22,
+              "unit_price_minor": 3736,
+              "amount_minor": 82192,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "SI9015",
+          "entity_name": "Heliorix Systems AG"
+        },
+        {
+          "doc_id": "DOC-WS4H8JEYVM",
+          "invoice_id": "INV-8C5D3HYH",
+          "entity_id": "SUP-NWDQ33",
+          "issued_at": "2025-03-08T21:12:56+02:00",
+          "due_at": "2025-03-22T21:12:56+02:00",
+          "currency": "CNY",
+          "total_minor": 1375053,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Seasonal stock",
+              "quantity": 51,
+              "unit_price_minor": 6871,
+              "amount_minor": 350421,
+              "service_period": null
+            },
+            {
+              "line_no": 2,
+              "description": "Packaging materials",
+              "quantity": 38,
+              "unit_price_minor": 26964,
+              "amount_minor": 1024632,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "SI3832",
+          "entity_name": "Galudar Partners GmbH"
+        },
+        {
+          "doc_id": "DOC-DYWR6P3CC2",
+          "invoice_id": "INV-4Z6GLTPM",
+          "entity_id": "SUP-YWTZE6",
+          "issued_at": "2025-03-09T23:08:28-05:00",
+          "due_at": "2025-04-08T23:08:28-05:00",
+          "currency": "USD",
+          "total_minor": 81225,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "POS maintenance",
+              "quantity": 3,
+              "unit_price_minor": 27075,
+              "amount_minor": 81225,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "SI2887",
+          "entity_name": "Wynaelis Services Ltd"
+        },
+        {
+          "doc_id": "DOC-SGB5W9STXR",
+          "invoice_id": "INV-8TPYR2CS",
+          "entity_id": "SUP-YWTZE6",
+          "issued_at": "2025-03-10T12:15:08-05:00",
+          "due_at": "2025-04-09T12:15:08-05:00",
+          "currency": "USD",
+          "total_minor": 101900,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Cleaning services",
+              "quantity": 4,
+              "unit_price_minor": 25475,
+              "amount_minor": 101900,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "F3474",
+          "entity_name": "Wynaelis Services Ltd"
+        },
+        {
+          "doc_id": "DOC-2XLD2PKJYX",
+          "invoice_id": "INV-GKLKCPLE",
+          "entity_id": "SUP-YZZ6R3",
+          "issued_at": "2025-03-11T08:29:55-05:00",
+          "due_at": "2025-03-25T08:29:55-05:00",
+          "currency": "EUR",
+          "total_minor": 321159,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Assorted merchandise",
+              "quantity": 26,
+              "unit_price_minor": 4647,
+              "amount_minor": 120822,
+              "service_period": null
+            },
+            {
+              "line_no": 2,
+              "description": "Shelf goods",
+              "quantity": 16,
+              "unit_price_minor": 4959,
+              "amount_minor": 79344,
+              "service_period": null
+            },
+            {
+              "line_no": 3,
+              "description": "Seasonal stock",
+              "quantity": 31,
+              "unit_price_minor": 3903,
+              "amount_minor": 120993,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "SI2887",
+          "entity_name": "Ulendex Works GmbH"
+        },
+        {
+          "doc_id": "DOC-YEY9RU7TLH",
+          "invoice_id": "INV-9572YXUR",
+          "entity_id": "SUP-AQL5ZL",
+          "issued_at": "2025-03-11T10:18:39-05:00",
+          "due_at": "2025-03-25T10:18:39-05:00",
+          "currency": "EUR",
+          "total_minor": 494290,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Seasonal stock",
+              "quantity": 10,
+              "unit_price_minor": 3951,
+              "amount_minor": 39510,
+              "service_period": null
+            },
+            {
+              "line_no": 2,
+              "description": "Assorted merchandise",
+              "quantity": 30,
+              "unit_price_minor": 5351,
+              "amount_minor": 160530,
+              "service_period": null
+            },
+            {
+              "line_no": 3,
+              "description": "Seasonal stock",
+              "quantity": 55,
+              "unit_price_minor": 5350,
+              "amount_minor": 294250,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "SI9006",
+          "entity_name": "Heliorix Systems AG"
+        },
+        {
+          "doc_id": "DOC-EQVN3C3A3B",
+          "invoice_id": "INV-RX5NXR3D",
+          "entity_id": "SUP-PDZN5V",
+          "issued_at": "2025-03-11T14:25:24-05:00",
+          "due_at": "2025-04-10T14:25:24-05:00",
+          "currency": "CNY",
+          "total_minor": 2643500,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Store rent",
+              "quantity": 1,
+              "unit_price_minor": 2643500,
+              "amount_minor": 2643500,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "BILL-5768",
+          "entity_name": "Joremont Services GmbH"
+        },
+        {
+          "doc_id": "DOC-YHS53GDH7F",
+          "invoice_id": "INV-NZ6YA57B",
+          "entity_id": "SUP-YWTZE6",
+          "issued_at": "2025-03-11T16:10:58-05:00",
+          "due_at": "2025-04-10T16:10:58-05:00",
+          "currency": "USD",
+          "total_minor": 97913,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Security services",
+              "quantity": 4,
+              "unit_price_minor": 14556,
+              "amount_minor": 58224,
+              "service_period": null
+            },
+            {
+              "line_no": 2,
+              "description": "Security services",
+              "quantity": 1,
+              "unit_price_minor": 39689,
+              "amount_minor": 39689,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "F3470",
+          "entity_name": "Wynaelis Services Ltd"
+        },
+        {
+          "doc_id": "DOC-X7J47EVKBG",
+          "invoice_id": "INV-UTUYKKYH",
+          "entity_id": "SUP-AQL5ZL",
+          "issued_at": "2025-03-13T14:09:21-05:00",
+          "due_at": "2025-03-27T14:09:21-05:00",
+          "currency": "EUR",
+          "total_minor": 93939,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Assorted merchandise",
+              "quantity": 18,
+              "unit_price_minor": 1711,
+              "amount_minor": 30798,
+              "service_period": null
+            },
+            {
+              "line_no": 2,
+              "description": "Shelf goods",
+              "quantity": 39,
+              "unit_price_minor": 1619,
+              "amount_minor": 63141,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "SI9013",
+          "entity_name": "Heliorix Systems AG"
+        },
+        {
+          "doc_id": "DOC-94TDV3GRXL",
+          "invoice_id": "INV-Q5KGPPZ9",
+          "entity_id": "SUP-PDZN5V",
+          "issued_at": "2025-03-13T23:16:08-05:00",
+          "due_at": "2025-04-12T23:16:08-05:00",
+          "currency": "CNY",
+          "total_minor": 2049936,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Store rent",
+              "quantity": 1,
+              "unit_price_minor": 2049936,
+              "amount_minor": 2049936,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "BILL-5773",
+          "entity_name": "Joremont Services GmbH"
+        },
+        {
+          "doc_id": "DOC-M9F8XUA57X",
+          "invoice_id": "INV-UC3KN835",
+          "entity_id": "SUP-YWTZE6",
+          "issued_at": "2025-03-16T10:06:07-05:00",
+          "due_at": "2025-04-15T10:06:07-05:00",
+          "currency": "USD",
+          "total_minor": 143228,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "POS maintenance",
+              "quantity": 4,
+              "unit_price_minor": 35807,
+              "amount_minor": 143228,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "F3462",
+          "entity_name": "Wynaelis Services Ltd"
+        },
+        {
+          "doc_id": "DOC-98Q443Y9TC",
+          "invoice_id": "INV-AU844KW2",
+          "entity_id": "SUP-AQL5ZL",
+          "issued_at": "2025-03-17T10:27:18-05:00",
+          "due_at": "2025-03-31T10:27:18-05:00",
+          "currency": "EUR",
+          "total_minor": 17202,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Shelf goods",
+              "quantity": 6,
+              "unit_price_minor": 1446,
+              "amount_minor": 8676,
+              "service_period": null
+            },
+            {
+              "line_no": 2,
+              "description": "Shelf goods",
+              "quantity": 6,
+              "unit_price_minor": 1421,
+              "amount_minor": 8526,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "SI9028",
+          "entity_name": "Heliorix Systems AG"
+        },
+        {
+          "doc_id": "DOC-SMD3GJU6SM",
+          "invoice_id": "INV-87899KC5",
+          "entity_id": "SUP-YWTZE6",
+          "issued_at": "2025-03-17T14:00:17-05:00",
+          "due_at": "2025-04-16T14:00:17-05:00",
+          "currency": "USD",
+          "total_minor": 163005,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Cleaning services",
+              "quantity": 3,
+              "unit_price_minor": 19235,
+              "amount_minor": 57705,
+              "service_period": null
+            },
+            {
+              "line_no": 2,
+              "description": "POS maintenance",
+              "quantity": 4,
+              "unit_price_minor": 26325,
+              "amount_minor": 105300,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "F3456",
+          "entity_name": "Wynaelis Services Ltd"
+        },
+        {
+          "doc_id": "DOC-G8E6KMMFV4",
+          "invoice_id": "INV-QXARHLZF",
+          "entity_id": "SUP-NWDQ33",
+          "issued_at": "2025-03-17T22:14:59+02:00",
+          "due_at": "2025-03-31T22:14:59+02:00",
+          "currency": "CNY",
+          "total_minor": 648594,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Assorted merchandise",
+              "quantity": 15,
+              "unit_price_minor": 18886,
+              "amount_minor": 283290,
+              "service_period": null
+            },
+            {
+              "line_no": 2,
+              "description": "Shelf goods",
+              "quantity": 24,
+              "unit_price_minor": 15221,
+              "amount_minor": 365304,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "SI3833",
+          "entity_name": "Galudar Partners GmbH"
+        },
+        {
+          "doc_id": "DOC-FNPWW85UX2",
+          "invoice_id": "INV-4Y8L8WLY",
+          "entity_id": "SUP-YWTZE6",
+          "issued_at": "2025-03-18T11:34:25-05:00",
+          "due_at": "2025-04-17T11:34:25-05:00",
+          "currency": "USD",
+          "total_minor": 89274,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "POS maintenance",
+              "quantity": 3,
+              "unit_price_minor": 6700,
+              "amount_minor": 20100,
+              "service_period": null
+            },
+            {
+              "line_no": 2,
+              "description": "Security services",
+              "quantity": 1,
+              "unit_price_minor": 8427,
+              "amount_minor": 8427,
+              "service_period": null
+            },
+            {
+              "line_no": 3,
+              "description": "POS maintenance",
+              "quantity": 3,
+              "unit_price_minor": 20249,
+              "amount_minor": 60747,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "F3480",
+          "entity_name": "Wynaelis Services Ltd"
+        },
+        {
+          "doc_id": "DOC-USLBL6WFV7",
+          "invoice_id": "INV-QAXFFCZ4",
+          "entity_id": "SUP-AQL5ZL",
+          "issued_at": "2025-03-19T12:50:02-05:00",
+          "due_at": "2025-04-02T12:50:02-05:00",
+          "currency": "EUR",
+          "total_minor": 297440,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Shelf goods",
+              "quantity": 37,
+              "unit_price_minor": 3275,
+              "amount_minor": 121175,
+              "service_period": null
+            },
+            {
+              "line_no": 2,
+              "description": "Assorted merchandise",
+              "quantity": 45,
+              "unit_price_minor": 3917,
+              "amount_minor": 176265,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "SI9000",
+          "entity_name": "Heliorix Systems AG"
+        },
+        {
+          "doc_id": "DOC-5Q28WYKQHY",
+          "invoice_id": "INV-C2YGP7MD",
+          "entity_id": "SUP-NWDQ33",
+          "issued_at": "2025-03-19T21:32:34+02:00",
+          "due_at": "2025-04-02T21:32:34+02:00",
+          "currency": "CNY",
+          "total_minor": 621594,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Seasonal stock",
+              "quantity": 12,
+              "unit_price_minor": 6864,
+              "amount_minor": 82368,
+              "service_period": null
+            },
+            {
+              "line_no": 2,
+              "description": "Seasonal stock",
+              "quantity": 18,
+              "unit_price_minor": 29957,
+              "amount_minor": 539226,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "SI3822",
+          "entity_name": "Galudar Partners GmbH"
+        },
+        {
+          "doc_id": "DOC-7XMEGUNHEK",
+          "invoice_id": "INV-B9WNUEY2",
+          "entity_id": "SUP-PDZN5V",
+          "issued_at": "2025-03-20T14:00:27-05:00",
+          "due_at": "2025-04-19T14:00:27-05:00",
+          "currency": "CNY",
+          "total_minor": 2634400,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Store rent",
+              "quantity": 1,
+              "unit_price_minor": 2634400,
+              "amount_minor": 2634400,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "BILL-5775",
+          "entity_name": "Joremont Services GmbH"
+        },
+        {
+          "doc_id": "DOC-BXRJ5437N2",
+          "invoice_id": "INV-MUFCLZ36",
+          "entity_id": "SUP-AKZAGW",
+          "issued_at": "2025-03-20T17:28:00-05:00",
+          "due_at": "2025-04-03T17:28:00-05:00",
+          "currency": "EUR",
+          "total_minor": 128865,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Assorted merchandise",
+              "quantity": 55,
+              "unit_price_minor": 2343,
+              "amount_minor": 128865,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "No.1322",
+          "entity_name": "Istarmont Trading Ltd"
+        },
+        {
+          "doc_id": "DOC-C5L42ST3WY",
+          "invoice_id": "INV-LNAZNF9Y",
+          "entity_id": "SUP-2FK8S2",
+          "issued_at": "2025-03-21T19:29:09+00:00",
+          "due_at": "2025-04-20T19:29:09+00:00",
+          "currency": "EUR",
+          "total_minor": 386550,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Store rent",
+              "quantity": 1,
+              "unit_price_minor": 386550,
+              "amount_minor": 386550,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "F1947",
+          "entity_name": "Ulorsta Supply Ltd"
+        },
+        {
+          "doc_id": "DOC-5AZT4XDNNF",
+          "invoice_id": "INV-WQYBM42J",
+          "entity_id": "SUP-YZZ6R3",
+          "issued_at": "2025-03-21T16:11:33-05:00",
+          "due_at": "2025-04-04T16:11:33-05:00",
+          "currency": "EUR",
+          "total_minor": 404080,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Assorted merchandise",
+              "quantity": 49,
+              "unit_price_minor": 2915,
+              "amount_minor": 142835,
+              "service_period": null
+            },
+            {
+              "line_no": 2,
+              "description": "Seasonal stock",
+              "quantity": 36,
+              "unit_price_minor": 4835,
+              "amount_minor": 174060,
+              "service_period": null
+            },
+            {
+              "line_no": 3,
+              "description": "Shelf goods",
+              "quantity": 53,
+              "unit_price_minor": 1645,
+              "amount_minor": 87185,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "SI2871",
+          "entity_name": "Ulendex Works GmbH"
+        },
+        {
+          "doc_id": "DOC-JYLVUNWAC7",
+          "invoice_id": "INV-YT9WKJ76",
+          "entity_id": "SUP-YWTZE6",
+          "issued_at": "2025-03-22T17:42:31-05:00",
+          "due_at": "2025-04-21T17:42:31-05:00",
+          "currency": "USD",
+          "total_minor": 135902,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Cleaning services",
+              "quantity": 1,
+              "unit_price_minor": 5418,
+              "amount_minor": 5418,
+              "service_period": null
+            },
+            {
+              "line_no": 2,
+              "description": "POS maintenance",
+              "quantity": 4,
+              "unit_price_minor": 32621,
+              "amount_minor": 130484,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "F3481",
+          "entity_name": "Wynaelis Services Ltd"
+        },
+        {
+          "doc_id": "DOC-ZRNV2UKTQW",
+          "invoice_id": "INV-ARFDYQQW",
+          "entity_id": "SUP-AQL5ZL",
+          "issued_at": "2025-03-22T19:37:14-05:00",
+          "due_at": "2025-04-05T19:37:14-05:00",
+          "currency": "EUR",
+          "total_minor": 48849,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Assorted merchandise",
+              "quantity": 5,
+              "unit_price_minor": 2559,
+              "amount_minor": 12795,
+              "service_period": null
+            },
+            {
+              "line_no": 2,
+              "description": "Shelf goods",
+              "quantity": 9,
+              "unit_price_minor": 4006,
+              "amount_minor": 36054,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "SI9017",
+          "entity_name": "Heliorix Systems AG"
+        },
+        {
+          "doc_id": "DOC-XCJSQPFUDF",
+          "invoice_id": "INV-YZFJURPD",
+          "entity_id": "SUP-AQL5ZL",
+          "issued_at": "2025-03-22T19:37:14-05:00",
+          "due_at": "2025-04-05T19:37:14-05:00",
+          "currency": "EUR",
+          "total_minor": 48849,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Assorted merchandise",
+              "quantity": 5,
+              "unit_price_minor": 2559,
+              "amount_minor": 12795,
+              "service_period": null
+            },
+            {
+              "line_no": 2,
+              "description": "Shelf goods",
+              "quantity": 9,
+              "unit_price_minor": 4006,
+              "amount_minor": 36054,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "SI9017",
+          "entity_name": "Heliorix Systems AG"
+        },
+        {
+          "doc_id": "DOC-6LAQNBUFMT",
+          "invoice_id": "INV-K68ASUKN",
+          "entity_id": "SUP-AKZAGW",
+          "issued_at": "2025-03-23T17:38:13-05:00",
+          "due_at": "2025-04-06T17:38:13-05:00",
+          "currency": "EUR",
+          "total_minor": 17358,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Assorted merchandise",
+              "quantity": 7,
+              "unit_price_minor": 194,
+              "amount_minor": 1358,
+              "service_period": null
+            },
+            {
+              "line_no": 2,
+              "description": "Shelf goods",
+              "quantity": 25,
+              "unit_price_minor": 640,
+              "amount_minor": 16000,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "No.1329",
+          "entity_name": "Istarmont Trading Ltd"
+        },
+        {
+          "doc_id": "DOC-BDC9MYJ535",
+          "invoice_id": "INV-GT4B9PF4",
+          "entity_id": "SUP-AKZAGW",
+          "issued_at": "2025-03-25T18:03:08-05:00",
+          "due_at": "2025-04-08T18:03:08-05:00",
+          "currency": "EUR",
+          "total_minor": 298473,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Seasonal stock",
+              "quantity": 26,
+              "unit_price_minor": 3037,
+              "amount_minor": 78962,
+              "service_period": null
+            },
+            {
+              "line_no": 2,
+              "description": "Assorted merchandise",
+              "quantity": 11,
+              "unit_price_minor": 1856,
+              "amount_minor": 20416,
+              "service_period": null
+            },
+            {
+              "line_no": 3,
+              "description": "Packaging materials",
+              "quantity": 39,
+              "unit_price_minor": 5105,
+              "amount_minor": 199095,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "No.1321",
+          "entity_name": "Istarmont Trading Ltd"
+        },
+        {
+          "doc_id": "DOC-6YDPVWLFRC",
+          "invoice_id": "INV-SFCMR7QN",
+          "entity_id": "SUP-YZZ6R3",
+          "issued_at": "2025-03-26T11:19:28-05:00",
+          "due_at": "2025-04-09T11:19:28-05:00",
+          "currency": "EUR",
+          "total_minor": 246102,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Packaging materials",
+              "quantity": 29,
+              "unit_price_minor": 4750,
+              "amount_minor": 137750,
+              "service_period": null
+            },
+            {
+              "line_no": 2,
+              "description": "Assorted merchandise",
+              "quantity": 32,
+              "unit_price_minor": 3386,
+              "amount_minor": 108352,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "SI2876",
+          "entity_name": "Ulendex Works GmbH"
+        },
+        {
+          "doc_id": "DOC-PZSP3PYPG8",
+          "invoice_id": "INV-XNSSQET7",
+          "entity_id": "SUP-AQL5ZL",
+          "issued_at": "2025-03-27T08:49:54-05:00",
+          "due_at": "2025-04-10T08:49:54-05:00",
+          "currency": "EUR",
+          "total_minor": 103500,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Assorted merchandise",
+              "quantity": 20,
+              "unit_price_minor": 5175,
+              "amount_minor": 103500,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "SI9024",
+          "entity_name": "Heliorix Systems AG"
+        },
+        {
+          "doc_id": "DOC-HPNHAR8QML",
+          "invoice_id": "INV-WBSGFA46",
+          "entity_id": "SUP-AQL5ZL",
+          "issued_at": "2025-03-27T14:59:56-05:00",
+          "due_at": "2025-04-10T14:59:56-05:00",
+          "currency": "EUR",
+          "total_minor": 417767,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Assorted merchandise",
+              "quantity": 19,
+              "unit_price_minor": 1286,
+              "amount_minor": 24434,
+              "service_period": null
+            },
+            {
+              "line_no": 2,
+              "description": "Assorted merchandise",
+              "quantity": 35,
+              "unit_price_minor": 5527,
+              "amount_minor": 193445,
+              "service_period": null
+            },
+            {
+              "line_no": 3,
+              "description": "Packaging materials",
+              "quantity": 52,
+              "unit_price_minor": 3844,
+              "amount_minor": 199888,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "SI9001",
+          "entity_name": "Heliorix Systems AG"
+        },
+        {
+          "doc_id": "DOC-83P75KB8XF",
+          "invoice_id": "INV-5CB2U6GS",
+          "entity_id": "SUP-AQL5ZL",
+          "issued_at": "2025-03-29T12:15:18-05:00",
+          "due_at": "2025-04-12T12:15:18-05:00",
+          "currency": "EUR",
+          "total_minor": 310266,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Assorted merchandise",
+              "quantity": 50,
+              "unit_price_minor": 2923,
+              "amount_minor": 146150,
+              "service_period": null
+            },
+            {
+              "line_no": 2,
+              "description": "Assorted merchandise",
+              "quantity": 21,
+              "unit_price_minor": 1761,
+              "amount_minor": 36981,
+              "service_period": null
+            },
+            {
+              "line_no": 3,
+              "description": "Seasonal stock",
+              "quantity": 47,
+              "unit_price_minor": 2705,
+              "amount_minor": 127135,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "SI9012",
+          "entity_name": "Heliorix Systems AG"
+        },
+        {
+          "doc_id": "DOC-ZWBAMZZ3WB",
+          "invoice_id": "INV-2FHPE2D9",
+          "entity_id": "SUP-YWTZE6",
+          "issued_at": "2025-03-29T14:24:59-05:00",
+          "due_at": "2025-04-28T14:24:59-05:00",
+          "currency": "USD",
+          "total_minor": 77528,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Cleaning services",
+              "quantity": 4,
+              "unit_price_minor": 19382,
+              "amount_minor": 77528,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "F3466",
+          "entity_name": "Wynaelis Services Ltd"
+        },
+        {
+          "doc_id": "DOC-4JQD2ENC4X",
+          "invoice_id": "INV-9YNL2N92",
+          "entity_id": "SUP-NWDQ33",
+          "issued_at": "2025-03-29T23:11:27+02:00",
+          "due_at": "2025-04-12T23:11:27+02:00",
+          "currency": "CNY",
+          "total_minor": 1812209,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Assorted merchandise",
+              "quantity": 53,
+              "unit_price_minor": 23343,
+              "amount_minor": 1237179,
+              "service_period": null
+            },
+            {
+              "line_no": 2,
+              "description": "Shelf goods",
+              "quantity": 14,
+              "unit_price_minor": 35086,
+              "amount_minor": 491204,
+              "service_period": null
+            },
+            {
+              "line_no": 3,
+              "description": "Seasonal stock",
+              "quantity": 6,
+              "unit_price_minor": 13971,
+              "amount_minor": 83826,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "SI3811",
+          "entity_name": "Galudar Partners GmbH"
+        },
+        {
+          "doc_id": "DOC-7LZ5U9M7LL",
+          "invoice_id": "INV-V6VJTDWA",
+          "entity_id": "SUP-YZZ6R3",
+          "issued_at": "2025-03-31T10:40:10-05:00",
+          "due_at": "2025-04-14T10:40:10-05:00",
+          "currency": "EUR",
+          "total_minor": 195842,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Seasonal stock",
+              "quantity": 26,
+              "unit_price_minor": 5227,
+              "amount_minor": 135902,
+              "service_period": null
+            },
+            {
+              "line_no": 2,
+              "description": "Packaging materials",
+              "quantity": 60,
+              "unit_price_minor": 999,
+              "amount_minor": 59940,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "SI2869",
+          "entity_name": "Ulendex Works GmbH"
+        },
+        {
+          "doc_id": "DOC-4L5LF6GGWG",
+          "invoice_id": "INV-3KWA8UT3",
+          "entity_id": "SUP-PDZN5V",
+          "issued_at": "2025-03-31T13:47:22-05:00",
+          "due_at": "2025-04-30T13:47:22-05:00",
+          "currency": "CNY",
+          "total_minor": 2069207,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Store rent",
+              "quantity": 1,
+              "unit_price_minor": 2069207,
+              "amount_minor": 2069207,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "BILL-5785",
+          "entity_name": "Joremont Services GmbH"
+        },
+        {
+          "doc_id": "DOC-L7GT9QZ4NC",
+          "invoice_id": "INV-NFZF2TVJ",
+          "entity_id": "SUP-AKZAGW",
+          "issued_at": "2025-03-31T15:19:54-05:00",
+          "due_at": "2025-04-14T15:19:54-05:00",
+          "currency": "EUR",
+          "total_minor": 232853,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Seasonal stock",
+              "quantity": 25,
+              "unit_price_minor": 3574,
+              "amount_minor": 89350,
+              "service_period": null
+            },
+            {
+              "line_no": 2,
+              "description": "Seasonal stock",
+              "quantity": 49,
+              "unit_price_minor": 2317,
+              "amount_minor": 113533,
+              "service_period": null
+            },
+            {
+              "line_no": 3,
+              "description": "Seasonal stock",
+              "quantity": 15,
+              "unit_price_minor": 1998,
+              "amount_minor": 29970,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "No.1325",
+          "entity_name": "Istarmont Trading Ltd"
+        },
+        {
+          "doc_id": "DOC-KZQUEAW6HT",
+          "invoice_id": "INV-D54H6Y2X",
+          "entity_id": "SUP-PDZN5V",
+          "issued_at": "2025-03-31T22:25:26-05:00",
+          "due_at": "2025-04-30T22:25:26-05:00",
+          "currency": "CNY",
+          "total_minor": 2069207,
+          "line_items": [
+            {
+              "line_no": 1,
+              "description": "Store rent",
+              "quantity": 1,
+              "unit_price_minor": 2069207,
+              "amount_minor": 2069207,
+              "service_period": null
+            }
+          ],
+          "vendor_ref": "BILL-5781",
+          "entity_name": "Joremont Services GmbH"
+        }
+      ],
+      "payments": [
+        {
+          "doc_id": "DOC-34UAZ5NS89",
+          "payment_id": "PAY-U2DB5KFG",
+          "timestamp": "2025-03-01T20:57:22+00:00",
+          "currency": "CNY",
+          "amount_minor": 4735247,
+          "invoice_refs": [
+            {
+              "invoice_id": "INV-KAJRF4QV",
+              "amount_minor": 4735247
+            }
+          ],
+          "entity_id": "SUP-NWDQ33",
+          "entity_name": "Galudar Partners GmbH"
+        },
+        {
+          "doc_id": "DOC-W2EM6XVLF4",
+          "payment_id": "PAY-WHARMW8V",
+          "timestamp": "2025-03-02T14:26:05+00:00",
+          "currency": "EUR",
+          "amount_minor": 51528,
+          "invoice_refs": [
+            {
+              "invoice_id": "INV-XYEEGTD2",
+              "amount_minor": 51528
+            }
+          ],
+          "entity_id": "SUP-YZZ6R3",
+          "entity_name": "Ulendex Works GmbH"
+        },
+        {
+          "doc_id": "DOC-PRMZS7P3GN",
+          "payment_id": "PAY-6QR4WGV5",
+          "timestamp": "2025-03-02T23:31:23+00:00",
+          "currency": "EUR",
+          "amount_minor": 39180,
+          "invoice_refs": [
+            {
+              "invoice_id": "INV-FK9HSSL4",
+              "amount_minor": 39180
+            }
+          ],
+          "entity_id": "SUP-YZZ6R3",
+          "entity_name": "Ulendex Works GmbH"
+        },
+        {
+          "doc_id": "DOC-QVLUHQCA5H",
+          "payment_id": "PAY-DFPT66L8",
+          "timestamp": "2025-03-11T16:10:44+00:00",
+          "currency": "CNY",
+          "amount_minor": 1375053,
+          "invoice_refs": [
+            {
+              "invoice_id": "INV-8C5D3HYH",
+              "amount_minor": 1375053
+            }
+          ],
+          "entity_id": "SUP-NWDQ33",
+          "entity_name": "Galudar Partners GmbH"
+        },
+        {
+          "doc_id": "DOC-9H6325KYTF",
+          "payment_id": "PAY-V6J9XDSC",
+          "timestamp": "2025-03-13T16:19:04+00:00",
+          "currency": "CNY",
+          "amount_minor": 1159708,
+          "invoice_refs": [
+            {
+              "invoice_id": "INV-VATGWFPZ",
+              "amount_minor": 1159708
+            }
+          ],
+          "entity_id": "SUP-NWDQ33",
+          "entity_name": "Galudar Partners GmbH"
+        },
+        {
+          "doc_id": "DOC-T3XVE58E7J",
+          "payment_id": "PAY-CE53UKH6",
+          "timestamp": "2025-03-14T13:23:57+00:00",
+          "currency": "EUR",
+          "amount_minor": 381104,
+          "invoice_refs": [
+            {
+              "invoice_id": "INV-DKKA2LNZ",
+              "amount_minor": 381104
+            }
+          ],
+          "entity_id": "SUP-AQL5ZL",
+          "entity_name": "Heliorix Systems AG"
+        },
+        {
+          "doc_id": "DOC-CRCU8YJNR6",
+          "payment_id": "PAY-CXSL9LS2",
+          "timestamp": "2025-03-14T15:57:26+00:00",
+          "currency": "CNY",
+          "amount_minor": 1189575,
+          "invoice_refs": [
+            {
+              "invoice_id": "INV-RX5NXR3D",
+              "amount_minor": 1189575
+            }
+          ],
+          "entity_id": "SUP-PDZN5V",
+          "entity_name": "Joremont Services GmbH"
+        },
+        {
+          "doc_id": "DOC-A8DBM2TYZC",
+          "payment_id": "PAY-S676T9JL",
+          "timestamp": "2025-03-15T16:01:09+00:00",
+          "currency": "EUR",
+          "amount_minor": 321159,
+          "invoice_refs": [
+            {
+              "invoice_id": "INV-GKLKCPLE",
+              "amount_minor": 321159
+            }
+          ],
+          "entity_id": "SUP-YZZ6R3",
+          "entity_name": "Ulendex Works GmbH"
+        },
+        {
+          "doc_id": "DOC-L5JJ467PS5",
+          "payment_id": "PAY-RUM24QBX",
+          "timestamp": "2025-03-16T17:17:08+00:00",
+          "currency": "CNY",
+          "amount_minor": 1038062,
+          "invoice_refs": [
+            {
+              "invoice_id": "INV-FZ4BJJ3L",
+              "amount_minor": 1038062
+            }
+          ],
+          "entity_id": "SUP-PDZN5V",
+          "entity_name": "Joremont Services GmbH"
+        },
+        {
+          "doc_id": "DOC-ZH9NBCJ3JR",
+          "payment_id": "PAY-B3FNNSHD",
+          "timestamp": "2025-03-16T21:19:07+00:00",
+          "currency": "CNY",
+          "amount_minor": 676478,
+          "invoice_refs": [
+            {
+              "invoice_id": "INV-Q5KGPPZ9",
+              "amount_minor": 676478
+            }
+          ],
+          "entity_id": "SUP-PDZN5V",
+          "entity_name": "Joremont Services GmbH"
+        },
+        {
+          "doc_id": "DOC-6VDT5J4W7L",
+          "payment_id": "PAY-YK99WM2P",
+          "timestamp": "2025-03-18T19:09:02+00:00",
+          "currency": "EUR",
+          "amount_minor": 88392,
+          "invoice_refs": [
+            {
+              "invoice_id": "INV-XYB4756P",
+              "amount_minor": 88392
+            }
+          ],
+          "entity_id": "SUP-AQL5ZL",
+          "entity_name": "Heliorix Systems AG"
+        },
+        {
+          "doc_id": "DOC-HZMP9LE4X5",
+          "payment_id": "PAY-Z82GQG5X",
+          "timestamp": "2025-03-19T13:19:09+00:00",
+          "currency": "EUR",
+          "amount_minor": 56368,
+          "invoice_refs": [
+            {
+              "invoice_id": "INV-U7DTGJ7C",
+              "amount_minor": 56368
+            }
+          ],
+          "entity_id": "SUP-AQL5ZL",
+          "entity_name": "Heliorix Systems AG"
+        },
+        {
+          "doc_id": "DOC-D9Y9V6BL8R",
+          "payment_id": "PAY-QYWGQH9T",
+          "timestamp": "2025-03-19T15:54:32+00:00",
+          "currency": "CNY",
+          "amount_minor": 1373458,
+          "invoice_refs": [
+            {
+              "invoice_id": "INV-Q5KGPPZ9",
+              "amount_minor": 1373458
+            }
+          ],
+          "entity_id": "SUP-PDZN5V",
+          "entity_name": "Joremont Services GmbH"
+        },
+        {
+          "doc_id": "DOC-28TZ9NB2GX",
+          "payment_id": "PAY-3AXW7GEX",
+          "timestamp": "2025-03-19T16:14:19+00:00",
+          "currency": "EUR",
+          "amount_minor": 157336,
+          "invoice_refs": [
+            {
+              "invoice_id": "INV-TTPSZALV",
+              "amount_minor": 157336
+            }
+          ],
+          "entity_id": "SUP-AQL5ZL",
+          "entity_name": "Heliorix Systems AG"
+        },
+        {
+          "doc_id": "DOC-ZVDB9YK3S8",
+          "payment_id": "PAY-6FMNS5UZ",
+          "timestamp": "2025-03-19T19:38:08+00:00",
+          "currency": "USD",
+          "amount_minor": 244230,
+          "invoice_refs": [
+            {
+              "invoice_id": "INV-87899KC5",
+              "amount_minor": 163005
+            },
+            {
+              "invoice_id": "INV-4Z6GLTPM",
+              "amount_minor": 81225
+            }
+          ],
+          "entity_id": "SUP-YWTZE6",
+          "entity_name": "Wynaelis Services Ltd"
+        },
+        {
+          "doc_id": "DOC-6L2UM7ASKB",
+          "payment_id": "PAY-T69QWU6J",
+          "timestamp": "2025-03-21T13:06:32+00:00",
+          "currency": "USD",
+          "amount_minor": 89274,
+          "invoice_refs": [
+            {
+              "invoice_id": "INV-4Y8L8WLY",
+              "amount_minor": 89274
+            }
+          ],
+          "entity_id": "SUP-YWTZE6",
+          "entity_name": "Wynaelis Services Ltd"
+        },
+        {
+          "doc_id": "DOC-66BPG5WGW9",
+          "payment_id": "PAY-EDH2EZKZ",
+          "timestamp": "2025-03-21T14:59:33+00:00",
+          "currency": "USD",
+          "amount_minor": 101900,
+          "invoice_refs": [
+            {
+              "invoice_id": "INV-8TPYR2CS",
+              "amount_minor": 101900
+            }
+          ],
+          "entity_id": "SUP-YWTZE6",
+          "entity_name": "Wynaelis Services Ltd"
+        },
+        {
+          "doc_id": "DOC-QL4GVJSZLM",
+          "payment_id": "PAY-N3GYW2XD",
+          "timestamp": "2025-03-21T20:48:25+00:00",
+          "currency": "CNY",
+          "amount_minor": 2634400,
+          "invoice_refs": [
+            {
+              "invoice_id": "INV-B9WNUEY2",
+              "amount_minor": 2634400
+            }
+          ],
+          "entity_id": "SUP-PDZN5V",
+          "entity_name": "Joremont Services GmbH"
+        },
+        {
+          "doc_id": "DOC-A76DQMXZKB",
+          "payment_id": "PAY-Q6Q33R68",
+          "timestamp": "2025-03-22T04:24:31+00:00",
+          "currency": "EUR",
+          "amount_minor": 885669,
+          "invoice_refs": [
+            {
+              "invoice_id": "INV-QAXFFCZ4",
+              "amount_minor": 297440
+            },
+            {
+              "invoice_id": "INV-9572YXUR",
+              "amount_minor": 494290
+            },
+            {
+              "invoice_id": "INV-UTUYKKYH",
+              "amount_minor": 93939
+            }
+          ],
+          "entity_id": "SUP-AQL5ZL",
+          "entity_name": "Heliorix Systems AG"
+        },
+        {
+          "doc_id": "DOC-ACLT8JV54X",
+          "payment_id": "PAY-LZ6U2SKF",
+          "timestamp": "2025-03-22T04:49:55+00:00",
+          "currency": "USD",
+          "amount_minor": 42536,
+          "invoice_refs": [
+            {
+              "invoice_id": "INV-VD293YSB",
+              "amount_minor": 42536
+            }
+          ],
+          "entity_id": "SUP-YWTZE6",
+          "entity_name": "Wynaelis Services Ltd"
+        },
+        {
+          "doc_id": "DOC-PVGX9MUFPS",
+          "payment_id": "PAY-4JQN9U8G",
+          "timestamp": "2025-03-22T19:04:18+00:00",
+          "currency": "USD",
+          "amount_minor": 97913,
+          "invoice_refs": [
+            {
+              "invoice_id": "INV-NZ6YA57B",
+              "amount_minor": 97913
+            }
+          ],
+          "entity_id": "SUP-YWTZE6",
+          "entity_name": "Wynaelis Services Ltd"
+        },
+        {
+          "doc_id": "DOC-S2AQGATLC8",
+          "payment_id": "PAY-3VBKA865",
+          "timestamp": "2025-03-23T23:47:57+00:00",
+          "currency": "USD",
+          "amount_minor": 77343,
+          "invoice_refs": [
+            {
+              "invoice_id": "INV-UC3KN835",
+              "amount_minor": 77343
+            }
+          ],
+          "entity_id": "SUP-YWTZE6",
+          "entity_name": "Wynaelis Services Ltd"
+        },
+        {
+          "doc_id": "DOC-2A26FWKN3E",
+          "payment_id": "PAY-S9ZKCYYT",
+          "timestamp": "2025-03-24T21:52:04+00:00",
+          "currency": "USD",
+          "amount_minor": 18230,
+          "invoice_refs": [
+            {
+              "invoice_id": "INV-VD293YSB",
+              "amount_minor": 18230
+            }
+          ],
+          "entity_id": "SUP-YWTZE6",
+          "entity_name": "Wynaelis Services Ltd"
+        },
+        {
+          "doc_id": "DOC-KFZ85WWDXR",
+          "payment_id": "PAY-E8MLFXFC",
+          "timestamp": "2025-03-24T22:03:00+00:00",
+          "currency": "CNY",
+          "amount_minor": 212757,
+          "invoice_refs": [
+            {
+              "invoice_id": "INV-ZLX2TADM",
+              "amount_minor": 212757
+            }
+          ],
+          "entity_id": "SUP-Z43RCW",
+          "entity_name": "Wynenrath Trading GmbH"
+        },
+        {
+          "doc_id": "DOC-X8D8L7YD4U",
+          "payment_id": "PAY-GPRW89CL",
+          "timestamp": "2025-03-25T13:24:00+00:00",
+          "currency": "USD",
+          "amount_minor": 65885,
+          "invoice_refs": [
+            {
+              "invoice_id": "INV-UC3KN835",
+              "amount_minor": 65885
+            }
+          ],
+          "entity_id": "SUP-YWTZE6",
+          "entity_name": "Wynaelis Services Ltd"
+        },
+        {
+          "doc_id": "DOC-ZMB5VNP3GV",
+          "payment_id": "PAY-72SAQ3T4",
+          "timestamp": "2025-03-25T15:25:20+00:00",
+          "currency": "EUR",
+          "amount_minor": 7568,
+          "invoice_refs": [
+            {
+              "invoice_id": "INV-AU844KW2",
+              "amount_minor": 7568
+            }
+          ],
+          "entity_id": "SUP-AQL5ZL",
+          "entity_name": "Heliorix Systems AG"
+        },
+        {
+          "doc_id": "DOC-9PTX7D8HAW",
+          "payment_id": "PAY-QLTAGMQ4",
+          "timestamp": "2025-03-26T13:41:23+00:00",
+          "currency": "CNY",
+          "amount_minor": 186478,
+          "invoice_refs": [
+            {
+              "invoice_id": "INV-C2YGP7MD",
+              "amount_minor": 186478
+            }
+          ],
+          "entity_id": "SUP-NWDQ33",
+          "entity_name": "Galudar Partners GmbH"
+        },
+        {
+          "doc_id": "DOC-63P9VF3A25",
+          "payment_id": "PAY-WE5LV9YN",
+          "timestamp": "2025-03-26T23:42:15+00:00",
+          "currency": "CNY",
+          "amount_minor": 1218595,
+          "invoice_refs": [
+            {
+              "invoice_id": "INV-FZ4BJJ3L",
+              "amount_minor": 1218595
+            }
+          ],
+          "entity_id": "SUP-PDZN5V",
+          "entity_name": "Joremont Services GmbH"
+        },
+        {
+          "doc_id": "DOC-C5E3KMLML9",
+          "payment_id": "PAY-48KZQVSA",
+          "timestamp": "2025-03-27T00:37:32+00:00",
+          "currency": "EUR",
+          "amount_minor": 9634,
+          "invoice_refs": [
+            {
+              "invoice_id": "INV-AU844KW2",
+              "amount_minor": 9634
+            }
+          ],
+          "entity_id": "SUP-AQL5ZL",
+          "entity_name": "Heliorix Systems AG"
+        },
+        {
+          "doc_id": "DOC-UDM2KSB53P",
+          "payment_id": "PAY-JP3P7LE3",
+          "timestamp": "2025-03-27T13:28:59+00:00",
+          "currency": "EUR",
+          "amount_minor": 404080,
+          "invoice_refs": [
+            {
+              "invoice_id": "INV-WQYBM42J",
+              "amount_minor": 404080
+            }
+          ],
+          "entity_id": "SUP-YZZ6R3",
+          "entity_name": "Ulendex Works GmbH"
+        },
+        {
+          "doc_id": "DOC-LY87FEGAXR",
+          "payment_id": "PAY-BRXSYLJA",
+          "timestamp": "2025-03-27T20:34:40+00:00",
+          "currency": "CNY",
+          "amount_minor": 212757,
+          "invoice_refs": [
+            {
+              "invoice_id": "INV-GSR3BDYR",
+              "amount_minor": 212757
+            }
+          ],
+          "entity_id": "SUP-Z43RCW",
+          "entity_name": "Wynenrath Trading GmbH"
+        },
+        {
+          "doc_id": "DOC-UR59F7RHF5",
+          "payment_id": "PAY-XMTX63DJ",
+          "timestamp": "2025-03-27T21:10:49+00:00",
+          "currency": "EUR",
+          "amount_minor": 246102,
+          "invoice_refs": [
+            {
+              "invoice_id": "INV-SFCMR7QN",
+              "amount_minor": 246102
+            }
+          ],
+          "entity_id": "SUP-YZZ6R3",
+          "entity_name": "Ulendex Works GmbH"
+        },
+        {
+          "doc_id": "DOC-ZX7458EGMU",
+          "payment_id": "PAY-7GG27T9G",
+          "timestamp": "2025-03-28T13:57:31+00:00",
+          "currency": "USD",
+          "amount_minor": 135902,
+          "invoice_refs": [
+            {
+              "invoice_id": "INV-YT9WKJ76",
+              "amount_minor": 135902
+            }
+          ],
+          "entity_id": "SUP-YWTZE6",
+          "entity_name": "Wynaelis Services Ltd"
+        },
+        {
+          "doc_id": "DOC-7QVPTEUF9D",
+          "payment_id": "PAY-Q3LE4FE6",
+          "timestamp": "2025-03-29T16:15:08+00:00",
+          "currency": "CNY",
+          "amount_minor": 59022,
+          "invoice_refs": [
+            {
+              "invoice_id": "INV-WNZFUC47",
+              "amount_minor": 59022
+            }
+          ],
+          "entity_id": "SUP-NWDQ33",
+          "entity_name": "Galudar Partners GmbH"
+        },
+        {
+          "doc_id": "DOC-LKKRFXGW8H",
+          "payment_id": "PAY-JDB4NRES",
+          "timestamp": "2025-03-30T14:31:00+00:00",
+          "currency": "EUR",
+          "amount_minor": 239801,
+          "invoice_refs": [
+            {
+              "invoice_id": "INV-Y9QJVP8Q",
+              "amount_minor": 239801
+            }
+          ],
+          "entity_id": "SUP-AKZAGW",
+          "entity_name": "Istarmont Trading Ltd"
+        },
+        {
+          "doc_id": "DOC-5THZT254NK",
+          "payment_id": "PAY-UUPGHM3W",
+          "timestamp": "2025-03-30T16:26:24+00:00",
+          "currency": "EUR",
+          "amount_minor": 128865,
+          "invoice_refs": [
+            {
+              "invoice_id": "INV-MUFCLZ36",
+              "amount_minor": 128865
+            }
+          ],
+          "entity_id": "SUP-AKZAGW",
+          "entity_name": "Istarmont Trading Ltd"
+        },
+        {
+          "doc_id": "DOC-2VYLCM9Z8Z",
+          "payment_id": "PAY-AX3YPG7W",
+          "timestamp": "2025-03-30T16:30:54+00:00",
+          "currency": "EUR",
+          "amount_minor": 103500,
+          "invoice_refs": [
+            {
+              "invoice_id": "INV-XNSSQET7",
+              "amount_minor": 103500
+            }
+          ],
+          "entity_id": "SUP-AQL5ZL",
+          "entity_name": "Heliorix Systems AG"
+        },
+        {
+          "doc_id": "DOC-CXLUMBB3H4",
+          "payment_id": "PAY-GNFWZS75",
+          "timestamp": "2025-03-30T23:24:29+00:00",
+          "currency": "EUR",
+          "amount_minor": 17358,
+          "invoice_refs": [
+            {
+              "invoice_id": "INV-K68ASUKN",
+              "amount_minor": 17358
+            }
+          ],
+          "entity_id": "SUP-AKZAGW",
+          "entity_name": "Istarmont Trading Ltd"
+        },
+        {
+          "doc_id": "DOC-PM3FFQEEB6",
+          "payment_id": "PAY-V4JK9VT8",
+          "timestamp": "2025-04-01T00:18:55+00:00",
+          "currency": "CNY",
+          "amount_minor": 169350,
+          "invoice_refs": null,
+          "entity_id": "SUP-PDZN5V",
+          "entity_name": "Joremont Services GmbH"
+        }
+      ],
+      "fx": [
+        {
+          "date": "2025-01-10",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1291881"
+        },
+        {
+          "date": "2025-01-10",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9489512"
+        },
+        {
+          "date": "2025-01-11",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1286843"
+        },
+        {
+          "date": "2025-01-11",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9434473"
+        },
+        {
+          "date": "2025-01-12",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1285813"
+        },
+        {
+          "date": "2025-01-12",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9482588"
+        },
+        {
+          "date": "2025-01-13",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1288128"
+        },
+        {
+          "date": "2025-01-13",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9532846"
+        },
+        {
+          "date": "2025-01-14",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1295470"
+        },
+        {
+          "date": "2025-01-14",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9584323"
+        },
+        {
+          "date": "2025-01-15",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1296895"
+        },
+        {
+          "date": "2025-01-15",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9578573"
+        },
+        {
+          "date": "2025-01-16",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1292356"
+        },
+        {
+          "date": "2025-01-16",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9595814"
+        },
+        {
+          "date": "2025-01-17",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1299205"
+        },
+        {
+          "date": "2025-01-17",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9588138"
+        },
+        {
+          "date": "2025-01-18",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1291410"
+        },
+        {
+          "date": "2025-01-18",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9572797"
+        },
+        {
+          "date": "2025-01-19",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1289731"
+        },
+        {
+          "date": "2025-01-19",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9545036"
+        },
+        {
+          "date": "2025-01-20",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1293343"
+        },
+        {
+          "date": "2025-01-20",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9567944"
+        },
+        {
+          "date": "2025-01-21",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1295541"
+        },
+        {
+          "date": "2025-01-21",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9553592"
+        },
+        {
+          "date": "2025-01-22",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1293727"
+        },
+        {
+          "date": "2025-01-22",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9533529"
+        },
+        {
+          "date": "2025-01-23",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1300843"
+        },
+        {
+          "date": "2025-01-23",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9495395"
+        },
+        {
+          "date": "2025-01-24",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1305526"
+        },
+        {
+          "date": "2025-01-24",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9520083"
+        },
+        {
+          "date": "2025-01-25",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1311401"
+        },
+        {
+          "date": "2025-01-25",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9527699"
+        },
+        {
+          "date": "2025-01-26",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1313237"
+        },
+        {
+          "date": "2025-01-26",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9514360"
+        },
+        {
+          "date": "2025-01-27",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1314287"
+        },
+        {
+          "date": "2025-01-27",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9482963"
+        },
+        {
+          "date": "2025-01-28",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1308242"
+        },
+        {
+          "date": "2025-01-28",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9515205"
+        },
+        {
+          "date": "2025-01-29",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1315829"
+        },
+        {
+          "date": "2025-01-29",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9547557"
+        },
+        {
+          "date": "2025-01-30",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1320303"
+        },
+        {
+          "date": "2025-01-30",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9506502"
+        },
+        {
+          "date": "2025-01-31",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1321227"
+        },
+        {
+          "date": "2025-01-31",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9489391"
+        },
+        {
+          "date": "2025-02-01",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1328098"
+        },
+        {
+          "date": "2025-02-01",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9480850"
+        },
+        {
+          "date": "2025-02-02",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1330356"
+        },
+        {
+          "date": "2025-02-02",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9440082"
+        },
+        {
+          "date": "2025-02-03",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1329025"
+        },
+        {
+          "date": "2025-02-03",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9489171"
+        },
+        {
+          "date": "2025-02-04",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1321981"
+        },
+        {
+          "date": "2025-02-04",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9445521"
+        },
+        {
+          "date": "2025-02-05",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1328591"
+        },
+        {
+          "date": "2025-02-05",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9486136"
+        },
+        {
+          "date": "2025-02-06",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1330319"
+        },
+        {
+          "date": "2025-02-06",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9460524"
+        },
+        {
+          "date": "2025-02-07",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1326328"
+        },
+        {
+          "date": "2025-02-07",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9434034"
+        },
+        {
+          "date": "2025-02-08",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1327521"
+        },
+        {
+          "date": "2025-02-08",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9464223"
+        },
+        {
+          "date": "2025-02-09",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1330442"
+        },
+        {
+          "date": "2025-02-09",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9509652"
+        },
+        {
+          "date": "2025-02-10",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1336562"
+        },
+        {
+          "date": "2025-02-10",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9476368"
+        },
+        {
+          "date": "2025-02-11",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1341908"
+        },
+        {
+          "date": "2025-02-11",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9518064"
+        },
+        {
+          "date": "2025-02-12",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1338151"
+        },
+        {
+          "date": "2025-02-12",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9470473"
+        },
+        {
+          "date": "2025-02-13",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1334270"
+        },
+        {
+          "date": "2025-02-13",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9497938"
+        },
+        {
+          "date": "2025-02-14",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1340541"
+        },
+        {
+          "date": "2025-02-14",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9490340"
+        },
+        {
+          "date": "2025-02-15",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1341211"
+        },
+        {
+          "date": "2025-02-15",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9451429"
+        },
+        {
+          "date": "2025-02-16",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1342687"
+        },
+        {
+          "date": "2025-02-16",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9410788"
+        },
+        {
+          "date": "2025-02-17",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1348460"
+        },
+        {
+          "date": "2025-02-17",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9367498"
+        },
+        {
+          "date": "2025-02-18",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1341314"
+        },
+        {
+          "date": "2025-02-18",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9311293"
+        },
+        {
+          "date": "2025-02-19",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1333668"
+        },
+        {
+          "date": "2025-02-19",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9286153"
+        },
+        {
+          "date": "2025-02-20",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1341270"
+        },
+        {
+          "date": "2025-02-20",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9266652"
+        },
+        {
+          "date": "2025-02-21",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1344757"
+        },
+        {
+          "date": "2025-02-21",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9291672"
+        },
+        {
+          "date": "2025-02-22",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1340051"
+        },
+        {
+          "date": "2025-02-22",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9333484"
+        },
+        {
+          "date": "2025-02-23",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1342195"
+        },
+        {
+          "date": "2025-02-23",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9280284"
+        },
+        {
+          "date": "2025-02-24",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1346490"
+        },
+        {
+          "date": "2025-02-24",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9324829"
+        },
+        {
+          "date": "2025-02-25",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1353761"
+        },
+        {
+          "date": "2025-02-25",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9359331"
+        },
+        {
+          "date": "2025-02-26",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1355250"
+        },
+        {
+          "date": "2025-02-26",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9328445"
+        },
+        {
+          "date": "2025-02-27",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1356334"
+        },
+        {
+          "date": "2025-02-27",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9288333"
+        },
+        {
+          "date": "2025-02-28",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1360810"
+        },
+        {
+          "date": "2025-02-28",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9242820"
+        },
+        {
+          "date": "2025-03-01",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1359993"
+        },
+        {
+          "date": "2025-03-01",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9247441"
+        },
+        {
+          "date": "2025-03-02",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1363937"
+        },
+        {
+          "date": "2025-03-02",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9218774"
+        },
+        {
+          "date": "2025-03-03",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1371166"
+        },
+        {
+          "date": "2025-03-03",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9251040"
+        },
+        {
+          "date": "2025-03-04",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1376377"
+        },
+        {
+          "date": "2025-03-04",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9205710"
+        },
+        {
+          "date": "2025-03-05",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1378992"
+        },
+        {
+          "date": "2025-03-05",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9227804"
+        },
+        {
+          "date": "2025-03-06",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1384922"
+        },
+        {
+          "date": "2025-03-06",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9176128"
+        },
+        {
+          "date": "2025-03-07",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1378966"
+        },
+        {
+          "date": "2025-03-07",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9185304"
+        },
+        {
+          "date": "2025-03-08",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1372899"
+        },
+        {
+          "date": "2025-03-08",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9235823"
+        },
+        {
+          "date": "2025-03-09",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1373585"
+        },
+        {
+          "date": "2025-03-09",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9247830"
+        },
+        {
+          "date": "2025-03-10",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1369739"
+        },
+        {
+          "date": "2025-03-10",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9235808"
+        },
+        {
+          "date": "2025-03-11",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1374944"
+        },
+        {
+          "date": "2025-03-11",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9229342"
+        },
+        {
+          "date": "2025-03-12",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1379344"
+        },
+        {
+          "date": "2025-03-12",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9263491"
+        },
+        {
+          "date": "2025-03-13",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1386931"
+        },
+        {
+          "date": "2025-03-13",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9277386"
+        },
+        {
+          "date": "2025-03-14",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1382908"
+        },
+        {
+          "date": "2025-03-14",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9250482"
+        },
+        {
+          "date": "2025-03-15",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1383600"
+        },
+        {
+          "date": "2025-03-15",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9271758"
+        },
+        {
+          "date": "2025-03-16",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1388996"
+        },
+        {
+          "date": "2025-03-16",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9299573"
+        },
+        {
+          "date": "2025-03-17",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1393302"
+        },
+        {
+          "date": "2025-03-17",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9325612"
+        },
+        {
+          "date": "2025-03-18",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1386893"
+        },
+        {
+          "date": "2025-03-18",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9360117"
+        },
+        {
+          "date": "2025-03-19",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1394798"
+        },
+        {
+          "date": "2025-03-19",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9321740"
+        },
+        {
+          "date": "2025-03-20",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1386708"
+        },
+        {
+          "date": "2025-03-20",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9303097"
+        },
+        {
+          "date": "2025-03-21",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1382409"
+        },
+        {
+          "date": "2025-03-21",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9349612"
+        },
+        {
+          "date": "2025-03-22",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1383792"
+        },
+        {
+          "date": "2025-03-22",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9381401"
+        },
+        {
+          "date": "2025-03-23",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1384899"
+        },
+        {
+          "date": "2025-03-23",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9387030"
+        },
+        {
+          "date": "2025-03-24",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1393208"
+        },
+        {
+          "date": "2025-03-24",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9358869"
+        },
+        {
+          "date": "2025-03-25",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1398781"
+        },
+        {
+          "date": "2025-03-25",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9374779"
+        },
+        {
+          "date": "2025-03-26",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1391927"
+        },
+        {
+          "date": "2025-03-26",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9370091"
+        },
+        {
+          "date": "2025-03-27",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1384550"
+        },
+        {
+          "date": "2025-03-27",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9384147"
+        },
+        {
+          "date": "2025-03-28",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1387873"
+        },
+        {
+          "date": "2025-03-28",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9363501"
+        },
+        {
+          "date": "2025-03-29",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1383987"
+        },
+        {
+          "date": "2025-03-29",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9312002"
+        },
+        {
+          "date": "2025-03-30",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1389938"
+        },
+        {
+          "date": "2025-03-30",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9299897"
+        },
+        {
+          "date": "2025-03-31",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1386880"
+        },
+        {
+          "date": "2025-03-31",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9323146"
+        },
+        {
+          "date": "2025-04-01",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1392566"
+        },
+        {
+          "date": "2025-04-01",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9305432"
+        },
+        {
+          "date": "2025-04-02",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1400782"
+        },
+        {
+          "date": "2025-04-02",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9314738"
+        },
+        {
+          "date": "2025-04-03",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1398401"
+        },
+        {
+          "date": "2025-04-03",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9348271"
+        },
+        {
+          "date": "2025-04-04",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1402596"
+        },
+        {
+          "date": "2025-04-04",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9378185"
+        },
+        {
+          "date": "2025-04-05",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1407645"
+        },
+        {
+          "date": "2025-04-05",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9403506"
+        },
+        {
+          "date": "2025-04-06",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1400748"
+        },
+        {
+          "date": "2025-04-06",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9440180"
+        },
+        {
+          "date": "2025-04-07",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1405651"
+        },
+        {
+          "date": "2025-04-07",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9392979"
+        },
+        {
+          "date": "2025-04-08",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1400871"
+        },
+        {
+          "date": "2025-04-08",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9439944"
+        },
+        {
+          "date": "2025-04-09",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1407456"
+        },
+        {
+          "date": "2025-04-09",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9487144"
+        },
+        {
+          "date": "2025-04-10",
+          "source_currency": "CNY",
+          "target_currency": "EUR",
+          "rate": "0.1404922"
+        },
+        {
+          "date": "2025-04-10",
+          "source_currency": "USD",
+          "target_currency": "EUR",
+          "rate": "0.9540272"
+        }
+      ]
+    }
+  }
+}

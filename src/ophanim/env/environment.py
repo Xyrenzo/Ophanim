@@ -32,8 +32,8 @@ from typing import Any, Callable
 
 from ophanim.env.task import TASK_TEXT, TOOL_SPECS
 from ophanim.env.tools import ERROR_MESSAGES, ToolError, Toolbox
-from ophanim.evaluator.judge import Judge, Outcome
-from ophanim.generator.episode import generate_episode
+from ophanim.evaluator.judge import Judge, Outcome, validate_submission
+from ophanim.generator.episode import PublicEpisode, SealedEpisode, generate_episode
 from ophanim.schemas import ACTION_NAMES, CalculatorAction, EpisodeConfig, GetDocumentAction, GetRecordAction, ListRecordsAction
 from ophanim.version import ENV_VERSION, SCHEMA_VERSION
 
@@ -53,7 +53,7 @@ _ACTION_MODELS = {
 @dataclass
 class _EpisodeState:
     toolbox: Toolbox
-    judge: Judge
+    judge: Judge | None  # None = closed episode loaded without truth (scoring happens elsewhere)
     manifest: dict
     policy: dict
     started_at: float
@@ -61,6 +61,7 @@ class _EpisodeState:
     done: bool = False
     terminated: bool = False
     truncated: bool = False
+    accepted_findings: dict | None = None  # structurally valid submission (public data only)
 
 
 class OphanimEnv:
@@ -86,18 +87,32 @@ class OphanimEnv:
             seed = secrets.randbelow(2**63)
         cfg = config if isinstance(config, EpisodeConfig) else EpisodeConfig.model_validate(config or {})
         generated = generate_episode(seed, cfg, secret=self._secret)
-        public = generated.public
+        return self._begin(generated.public, Judge(sealed=generated.sealed))
+
+    def reset_loaded(self, public: PublicEpisode, sealed: SealedEpisode | None = None) -> tuple[dict, dict]:
+        """Start an episode from already-loaded data (e.g. a jury episode directory).
+
+        ``sealed=None`` is the closed-evaluation path: the environment then holds no truth at all;
+        ``submit`` only checks the structure and records the findings, every reward is 0.0, and the
+        evaluator scores the findings separately (``ophanim.adapter.score_episode``). Closed loading
+        is only allowed in ``mode="eval"``.
+        """
+        if sealed is None and self.mode != "eval":
+            raise ValueError("an episode without truth can only be run in eval mode")
+        return self._begin(public, Judge(sealed=sealed) if sealed is not None else None)
+
+    def _begin(self, public: PublicEpisode, judge: Judge | None) -> tuple[dict, dict]:
         self._state = _EpisodeState(
             toolbox=Toolbox(public.tables),
-            judge=Judge(sealed=generated.sealed),
+            judge=judge,
             manifest=copy.deepcopy(public.manifest),
             policy=copy.deepcopy(public.policy),
             started_at=self._clock(),
         )
         observation = {
             "task": TASK_TEXT,
-            "manifest": copy.deepcopy(public.manifest),
-            "policy": copy.deepcopy(public.policy),
+            "manifest": copy.deepcopy(self._state.manifest),
+            "policy": copy.deepcopy(self._state.policy),
             "tools": copy.deepcopy(TOOL_SPECS),
             "remaining_steps": MAX_STEPS,
             "time_budget_seconds": self._time_limit,
@@ -133,11 +148,22 @@ class OphanimEnv:
     # ------------------------------------------------------------------ evaluator-side accessors
     def evaluator_outcome(self) -> Outcome | None:
         """EVALUATOR ONLY: the judged outcome of the finished episode (never sent to the agent)."""
-        return None if self._state is None else self._state.judge.outcome
+        if self._state is None or self._state.judge is None:
+            return None
+        return self._state.judge.outcome
 
     def evaluator_log(self) -> list[dict]:
         """EVALUATOR ONLY: judge diagnostics and error log."""
-        return [] if self._state is None else copy.deepcopy(self._state.judge.log)
+        if self._state is None or self._state.judge is None:
+            return []
+        return copy.deepcopy(self._state.judge.log)
+
+    @property
+    def accepted_findings(self) -> dict | None:
+        """The structurally valid submission of the current episode, if any (public data, a deep copy)."""
+        if self._state is None or self._state.accepted_findings is None:
+            return None
+        return copy.deepcopy(self._state.accepted_findings)
 
     def evaluator_time_remaining(self) -> float:
         """EVALUATOR ONLY: seconds left in this episode's time budget."""
@@ -179,12 +205,17 @@ class OphanimEnv:
     def _submit(self, action: dict, remaining: int):
         st = self._state
         inspection_steps = st.steps - 1
-        if set(action) - {"action", "findings"}:
-            outcome = st.judge.submit(None, inspection_steps)  # extra keys -> invalid structure
-        else:
-            outcome = st.judge.submit(action.get("findings"), inspection_steps)
+        raw = None if set(action) - {"action", "findings"} else action.get("findings")  # extra keys -> invalid
+        if st.judge is not None:
+            outcome = st.judge.submit(raw, inspection_steps)
+            valid = outcome.valid
+        else:  # closed episode without truth: structure check only, no scoring here
+            outcome = None
+            valid = validate_submission(raw, st.manifest["episode_id"])[0] is not None
+        if valid:
+            st.accepted_findings = copy.deepcopy(raw)
         st.done = st.terminated = True
-        if outcome.valid:
+        if valid:
             obs = {"ok": True, "result": {"status": "submitted"}, "error": None, "remaining_steps": remaining}
         else:
             obs = self._error_obs("invalid_submission", remaining)
@@ -192,12 +223,14 @@ class OphanimEnv:
 
     def _truncate(self, obs: dict, reason: str):
         st = self._state
-        outcome = st.judge.empty_answer(st.steps, reason)
+        outcome = st.judge.empty_answer(st.steps, reason) if st.judge is not None else None
         st.done = st.truncated = True
         return obs, self._visible_reward(outcome), False, True, {"truncation_reason": reason, "final_answer": "empty"}
 
-    def _visible_reward(self, outcome: Outcome) -> float:
-        return outcome.reward if self.mode == "train" else 0.0
+    def _visible_reward(self, outcome: Outcome | None) -> float:
+        if self.mode != "train" or outcome is None:
+            return 0.0
+        return outcome.reward
 
     @staticmethod
     def _error_obs(code: str, remaining: int) -> dict:

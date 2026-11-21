@@ -17,6 +17,22 @@ from ophanim.evaluator.reward import INVALID_SUBMISSION_REWARD, f1, official_rew
 from ophanim.schemas import FindingsSubmission
 
 
+def validate_submission(raw_findings: object, expected_episode_id: str) -> tuple[FindingsSubmission | None, list[str]]:
+    """Structural validation of a findings submission (the single canonical implementation).
+
+    Used by the judge before scoring and by the closed-mode environment, which accepts or rejects a
+    submission without holding any truth. Needs only the public episode id.
+    Returns (submission, []) when valid, otherwise (None, bounded list of error descriptions).
+    """
+    try:
+        submission = FindingsSubmission.model_validate(raw_findings)
+    except ValidationError as exc:
+        return None, [f"{'.'.join(map(str, e['loc']))}: {e['type']}" for e in exc.errors()][:20]
+    if normalize_id(submission.episode_id) != normalize_id(expected_episode_id):
+        return None, ["episode_id: does not match the current episode"]
+    return submission, []
+
+
 @dataclass
 class Outcome:
     reward: float
@@ -63,12 +79,9 @@ class Judge:
         return out
 
     def submit(self, raw_findings: object, inspection_steps: int) -> Outcome:
-        try:
-            submission = FindingsSubmission.model_validate(raw_findings)
-        except ValidationError as exc:
-            return self._invalid(inspection_steps, [f"{'.'.join(map(str, e['loc']))}: {e['type']}" for e in exc.errors()][:20])
-        if normalize_id(submission.episode_id) != normalize_id(self.sealed.truth.episode_id):
-            return self._invalid(inspection_steps, ["episode_id: does not match the current episode"])
+        submission, errors = validate_submission(raw_findings, self.sealed.truth.episode_id)
+        if submission is None:
+            return self._invalid(inspection_steps, errors)
         return self._score(submission.findings, inspection_steps, "submitted")
 
     def empty_answer(self, inspection_steps: int, reason: str) -> Outcome:

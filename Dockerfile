@@ -5,6 +5,7 @@
 #   docker run --rm --network none --cpus 2 --memory 4g ophanim            # one-command verify
 #   docker run --rm --network none ophanim evaluate --seed-base <hidden>   # closed evaluation
 #   docker run --rm --network none ophanim demo --seed 7                   # scripted demo
+#   docker run --rm --network none --entrypoint python ophanim judge_adapter.py --smoke   # jury adapter
 FROM python:3.11.15-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -16,7 +17,7 @@ WORKDIR /app
 COPY requirements.lock ./
 RUN pip install --no-cache-dir -r requirements.lock
 
-COPY pyproject.toml README.md LICENSE ./
+COPY pyproject.toml README.md LICENSE judge_adapter.py ./
 COPY src ./src
 COPY tests ./tests
 COPY configs ./configs

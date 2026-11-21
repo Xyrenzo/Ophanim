@@ -166,7 +166,9 @@ class TruthIssue(StrictModel):
     expected_amount_minor: int = Field(ge=0)
     currency: str
     allowed_evidence_sets: list[list[str]] = Field(min_length=1)
-    scenario: str  # "single" or the interacting-scenario name
+    # "single" or the interacting-scenario name. Optional so that a minimal truth file containing only
+    # the officially listed fields (jury fixtures) still loads.
+    scenario: str = "single"
 
 
 class TruthFile(StrictModel):

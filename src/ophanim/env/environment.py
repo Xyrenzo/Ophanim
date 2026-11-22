@@ -18,7 +18,7 @@
 Isolation inside this object: the agent-facing tools (Toolbox) are built from the
 public tables only. The judge holds the sealed truth; nothing it knows is copied
 into observations or info. For closed evaluation the environment runs in the
-evaluator process and the agent talks to it over a JSON pipe (P4), so the agent
+evaluator process and the agent talks to it over a JSON pipe, so the agent
 cannot inspect this object at all.
 """
 

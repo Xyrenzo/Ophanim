@@ -3,7 +3,7 @@
 OPHANIM uses fixed UTC offsets (e.g. "+05:00", "+05:30", "-05:00") instead of
 IANA zone names. That removes daylight-saving ambiguity and any dependency on the
 operating system's tz database, which differs between Windows and Linux images.
-This is a documented simplification (docs/limitations).
+This is a documented simplification (docs/design_note.md, limitations).
 
 All timestamps are ISO-8601 with an explicit offset. The accounting date of a
 document is its *local calendar date in the company's offset*.

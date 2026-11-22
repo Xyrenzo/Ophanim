@@ -133,8 +133,10 @@ PROFILES: dict[str, Profile] = {
     ),
 }
 
-# Tuned so episodes fall in the suggested ranges (about 200-2,000 ledger rows,
-# 20-200 documents) while a full scan still fits comfortably in 100 steps.
+# Tuned to the lower end of the suggested ranges (about 200-2,000 ledger rows,
+# 20-200 documents) so that a full scan still fits comfortably in 100 steps.
+# Published small episodes have slightly fewer than 200 rows and the largest
+# slightly more than 200 documents (measured sizes: docs/data_model.md).
 SIZE_RANGES: dict[str, dict[str, tuple[int, int]]] = {
     "small": {"suppliers": (6, 9), "period_invoices": (34, 42), "prior_invoices": (6, 9)},
     "medium": {"suppliers": (9, 14), "period_invoices": (55, 72), "prior_invoices": (10, 14)},

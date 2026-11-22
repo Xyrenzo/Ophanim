@@ -1,6 +1,6 @@
 """Specification-gaming tests for the official reward (run through the real environment).
 
-Each test name maps to one required property from the case / master prompt.
+Each test name maps to one required property from the case.
 """
 
 from __future__ import annotations

@@ -48,16 +48,19 @@ class ReferenceAuditor:
 
     def _submit(self) -> dict:
         ds = PublicDataset.from_tables(self.manifest, self.policy, self.tables)
-        report = reconcile(ds)
-        findings = [
-            {
-                "type": f.type,
-                "affected_ids": list(f.affected_ids),
-                "claimed_amount_minor": f.amount_minor,
-                "currency": f.currency,
-                "evidence_ids": list(f.evidence_ids)[:10],
-                "explanation": f.note[:1000],
-            }
-            for f in report.findings[:30]
-        ]
-        return submit_action(self.manifest["episode_id"], findings)
+        return submit_action(self.manifest["episode_id"], findings_from_report(reconcile(ds)))
+
+
+def findings_from_report(report) -> list[dict]:
+    """Audit findings -> official finding dicts, within the published limits (30 findings, 10 evidence ids)."""
+    return [
+        {
+            "type": f.type,
+            "affected_ids": list(f.affected_ids),
+            "claimed_amount_minor": f.amount_minor,
+            "currency": f.currency,
+            "evidence_ids": list(f.evidence_ids)[:10],
+            "explanation": f.note[:1000],
+        }
+        for f in report.findings[:30]
+    ]

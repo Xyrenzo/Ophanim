@@ -1,0 +1,352 @@
+{
+  "suite_version": "1.0",
+  "name": "ablation",
+  "description": "Fixed open episodes for the ablation study (python -m ophanim ablate). Not used for training, tuning or the official closed evaluation.",
+  "episodes": [
+    {
+      "id": "abl-01-clean-retail",
+      "category": "clean",
+      "seed": 7001,
+      "config": {
+        "profile": "retail",
+        "size": "small",
+        "distractors": "normal"
+      }
+    },
+    {
+      "id": "abl-02-clean-trading",
+      "category": "clean",
+      "seed": 7002,
+      "config": {
+        "profile": "trading",
+        "size": "medium",
+        "distractors": "high"
+      }
+    },
+    {
+      "id": "abl-03-clean-software",
+      "category": "clean",
+      "seed": 7003,
+      "config": {
+        "profile": "software",
+        "size": "large",
+        "distractors": "normal"
+      }
+    },
+    {
+      "id": "abl-04-clean-manufacturing",
+      "category": "clean",
+      "seed": 7004,
+      "config": {
+        "profile": "manufacturing",
+        "size": "small",
+        "distractors": "high"
+      }
+    },
+    {
+      "id": "abl-05-clean-logistics",
+      "category": "clean",
+      "seed": 7005,
+      "config": {
+        "profile": "logistics",
+        "size": "medium",
+        "distractors": "normal"
+      }
+    },
+    {
+      "id": "abl-06-clean-consulting",
+      "category": "clean",
+      "seed": 7006,
+      "config": {
+        "profile": "consulting",
+        "size": "large",
+        "distractors": "high"
+      }
+    },
+    {
+      "id": "abl-07-duplicate_invoice-1",
+      "category": "single_type",
+      "seed": 7007,
+      "config": {
+        "profile": "retail",
+        "errors": {
+          "duplicate_invoice": 2
+        }
+      }
+    },
+    {
+      "id": "abl-08-duplicate_invoice-2",
+      "category": "single_type",
+      "seed": 7008,
+      "config": {
+        "profile": "software",
+        "errors": {
+          "duplicate_invoice": 2
+        }
+      }
+    },
+    {
+      "id": "abl-09-payment_allocation-1",
+      "category": "single_type",
+      "seed": 7009,
+      "config": {
+        "profile": "software",
+        "errors": {
+          "payment_allocation": 2
+        },
+        "allocation_mode": "missing"
+      }
+    },
+    {
+      "id": "abl-10-payment_allocation-2",
+      "category": "single_type",
+      "seed": 7010,
+      "config": {
+        "profile": "logistics",
+        "errors": {
+          "payment_allocation": 2
+        },
+        "allocation_mode": "partial"
+      }
+    },
+    {
+      "id": "abl-11-fx_rate-1",
+      "category": "single_type",
+      "seed": 7011,
+      "config": {
+        "profile": "logistics",
+        "errors": {
+          "fx_rate": 2
+        }
+      }
+    },
+    {
+      "id": "abl-12-fx_rate-2",
+      "category": "single_type",
+      "seed": 7012,
+      "config": {
+        "profile": "retail",
+        "errors": {
+          "fx_rate": 2
+        }
+      }
+    },
+    {
+      "id": "abl-13-period_attribution-1",
+      "category": "single_type",
+      "seed": 7013,
+      "config": {
+        "profile": "retail",
+        "errors": {
+          "period_attribution": 2
+        }
+      }
+    },
+    {
+      "id": "abl-14-period_attribution-2",
+      "category": "single_type",
+      "seed": 7014,
+      "config": {
+        "profile": "software",
+        "errors": {
+          "period_attribution": 2
+        },
+        "presentation": {
+          "timestamp_offset": "company"
+        }
+      }
+    },
+    {
+      "id": "abl-15-s1-1",
+      "category": "interacting",
+      "seed": 7015,
+      "config": {
+        "profile": "retail",
+        "scenarios": {
+          "fx_partial_payment_boundary": 1
+        }
+      }
+    },
+    {
+      "id": "abl-16-s2-1",
+      "category": "interacting",
+      "seed": 7016,
+      "config": {
+        "profile": "software",
+        "scenarios": {
+          "fx_invoice_unapplied_payment": 1
+        }
+      }
+    },
+    {
+      "id": "abl-17-s1-2",
+      "category": "interacting",
+      "seed": 7017,
+      "config": {
+        "profile": "trading",
+        "scenarios": {
+          "fx_partial_payment_boundary": 1
+        }
+      }
+    },
+    {
+      "id": "abl-18-s2-2",
+      "category": "interacting",
+      "seed": 7018,
+      "config": {
+        "profile": "manufacturing",
+        "scenarios": {
+          "fx_invoice_unapplied_payment": 1
+        }
+      }
+    },
+    {
+      "id": "abl-19-all-four-1",
+      "category": "mixed",
+      "seed": 7019,
+      "config": {
+        "profile": "retail",
+        "size": "medium",
+        "errors": {
+          "duplicate_invoice": 1,
+          "payment_allocation": 1,
+          "fx_rate": 1,
+          "period_attribution": 1
+        },
+        "scenarios": {
+          "fx_partial_payment_boundary": 0,
+          "fx_invoice_unapplied_payment": 1
+        }
+      }
+    },
+    {
+      "id": "abl-20-all-four-2",
+      "category": "mixed",
+      "seed": 7020,
+      "config": {
+        "profile": "trading",
+        "size": "large",
+        "errors": {
+          "duplicate_invoice": 1,
+          "payment_allocation": 1,
+          "fx_rate": 1,
+          "period_attribution": 1
+        },
+        "scenarios": {
+          "fx_partial_payment_boundary": 1,
+          "fx_invoice_unapplied_payment": 0
+        }
+      }
+    },
+    {
+      "id": "abl-21-all-four-3",
+      "category": "mixed",
+      "seed": 7021,
+      "config": {
+        "profile": "software",
+        "size": "medium",
+        "errors": {
+          "duplicate_invoice": 1,
+          "payment_allocation": 1,
+          "fx_rate": 1,
+          "period_attribution": 1
+        },
+        "scenarios": {
+          "fx_partial_payment_boundary": 0,
+          "fx_invoice_unapplied_payment": 1
+        }
+      }
+    },
+    {
+      "id": "abl-22-all-four-4",
+      "category": "mixed",
+      "seed": 7022,
+      "config": {
+        "profile": "manufacturing",
+        "size": "large",
+        "errors": {
+          "duplicate_invoice": 1,
+          "payment_allocation": 1,
+          "fx_rate": 1,
+          "period_attribution": 1
+        },
+        "scenarios": {
+          "fx_partial_payment_boundary": 1,
+          "fx_invoice_unapplied_payment": 0
+        }
+      }
+    },
+    {
+      "id": "abl-23-errors-high-rh-1",
+      "category": "red_herring_heavy",
+      "seed": 7023,
+      "config": {
+        "profile": "manufacturing",
+        "distractors": "high",
+        "errors": {
+          "duplicate_invoice": 1,
+          "payment_allocation": 1,
+          "fx_rate": 2,
+          "period_attribution": 2
+        },
+        "presentation": {
+          "order": "shuffled"
+        }
+      }
+    },
+    {
+      "id": "abl-24-errors-high-rh-2",
+      "category": "red_herring_heavy",
+      "seed": 7024,
+      "config": {
+        "profile": "logistics",
+        "distractors": "high",
+        "errors": {
+          "duplicate_invoice": 1,
+          "payment_allocation": 1,
+          "fx_rate": 2,
+          "period_attribution": 2
+        },
+        "presentation": {
+          "order": "shuffled"
+        }
+      }
+    },
+    {
+      "id": "abl-25-errors-high-rh-3",
+      "category": "red_herring_heavy",
+      "seed": 7025,
+      "config": {
+        "profile": "consulting",
+        "distractors": "high",
+        "errors": {
+          "duplicate_invoice": 1,
+          "payment_allocation": 1,
+          "fx_rate": 2,
+          "period_attribution": 2
+        },
+        "presentation": {
+          "order": "shuffled"
+        }
+      }
+    },
+    {
+      "id": "abl-26-errors-high-rh-4",
+      "category": "red_herring_heavy",
+      "seed": 7026,
+      "config": {
+        "profile": "retail",
+        "distractors": "high",
+        "errors": {
+          "duplicate_invoice": 1,
+          "payment_allocation": 1,
+          "fx_rate": 2,
+          "period_attribution": 2
+        },
+        "presentation": {
+          "order": "shuffled"
+        }
+      }
+    }
+  ]
+}

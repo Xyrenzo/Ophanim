@@ -7,6 +7,10 @@
     verify-episode  independently verify an episode directory
     demo            run the scripted reference auditor on one episode
     schemas         print the public JSON Schemas
+    stress          large-scale stress test of generator, auditor and verifier (smoke / standard / full)
+    ablate          ablation and comparison study on fixed open episodes
+    trace           evaluator-side trace: finding -> issue -> injection -> rows (needs evaluator/ files)
+    run-agent       run one closed episode with an external agent process or container
 """
 
 from __future__ import annotations
@@ -14,6 +18,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shlex
 import subprocess
 import sys
 from pathlib import Path
@@ -206,6 +211,83 @@ def cmd_schemas(_: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_stress(args: argparse.Namespace) -> int:
+    from ophanim.evaluator.stress import run_stress
+
+    summary = run_stress(args.level)
+    text = json.dumps(summary, indent=2)
+    if args.out:
+        Path(args.out).parent.mkdir(parents=True, exist_ok=True)
+        with open(args.out, "w", encoding="utf-8", newline="\n") as fh:
+            fh.write(text + "\n")
+    print(text)
+    print("\nOPHANIM STRESS:", "PASS" if summary["ok"] else "FAIL")
+    return 0 if summary["ok"] else 1
+
+
+def cmd_ablate(args: argparse.Namespace) -> int:
+    from ophanim.evaluator.ablation import render_markdown, run_ablation
+
+    report = run_ablation(args.suite, args.out)
+    print(render_markdown(report))
+    if report["data_problems"]:
+        print("data problems:", report["data_problems"])
+        return 1
+    return 0
+
+
+def cmd_trace(args: argparse.Namespace) -> int:
+    from ophanim.audit.dataset import PublicDataset
+    from ophanim.evaluator.provenance_check import check_provenance, trace_findings
+    from ophanim.schemas import TruthFile
+
+    d = Path(args.path)
+    ds = PublicDataset.from_directory(d / "public")
+    tables = {"ledger": ds.ledger, "invoices": ds.invoices, "payments": ds.payments, "fx": ds.fx}
+    truth = TruthFile.model_validate_json((d / "evaluator" / "truth.json").read_text(encoding="utf-8"))
+    prov = json.loads((d / "evaluator" / "provenance.json").read_text(encoding="utf-8"))
+    out: dict = {"provenance_problems": check_provenance(tables, prov, truth, ds.manifest)}
+    if args.submission:
+        sub = json.loads(Path(args.submission).read_text(encoding="utf-8"))
+        out["findings"] = trace_findings(tables, prov, truth, sub.get("submission", sub))
+    print(json.dumps(out, indent=2))
+    return 0 if not out["provenance_problems"] else 1
+
+
+def cmd_run_agent(args: argparse.Namespace) -> int:
+    from ophanim.analytics import TrajectoryLogger
+    from ophanim.env import OphanimEnv
+    from ophanim.evaluator.process_runner import (
+        agent_command,
+        container_agent_command,
+        container_name,
+        remove_container,
+        run_episode_isolated,
+    )
+
+    if bool(args.cmd) == bool(args.policy):
+        print("give exactly one of --cmd or --policy", file=sys.stderr)
+        return 2
+    if args.container:
+        inner = ["--policy", args.policy] if args.policy else shlex.split(args.cmd)
+        cmd = container_agent_command(args.container, inner)
+    else:
+        cmd = agent_command(args.policy) if args.policy else shlex.split(args.cmd, posix=os.name != "nt")
+        # The agent starts in an empty temporary directory: make paths given relative to here absolute.
+        cmd = [str(Path(a).resolve()) if not a.startswith("-") and Path(a).is_file() else a for a in cmd]
+    logger = TrajectoryLogger(args.trajectory) if args.trajectory else None
+    try:
+        rec = run_episode_isolated(OphanimEnv(mode="eval"), cmd, args.seed, _load_config(args.config), logger,
+                                   policy_name=args.policy or "external")
+    finally:
+        if args.container and container_name(cmd):
+            remove_container(container_name(cmd))
+        if logger is not None:
+            logger.close()
+    print(json.dumps({"isolation": "container" if args.container else "process", "record": rec.to_dict()}, indent=2))
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="ophanim", description="OPHANIM - Financial Forensics Lab")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -244,6 +326,30 @@ def main(argv: list[str] | None = None) -> int:
 
     s = sub.add_parser("schemas", help="print public JSON Schemas")
     s.set_defaults(fn=cmd_schemas)
+
+    st = sub.add_parser("stress", help="stress test generator, independent auditor and verifier")
+    st.add_argument("--level", choices=("smoke", "standard", "full"), default="standard")
+    st.add_argument("--out", help="write the JSON summary to this file")
+    st.set_defaults(fn=cmd_stress)
+
+    ab = sub.add_parser("ablate", help="ablation and comparison study on fixed open episodes")
+    ab.add_argument("--suite", default=str(ROOT / "configs" / "ablation" / "suite.json"))
+    ab.add_argument("--out", default=str(ROOT / "runs" / "ablation"))
+    ab.set_defaults(fn=cmd_ablate)
+
+    tr = sub.add_parser("trace", help="evaluator side: validate provenance and trace a submission")
+    tr.add_argument("path", help="episode directory with public/ and evaluator/")
+    tr.add_argument("--submission", help="findings JSON ({episode_id, findings})")
+    tr.set_defaults(fn=cmd_trace)
+
+    ra = sub.add_parser("run-agent", help="run one closed episode with an external agent (JSON lines)")
+    ra.add_argument("--cmd", help='agent command line, e.g. "python examples/external_agent.py"')
+    ra.add_argument("--policy", help="built-in policy, run through ophanim.agent_runtime")
+    ra.add_argument("--container", metavar="IMAGE", help="run the agent in a hardened Docker container from IMAGE")
+    ra.add_argument("--seed", type=int, default=7)
+    ra.add_argument("--config")
+    ra.add_argument("--trajectory", help="write the public trajectory (JSONL) here")
+    ra.set_defaults(fn=cmd_run_agent)
 
     args = parser.parse_args(argv)
     return args.fn(args)

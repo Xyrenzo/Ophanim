@@ -9,7 +9,12 @@ Checks, using the stdlib-only auditor in ``ophanim.audit`` (no generator code):
                   declared in truth.json (same type, ids, amount, currency):
                   nothing missing, nothing extra, no anomalies;
   4. evidence   - every allowed evidence set of every issue exists in the public
-                  data and, on its own, proves the issue and its amount.
+                  data and, on its own, proves the issue and its amount;
+  5. integrity  - ids are unique, references resolve, truth cites existing records
+                  (``evaluator/integrity.py``);
+  6. provenance - when provenance is supplied, replaying the clean books through the
+                  recorded injections reproduces the published ledger exactly and every
+                  issue traces back to its injection (``evaluator/provenance_check.py``).
 """
 
 from __future__ import annotations
@@ -21,6 +26,8 @@ from ophanim.audit.dataset import PublicDataset
 from ophanim.audit.evidence import check_evidence
 from ophanim.audit.formats import check_formats
 from ophanim.audit.reconcile import reconcile
+from ophanim.evaluator.integrity import check_integrity
+from ophanim.evaluator.provenance_check import check_provenance
 from ophanim.schemas import TruthFile
 
 
@@ -36,7 +43,8 @@ class VerificationReport:
         return not self.problems
 
 
-def verify(dataset: PublicDataset, truth: TruthFile, pre_mutation_tables: dict | None = None) -> VerificationReport:
+def verify(dataset: PublicDataset, truth: TruthFile, pre_mutation_tables: dict | None = None,
+           provenance: dict | None = None) -> VerificationReport:
     rep = VerificationReport(issues_declared=len(truth.issues))
     rep.problems += [f"format: {x}" for x in check_formats(dataset)]
     if truth.episode_id != dataset.manifest.get("episode_id"):
@@ -80,13 +88,20 @@ def verify(dataset: PublicDataset, truth: TruthFile, pre_mutation_tables: dict |
                                     {i: index[i] for i in s}, dataset.policy)
             if reason:
                 rep.problems.append(f"{t.issue_id}: evidence set insufficient ({reason})")
+
+    # 5. referential integrity, 6. provenance chain
+    tables = {"ledger": dataset.ledger, "invoices": dataset.invoices, "payments": dataset.payments, "fx": dataset.fx}
+    rep.problems += [f"integrity: {x}" for x in check_integrity(tables, truth)]
+    if provenance is not None:
+        rep.problems += [f"provenance: {x}" for x in check_provenance(tables, provenance, truth, dataset.manifest)]
     return rep
 
 
 def verify_generated(episode) -> VerificationReport:
     """Verify an in-memory GeneratedEpisode."""
     ds = PublicDataset.from_tables(episode.public.manifest, episode.public.policy, episode.public.tables)
-    return verify(ds, episode.sealed.truth, episode.sealed.provenance["pre_mutation"]["tables"])
+    prov = episode.sealed.provenance
+    return verify(ds, episode.sealed.truth, prov["pre_mutation"]["tables"], prov)
 
 
 def verify_directory(directory: str | Path) -> VerificationReport:
@@ -97,4 +112,4 @@ def verify_directory(directory: str | Path) -> VerificationReport:
     ds = PublicDataset.from_directory(d / "public")
     truth = TruthFile.model_validate(json.loads((d / "evaluator" / "truth.json").read_text(encoding="utf-8")))
     prov = json.loads((d / "evaluator" / "provenance.json").read_text(encoding="utf-8"))
-    return verify(ds, truth, prov["pre_mutation"]["tables"])
+    return verify(ds, truth, prov["pre_mutation"]["tables"], prov)

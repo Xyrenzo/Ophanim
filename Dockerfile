@@ -23,6 +23,8 @@ COPY tests ./tests
 COPY configs ./configs
 COPY data ./data
 COPY docs ./docs
+COPY examples ./examples
+COPY docker ./docker
 
 # Run as an unprivileged user; /app/runs is the only place the evaluator writes.
 RUN useradd --create-home --uid 10001 ophanim && mkdir -p /app/runs && chown -R ophanim /app

@@ -64,7 +64,22 @@ evaluator -> agent  {"type": "end"}
 
 На Python: `run_episode_isolated(OphanimEnv(mode="eval", secret=...), ["python", "my_agent.py"], seed, config)`
 или внутри процесса `run_episode(env, policy, seed, config)` для любого объекта с методами
-`reset(obs, info)` и `act(obs)`.
+`reset(obs, info)` и `act(obs)`. Из командной строки: `python -m ophanim run-agent --cmd "python my_agent.py"`;
+для недоверенного кода — `--container IMAGE` (контейнер без сети, с файловой системой только для чтения и
+без привилегий). Протокол, коды ошибок и лимиты: `docs/agent_protocol.md`.
+
+## Стресс-тесты и абляции (вне официальной оценки)
+
+* `python -m ophanim stress --level smoke|standard|full` — детерминированная сетка конфигураций (seed
+  выводятся из идентификатора случая). Для каждого случая: генерация, полная независимая верификация
+  (включая ссылочную целостность и цепочку provenance), побайтная воспроизводимость, инвариантность к
+  представлению; плюс 18 невалидных конфигураций, которые должны быть отклонены. Машиночитаемая сводка:
+  число конфигураций, успешных генераций, отклонённых невалидных конфигураций, нарушений инвариантов,
+  сбоев воспроизводимости, длительность. `smoke` входит в набор тестов, `standard` и `full` — нет.
+* `python -m ophanim ablate` — все политики на одних и тех же 26 открытых эпизодах
+  (`configs/ablation/suite.json`, явные seed, без секрета): reference auditor, шесть его абляций, базовые
+  политики и oracle. Политики — фиксированный код; ничего не настраивается на этих эпизодах, и они не
+  пересекаются с закрытым набором. Отчёт: `runs/ablation/report.json` и `report.md`.
 
 ## Команды
 
@@ -74,4 +89,7 @@ OPHANIM_EVAL_SECRET=<secret> python -m ophanim evaluate --seed-base <hidden-base
 python -m ophanim evaluate --out artifacts/eval-env-0.3.0  # без секрета: воспроизводит docs/results.md, раздел 1
 python -m ophanim verify-episode data/train/train-06-all-four
 python -m ophanim build-data                               # заново сгенерировать data/ (побайтно идентично)
+python -m ophanim stress --level standard --out runs/stress/standard.json
+python -m ophanim ablate --out runs/ablation
+python -m ophanim run-agent --cmd "python examples/external_agent.py" --seed 7
 ```

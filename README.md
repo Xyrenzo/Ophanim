@@ -44,6 +44,7 @@ Genesis Hackathon 2026.
 * [Базовые политики](#базовые-политики)
 * [Траектории](#траектории)
 * [Воспроизводимость](#воспроизводимость)
+* [Стресс-тесты, абляции, свой агент](#стресс-тесты-абляции-свой-агент)
 * [Адаптер жюри](#адаптер-жюри)
 * [Где что находится](#где-что-находится)
 
@@ -108,6 +109,10 @@ python -m ophanim verify                               # тесты + данны
 | `verify-episode <каталог>` | независимо проверить каталог эпизода |
 | `build-data` | заново сгенерировать `data/train`, `data/dev` и `data/trajectories.jsonl` из `configs/` |
 | `schemas` | вывести публичные JSON Schema |
+| `stress --level smoke\|standard\|full` | стресс-тест генератора, независимого аудитора и верификатора; JSON-сводка |
+| `ablate` | абляции reference auditor и сравнение всех политик на фиксированных эпизодах |
+| `trace <каталог> --submission <файл>` | со стороны оценщика: проверить цепочку provenance и проследить каждый вывод до причины |
+| `run-agent --cmd ... \| --policy ... [--container IMAGE]` | один закрытый эпизод с внешним агентом в отдельном процессе или контейнере |
 
 ## <img src="assets/icons/shield.svg" width="26" height="26" alt=""> Проверка одной командой
 
@@ -333,6 +338,35 @@ episode_id, step, action, observation, reward, terminated, truncated
 * Версии зафиксированы: код - `ENV_VERSION 0.3.0` (`src/ophanim/version.py`), зависимости -
   `requirements.lock`, образ - `python:3.11.15-slim`, конфигурации наборов - `configs/`.
 
+## <img src="assets/icons/layers.svg" width="26" height="26" alt=""> Стресс-тесты, абляции, свой агент
+
+**Стресс-тесты** (`python -m ophanim stress`). Детерминированная сетка конфигураций: 16 смесей ошибок (от
+чистых книг до предела в 12 проблем, оба сценария, оба явных режима распределения) × 7 профилей × размеры ×
+уровни ложных следов × варианты представления. Для каждого случая проверяются генерация, полная независимая
+верификация (включая ссылочную целостность и цепочку provenance), побайтная воспроизводимость и
+инвариантность к представлению; 18 заведомо невалидных конфигураций обязаны быть отклонены. Уровень
+`smoke` входит в обычный набор тестов, `standard` (336 случаев) и `full` (1 008 случаев) запускаются
+отдельно, чтобы `verify` оставался быстрым.
+
+**Абляции** (`python -m ophanim ablate`). На 26 фиксированных открытых эпизодах (`configs/ablation/suite.json`)
+сравниваются reference auditor, шесть его абляций (без одной из четырёх проверок, без рассуждения о часовом
+поясе компании, без строк главной книги и FX-ключей в доказательствах), базовые политики и oracle. Отчёт
+даёт precision, recall, F1, TP/FP/FN, награду и шаги проверки в целом, по типам ошибок, на чистых эпизодах
+и на документах ложных следов. Ни одна политика не является обученной моделью.
+
+**Цепочка provenance** (`python -m ophanim trace`). Верификатор воспроизводит историю эпизода: чистые книги,
+затем каждая внесённая ошибка по порядку, — и требует, чтобы результат совпал с опубликованной главной
+книгой строка в строку, а каждая проблема эталона вела к своей внесённой ошибке и к доступным
+доказательствам. `trace` показывает ту же цепочку для конкретного ответа агента.
+
+**Свой агент.** Любая программа, читающая и пишущая JSON lines, может быть агентом:
+`python -m ophanim run-agent --cmd "python examples/external_agent.py" --seed 7`. Пример на одной
+стандартной библиотеке — [`examples/external_agent.py`](examples/external_agent.py), протокол и коды ошибок —
+[`docs/agent_protocol.md`](docs/agent_protocol.md). Для недоверенного кода есть контейнерный режим
+(`--container`, образ [`docker/agent.Dockerfile`](docker/agent.Dockerfile)).
+
+Измеренные результаты: [`docs/results.md`](docs/results.md), разделы 7–9.
+
 ## <img src="assets/icons/plug.svg" width="26" height="26" alt=""> Адаптер жюри
 
 Реализует точки входа из официальных определений проверок Genesis FinTech.
@@ -421,6 +455,10 @@ scores = ja.score_episode(output_dir, findings, inspection_steps)
 | закрытая оценка и отчёт | `evaluator/evaluation.py`, `python -m ophanim evaluate` |
 | схемы JSON | `src/ophanim/schemas.py`, `python -m ophanim schemas` |
 | тесты окружения, matcher и награды | `tests/` |
+| стресс-тесты | `evaluator/stress.py`, `tests/stress/` |
+| целостность и цепочка provenance | `evaluator/integrity.py`, `evaluator/provenance_check.py` |
+| абляции | `policies/ablations.py`, `evaluator/ablation.py`, `configs/ablation/suite.json` |
+| внешний агент и контейнер для него | `examples/external_agent.py`, `docker/agent.Dockerfile`, `evaluator/process_runner.py` |
 
 Каталог `artifacts/` (результаты локальных прогонов `evaluate`) исключён из Git: в нём лежат файлы только
 для оценщика - траектория oracle и журнал судьи.
@@ -436,6 +474,7 @@ scores = ja.score_episode(output_dir, findings, inspection_steps)
 | [`docs/security_model.md`](docs/security_model.md) | изоляция, угрозы, остаточные риски |
 | [`docs/evaluation_protocol.md`](docs/evaluation_protocol.md) | выборки, seed, структура официальной оценки, подключение своих политик |
 | [`docs/provenance_format.md`](docs/provenance_format.md) | формат `provenance.json` |
+| [`docs/agent_protocol.md`](docs/agent_protocol.md) | протокол JSON lines, коды ошибок, лимиты, запуск своего агента |
 | [`docs/results.md`](docs/results.md) | измеренные результаты ENV 0.3.0 и разбор сбоев |
 | [`docs/research/`](docs/research/README.md) | исследовательские материалы и отчёты о соответствии официальным проверкам |
 
@@ -445,7 +484,8 @@ scores = ja.score_episode(output_dir, findings, inspection_steps)
 
 * только кредиторская задолженность;
 * фиксированные смещения от UTC, без перехода на летнее время;
-* изоляция на уровне процессов, а не песочница;
+* по умолчанию изоляция на уровне процессов, а не песочница; для недоверенного кода есть контейнерный
+  режим, но и контейнер делит ядро с хостом (подробно — `docs/security_model.md`);
 * на книгах с ошибками официальная формула не различает молчание и массовые ложные обвинения;
 * reference auditor показывает, что эпизоды решаются процедурой на правилах, поэтому сложность - в
   рассуждении при ограниченном бюджете шагов, а не в скрытых фактах;

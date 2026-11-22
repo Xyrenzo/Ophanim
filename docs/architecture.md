@@ -24,8 +24,8 @@
 | `ophanim.generator` | скрытая история, проводки, причинное внесение ошибок, представление | всё, кроме `audit` |
 | `ophanim.audit` | независимая сверка публичных записей, достаточность доказательств, проверка форматов | **только stdlib и сам себя** (проверяется AST-тестом) |
 | `ophanim.env` | контракт `reset`/`step`, инструменты, калькулятор, текст задачи | generator (при `reset`), evaluator.judge |
-| `ophanim.evaluator` | matcher, награда, судья, верификатор, oracle, раннеры, метаморфные проверки, отчёт оценки | всё |
-| `ophanim.policies` | базовые политики на стороне агента | **никогда evaluator и generator** (проверяется AST-тестом) |
+| `ophanim.evaluator` | matcher, награда, судья, верификатор (с проверками целостности и цепочки provenance), oracle, раннеры, метаморфные проверки, отчёт оценки, стресс-тесты, абляции | всё |
+| `ophanim.policies` | базовые политики на стороне агента и абляции reference auditor | **никогда evaluator и generator** (проверяется AST-тестом) |
 | `ophanim.agent_runtime` | цикл агента через stdin/stdout для закрытой оценки | policies |
 | `ophanim.adapter` | точки входа для жюри (`generate_episode`, `make_env`, `score_episode`); реэкспортируются `judge_adapter.py` | env, generator, evaluator, audit (чтение публичных файлов эпизода) |
 

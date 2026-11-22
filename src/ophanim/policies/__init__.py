@@ -7,9 +7,14 @@ tests/unit/test_independence.py). The evaluator-only Oracle lives in
 
 Official baselines from the case: random_explorer (fixed seed),
 simple_reconciliation, mark_everything, and the evaluator-side oracle.
-reference_auditor is an extra scripted policy demonstrating solvability.
+reference_auditor is an extra scripted policy demonstrating solvability. The ablation_* policies
+(policies/ablations.py) are scripted variants of it with one ingredient removed, for ablation studies; they
+are kept in a separate registry so that the official baselines and published trajectories are unchanged.
+
+No policy in this package is a trained model.
 """
 
+from ophanim.policies.ablations import ABLATION_POLICIES, AblatedAuditor
 from ophanim.policies.base import Policy
 from ophanim.policies.mark_everything import MarkEverything
 from ophanim.policies.random_explorer import RandomExplorer
@@ -24,11 +29,22 @@ AGENT_POLICIES = {
 }
 
 
+# What each policy is, for reports: none of them is a learned model.
+POLICY_KINDS = {
+    "random_explorer": "baseline",
+    "simple_reconciliation": "baseline",
+    "mark_everything": "baseline",
+    "reference_auditor": "scripted reference",
+    **{name: "scripted ablation" for name in ABLATION_POLICIES},
+}
+
+
 def make_policy(name: str, seed: int = 0) -> Policy:
-    try:
-        return AGENT_POLICIES[name](seed)
-    except KeyError:
-        raise ValueError(f"unknown policy {name!r}; choose from {sorted(AGENT_POLICIES)}") from None
+    factory = AGENT_POLICIES.get(name) or ABLATION_POLICIES.get(name)
+    if factory is None:
+        raise ValueError(f"unknown policy {name!r}; choose from {sorted(AGENT_POLICIES) + sorted(ABLATION_POLICIES)}")
+    return factory(seed)
 
 
-__all__ = ["AGENT_POLICIES", "MarkEverything", "Policy", "RandomExplorer", "ReferenceAuditor", "SimpleReconciliation", "make_policy"]
+__all__ = ["ABLATION_POLICIES", "AGENT_POLICIES", "AblatedAuditor", "MarkEverything", "POLICY_KINDS", "Policy",
+           "RandomExplorer", "ReferenceAuditor", "SimpleReconciliation", "make_policy"]

@@ -1,20 +1,20 @@
 {
   "schema_version": "1.0",
-  "env_version": "0.2.0",
-  "episode_id": "EP-9C24DB7331FB",
-  "company_name": "Eldorwen Trading House Co.",
+  "env_version": "0.3.0",
+  "episode_id": "EP-086B50F18268",
+  "company_name": "Norarlan Retail GmbH",
   "company_profile": "Consulting company",
   "base_currency": "GBP",
   "period_start": "2025-08-01",
   "period_end": "2025-08-31",
   "timezone": "+05:30",
   "record_counts": {
-    "ledger": 399,
-    "invoices": 117,
-    "payments": 87,
+    "ledger": 397,
+    "invoices": 116,
+    "payments": 86,
     "fx": 364
   },
-  "document_count": 204,
+  "document_count": 202,
   "rounding": {
     "mode": "ROUND_HALF_UP",
     "currency_exponents": {

@@ -110,7 +110,8 @@ def reconcile(ds: PublicDataset) -> AuditReport:
             anomalies.append(f"payment {pid}: expected exactly one bank row")
             continue
         bank_row = bank_rows[0]
-        bank = bank_row["credit_minor"] - bank_row["debit_minor"]
+        inbound = doc.get("direction") == "inbound"  # a supplier refund brings money back (Dr Bank)
+        bank = (bank_row["debit_minor"] - bank_row["credit_minor"]) if inbound else (bank_row["credit_minor"] - bank_row["debit_minor"])
         if not rules.in_period(pdate):
             findings.append(AuditFinding("period_attribution", (pid,), bank, base,
                                          tuple(sorted((doc["doc_id"], bank_row["row_id"]))),
@@ -132,6 +133,25 @@ def reconcile(ds: PublicDataset) -> AuditReport:
         refs = doc["invoice_refs"]
         ap_rows = [r for r in rows if r["account"] == rules.ap]
         susp_rows = [r for r in rows if r["account"] == rules.suspense]
+        if inbound:
+            # Refund (policy posting rule "refund"): it must return, in full, an earlier outbound payment of
+            # the same supplier that had no remittance, and clear exactly the Suspense amount that payment
+            # parked. A correct refund is never a finding; any inconsistency is an anomaly.
+            original = payments.get(doc.get("refund_of"))
+            parked = sum(r["debit_minor"] - r["credit_minor"]
+                         for r in by_payment.get(doc.get("refund_of"), []) if r["account"] == rules.suspense)
+            cleared = sum(r["credit_minor"] - r["debit_minor"] for r in susp_rows)
+            if refs is not None or ap_rows:
+                anomalies.append(f"refund {pid}: refunds carry no remittance and touch no AP")
+            elif original is None or original.get("direction", "outbound") != "outbound" or original["invoice_refs"] is not None:
+                anomalies.append(f"refund {pid}: must refund an outbound payment without remittance")
+            elif (original["entity_id"], original["currency"], original["amount_minor"]) != (doc["entity_id"], doc["currency"], doc["amount_minor"]):
+                anomalies.append(f"refund {pid}: does not match the refunded payment")
+            elif not datetime.fromisoformat(original["timestamp"]) < datetime.fromisoformat(doc["timestamp"]):
+                anomalies.append(f"refund {pid}: precedes the refunded payment")
+            elif cleared != parked or parked <= 0:
+                anomalies.append(f"refund {pid}: clears {cleared} of Suspense, the refunded payment parked {parked}")
+            continue
         if refs is None:
             if ap_rows:
                 anomalies.append(f"payment {pid}: AP applied without remittance information")

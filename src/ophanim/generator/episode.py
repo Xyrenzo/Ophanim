@@ -227,6 +227,7 @@ def generate_episode(seed: int, config: EpisodeConfig | dict | None = None, *, s
                     "period": [world.period_start.isoformat(), world.period_end.isoformat()]},
         "id_map": ids.flat(),
         "distractors": world.distractors,
+        "scenario_carriers": world.scenario_carriers,
         "injections": injections,
         "pre_mutation": {
             "validation_problems": problems,

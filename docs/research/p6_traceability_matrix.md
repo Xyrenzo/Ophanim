@@ -195,3 +195,16 @@ P01–P20 is now reachable. Report: `p6c_phase1_adapter_report.md`.
 Unmodified P6 harness: 34 PASS / 10 FAIL → 44 PASS / 0 FAIL
 (`evidence/p6c_phase2_official_checks.out.txt`). Still open (Phase 3): D02, D03, D05, D09–D11, DC1, T1.
 Report: `p6c_phase2_matcher_report.md`.
+
+### P6-C Phase 3 — generator compliance (working tree, ENV_VERSION 0.3.0)
+
+| ID | new status | evidence |
+|---|---|---|
+| D02 split payment | VERIFIED (guaranteed at distractors normal/high) | `test_d02_clean_episode_has_a_legitimate_split_payment`, `test_d02_guarantee_path_plants_a_valid_split_when_none_occurred` |
+| D03 correct refund | VERIFIED (clean, truth empty; independently checked; tamper controls) | `test_d03_*` (13 tests) |
+| D05 FX/period boundary | VERIFIED (foreign boundary invoice; provable with the tools) | `test_d05_clean_foreign_boundary_document_is_correct_and_provable_with_tools` |
+| D09–D11 missing/partial allocation | VERIFIED (`allocation_mode`; no fallback) | `test_d09_*`, `test_d10_*`, `test_d09_d11_three_episodes_with_both_kinds_pass_end_to_end`, `test_explicit_mode_never_falls_back` |
+| DC1 / T1 provenance format | VERIFIED (documented from the real schema; keys pinned by a test) | `docs/provenance_format.md`, `test_provenance_has_exactly_the_documented_top_level_keys` |
+
+Report: `p6c_phase3_generator_report.md`. These statuses come from our own tests and the independent
+auditor; no official jury run has taken place.

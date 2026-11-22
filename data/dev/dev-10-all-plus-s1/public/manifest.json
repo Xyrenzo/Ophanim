@@ -1,20 +1,20 @@
 {
   "schema_version": "1.0",
-  "env_version": "0.2.0",
-  "episode_id": "EP-01D37A2560AB",
-  "company_name": "Pellorwen Group S.A.",
+  "env_version": "0.3.0",
+  "episode_id": "EP-132009C7CC1C",
+  "company_name": "Selenvia Group GmbH",
   "company_profile": "Logistics company",
   "base_currency": "AED",
   "period_start": "2026-10-01",
   "period_end": "2026-10-31",
   "timezone": "+05:30",
   "record_counts": {
-    "ledger": 377,
-    "invoices": 104,
-    "payments": 79,
+    "ledger": 388,
+    "invoices": 107,
+    "payments": 84,
     "fx": 364
   },
-  "document_count": 183,
+  "document_count": 191,
   "rounding": {
     "mode": "ROUND_HALF_UP",
     "currency_exponents": {

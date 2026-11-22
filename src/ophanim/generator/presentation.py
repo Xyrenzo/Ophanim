@@ -140,6 +140,9 @@ def build_policy(world: World) -> dict:
             "payment_with_remittance": "One Dr 2000 AP row per remittance line (invoice_id set) at the invoice's rate; "
                                        "Cr 1000 Bank at the payment's rate; difference to 7900.",
             "payment_without_remittance": "Dr 2090 Suspense / Cr 1000 Bank at the payment's rate. This is correct treatment.",
+            "refund": "An inbound payment (direction 'inbound') with refund_of = the refunded payment: Dr 1000 Bank at the "
+                      "refund's rate / Cr 2090 Suspense for the amount the refunded payment was parked at; difference "
+                      "to 7900. This is correct treatment.",
             "reversal": "Mirror image of the original invoice rows; an invoice reversed in full has no net effect.",
         },
         "allocation": "Every remittance line (invoice_refs) of a payment must be applied in full to the referenced "
@@ -224,6 +227,10 @@ def render_tables(world: World, ids: IdMap, nm: Names, order_rng: DeterministicR
             ],
             "entity_id": ids.supplier[pay.supplier_key],
             "entity_name": nm.suppliers[pay.supplier_key],
+            # outbound = we paid the supplier; inbound = the supplier refunded us. refund_of is an explicit
+            # null unless this is a refund, in which case it is the payment_id being refunded.
+            "direction": pay.direction,
+            "refund_of": ids.payment[pay.refund_of] if pay.refund_of else None,
         })
 
     fx = [

@@ -1,20 +1,20 @@
 {
   "schema_version": "1.0",
-  "env_version": "0.2.0",
-  "episode_id": "EP-A89F92652F58",
-  "company_name": "Zanaedex Digital AG",
+  "env_version": "0.3.0",
+  "episode_id": "EP-EBF2C162DD3F",
+  "company_name": "Meriquill Holdings Ltd",
   "company_profile": "Consulting company",
   "base_currency": "EUR",
   "period_start": "2025-12-01",
   "period_end": "2025-12-31",
   "timezone": "+03:00",
   "record_counts": {
-    "ledger": 302,
-    "invoices": 83,
-    "payments": 59,
+    "ledger": 312,
+    "invoices": 85,
+    "payments": 63,
     "fx": 364
   },
-  "document_count": 142,
+  "document_count": 148,
   "rounding": {
     "mode": "ROUND_HALF_UP",
     "currency_exponents": {

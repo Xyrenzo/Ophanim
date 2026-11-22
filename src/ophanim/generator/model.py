@@ -78,7 +78,9 @@ class Payment:
     currency: str
     amount_minor: int
     refs: list[Allocation] | None  # None = no remittance information
-    origin: str  # period | next | prior
+    origin: str  # period | next | prior | adjacent
+    direction: str = "outbound"     # outbound = we pay the supplier; inbound = the supplier refunds us
+    refund_of: str | None = None    # inbound only: key of the payment being refunded
 
 
 @dataclass

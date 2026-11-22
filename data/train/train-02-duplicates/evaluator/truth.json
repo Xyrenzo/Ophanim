@@ -1,71 +1,71 @@
 {
   "schema_version": "1.0",
-  "episode_id": "EP-4E958D774EE5",
+  "episode_id": "EP-3A6BF01C72D0",
   "base_currency": "GBP",
   "tolerance_minor": 0,
   "issues": [
     {
-      "issue_id": "ISS-FES4CNFH7A",
+      "issue_id": "ISS-KXNJHWKMQN",
       "type": "duplicate_invoice",
       "affected_ids": [
-        "INV-N9KVSUHF",
-        "INV-XBZ8D2FL"
+        "INV-H2RQK7LG",
+        "INV-YMU5DLAL"
       ],
       "expected_amount_minor": 69765,
       "currency": "GBP",
       "allowed_evidence_sets": [
         [
-          "DOC-JCUVSWB5BH",
-          "DOC-MK63VSB2BH",
-          "GL-65NP46QNY"
+          "DOC-5DSQ2DVNNM",
+          "DOC-JY3CG5S3QF",
+          "GL-64G3FQV89"
         ],
         [
-          "DOC-JCUVSWB5BH",
-          "DOC-MK63VSB2BH",
-          "GL-F2PA6E9U7"
+          "DOC-5DSQ2DVNNM",
+          "DOC-JY3CG5S3QF",
+          "GL-YPYQDB6PG"
         ],
         [
-          "DOC-JCUVSWB5BH",
-          "DOC-MK63VSB2BH",
-          "GL-ZAK3Z5794"
+          "DOC-5DSQ2DVNNM",
+          "DOC-JY3CG5S3QF",
+          "GL-UKPV64H7S"
         ],
         [
-          "DOC-JCUVSWB5BH",
-          "DOC-MK63VSB2BH",
-          "GL-SKDE3LBDE"
+          "DOC-5DSQ2DVNNM",
+          "DOC-JY3CG5S3QF",
+          "GL-Z39H65A7H"
         ]
       ],
       "scenario": "single"
     },
     {
-      "issue_id": "ISS-JGEXT5V54M",
+      "issue_id": "ISS-Y3M7GNDD75",
       "type": "duplicate_invoice",
       "affected_ids": [
-        "INV-DY5T7HWM",
-        "INV-RH63TL3L"
+        "INV-MNM7LAW6",
+        "INV-X583XLC8"
       ],
       "expected_amount_minor": 138146,
       "currency": "GBP",
       "allowed_evidence_sets": [
         [
-          "DOC-JFSB63EF87",
-          "DOC-XZXKXU6G7G",
-          "GL-VBL6J7QHY"
+          "DOC-7UPEJZ5NU5",
+          "DOC-PQE2LFH4HG",
+          "GL-5JKFAKK55"
         ],
         [
-          "DOC-JFSB63EF87",
-          "DOC-XZXKXU6G7G",
-          "GL-84UGMFF2X"
+          "DOC-7UPEJZ5NU5",
+          "DOC-PQE2LFH4HG",
+          "GL-8A7A9EUML"
         ],
         [
-          "DOC-JFSB63EF87",
-          "DOC-XZXKXU6G7G",
-          "GL-23L58VE7Z"
+          "DOC-7UPEJZ5NU5",
+          "DOC-PQE2LFH4HG",
+          "GL-8H98NAM5J"
         ],
         [
-          "DOC-JFSB63EF87",
-          "DOC-XZXKXU6G7G",
-          "GL-Z4C56U43A"
+          "DOC-7UPEJZ5NU5",
+          "DOC-PQE2LFH4HG",
+          "GL-F925JMKYM"
         ]
       ],
       "scenario": "single"

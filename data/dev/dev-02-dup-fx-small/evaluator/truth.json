@@ -1,60 +1,60 @@
 {
   "schema_version": "1.0",
-  "episode_id": "EP-ED2085DAA240",
+  "episode_id": "EP-7EF382CBAA4A",
   "base_currency": "USD",
   "tolerance_minor": 0,
   "issues": [
     {
-      "issue_id": "ISS-4448XMMZR8",
+      "issue_id": "ISS-AKUB72Y2DB",
       "type": "duplicate_invoice",
       "affected_ids": [
-        "INV-JHG4B6AR",
-        "INV-SG6U3VP8"
+        "INV-CUUXNKQJ",
+        "INV-TAL9QABK"
       ],
-      "expected_amount_minor": 161894,
+      "expected_amount_minor": 29240,
       "currency": "USD",
       "allowed_evidence_sets": [
         [
-          "DOC-E48YFWDNRG",
-          "DOC-PE8VLZZVNJ",
-          "GL-HVQN34PNK"
+          "DOC-ASL3WXW9V2",
+          "DOC-SLG4DC7PKC",
+          "GL-BKC2SBA5Z"
         ],
         [
-          "DOC-E48YFWDNRG",
-          "DOC-PE8VLZZVNJ",
-          "GL-ERYLKLUAR"
+          "DOC-ASL3WXW9V2",
+          "DOC-SLG4DC7PKC",
+          "GL-GW5KEJADZ"
         ],
         [
-          "DOC-E48YFWDNRG",
-          "DOC-PE8VLZZVNJ",
-          "GL-VLHC5AM4L"
+          "DOC-ASL3WXW9V2",
+          "DOC-SLG4DC7PKC",
+          "GL-Z4TY3KF8D"
         ],
         [
-          "DOC-E48YFWDNRG",
-          "DOC-PE8VLZZVNJ",
-          "GL-3PCZ6CRFG"
+          "DOC-ASL3WXW9V2",
+          "DOC-SLG4DC7PKC",
+          "GL-JJ3SKDNKN"
         ]
       ],
       "scenario": "single"
     },
     {
-      "issue_id": "ISS-QZCG7KCNAF",
+      "issue_id": "ISS-T8ZNFRREAD",
       "type": "fx_rate",
       "affected_ids": [
-        "INV-S9T6CGX5"
+        "INV-SYD9MXQ5"
       ],
       "expected_amount_minor": 1639,
       "currency": "USD",
       "allowed_evidence_sets": [
         [
           "2026-12-25:CNY:USD",
-          "DOC-AFCLY43GSK",
-          "GL-566PNWJNB"
+          "DOC-YZB5P5SK47",
+          "GL-LK7XXMGRQ"
         ],
         [
           "2026-12-25:CNY:USD",
-          "DOC-AFCLY43GSK",
-          "GL-U4HXZ2BP2"
+          "DOC-YZB5P5SK47",
+          "GL-437T7MTGB"
         ]
       ],
       "scenario": "single"

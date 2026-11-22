@@ -5,6 +5,6 @@ ENV_VERSION is part of the reproducibility contract: identical
 transitions and rewards. Bump it whenever generation or evaluation logic changes.
 """
 
-ENV_VERSION = "0.2.0"  # 0.2.0: exact ids, tau = 0, official structure/semantic split and tie-break
+ENV_VERSION = "0.3.0"  # 0.3.0: refunds (D03), allocation_mode (D09-D11), guaranteed split (D02), foreign FX boundary (D05)
 SCHEMA_VERSION = "1.0"
 CONFIG_VERSION = "1.0"

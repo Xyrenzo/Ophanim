@@ -1,20 +1,20 @@
 {
   "schema_version": "1.0",
-  "env_version": "0.2.0",
-  "episode_id": "EP-4E958D774EE5",
-  "company_name": "Norenwen Group AG",
+  "env_version": "0.3.0",
+  "episode_id": "EP-3A6BF01C72D0",
+  "company_name": "Uliowen Holdings Inc.",
   "company_profile": "Software services company",
   "base_currency": "GBP",
   "period_start": "2025-05-01",
   "period_end": "2025-05-31",
   "timezone": "+01:00",
   "record_counts": {
-    "ledger": 298,
+    "ledger": 302,
     "invoices": 77,
-    "payments": 64,
+    "payments": 65,
     "fx": 364
   },
-  "document_count": 141,
+  "document_count": 142,
   "rounding": {
     "mode": "ROUND_HALF_UP",
     "currency_exponents": {

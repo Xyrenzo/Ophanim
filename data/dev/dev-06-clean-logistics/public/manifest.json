@@ -1,20 +1,20 @@
 {
   "schema_version": "1.0",
-  "env_version": "0.2.0",
-  "episode_id": "EP-9E0141236406",
-  "company_name": "Kaloquill Holdings Ltd",
+  "env_version": "0.3.0",
+  "episode_id": "EP-B27C9F11EA10",
+  "company_name": "Fenenvale Holdings Ltd",
   "company_profile": "Logistics company",
   "base_currency": "USD",
   "period_start": "2025-11-01",
   "period_end": "2025-11-30",
   "timezone": "+05:30",
   "record_counts": {
-    "ledger": 333,
+    "ledger": 338,
     "invoices": 88,
-    "payments": 72,
+    "payments": 73,
     "fx": 360
   },
-  "document_count": 160,
+  "document_count": 161,
   "rounding": {
     "mode": "ROUND_HALF_UP",
     "currency_exponents": {

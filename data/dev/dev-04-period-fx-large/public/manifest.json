@@ -1,20 +1,20 @@
 {
   "schema_version": "1.0",
-  "env_version": "0.2.0",
-  "episode_id": "EP-36FABED50EFE",
-  "company_name": "Rosudar Holdings GmbH",
+  "env_version": "0.3.0",
+  "episode_id": "EP-2D4A7C4661AD",
+  "company_name": "Rosorlis Group B.V.",
   "company_profile": "International trading company",
   "base_currency": "USD",
   "period_start": "2026-12-01",
   "period_end": "2026-12-31",
   "timezone": "+09:00",
   "record_counts": {
-    "ledger": 459,
-    "invoices": 113,
-    "payments": 102,
+    "ledger": 442,
+    "invoices": 109,
+    "payments": 96,
     "fx": 455
   },
-  "document_count": 215,
+  "document_count": 205,
   "rounding": {
     "mode": "ROUND_HALF_UP",
     "currency_exponents": {

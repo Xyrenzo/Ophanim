@@ -38,6 +38,7 @@
     "invoice": "Dr expense / Cr 2000 AP, base amount of the invoice total.",
     "payment_with_remittance": "One Dr 2000 AP row per remittance line (invoice_id set) at the invoice's rate; Cr 1000 Bank at the payment's rate; difference to 7900.",
     "payment_without_remittance": "Dr 2090 Suspense / Cr 1000 Bank at the payment's rate. This is correct treatment.",
+    "refund": "An inbound payment (direction 'inbound') with refund_of = the refunded payment: Dr 1000 Bank at the refund's rate / Cr 2090 Suspense for the amount the refunded payment was parked at; difference to 7900. This is correct treatment.",
     "reversal": "Mirror image of the original invoice rows; an invoice reversed in full has no net effect."
   },
   "allocation": "Every remittance line (invoice_refs) of a payment must be applied in full to the referenced invoice's AP. Suspense is only for payments without remittance information.",

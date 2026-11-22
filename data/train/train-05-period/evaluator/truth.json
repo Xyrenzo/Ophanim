@@ -1,41 +1,41 @@
 {
   "schema_version": "1.0",
-  "episode_id": "EP-A922F32F9A0F",
+  "episode_id": "EP-537543C2E17B",
   "base_currency": "SGD",
   "tolerance_minor": 0,
   "issues": [
     {
-      "issue_id": "ISS-JRVDTNEXUH",
+      "issue_id": "ISS-5ZQQTH3EE8",
       "type": "period_attribution",
       "affected_ids": [
-        "PAY-L6BTUVA5"
-      ],
-      "expected_amount_minor": 462124,
-      "currency": "SGD",
-      "allowed_evidence_sets": [
-        [
-          "DOC-SB2PJPVESP",
-          "GL-L5XA95YNT"
-        ]
-      ],
-      "scenario": "single"
-    },
-    {
-      "issue_id": "ISS-NZTJV2AQZV",
-      "type": "period_attribution",
-      "affected_ids": [
-        "INV-9M7HERW7"
+        "INV-BVPVUA7Q"
       ],
       "expected_amount_minor": 2079645,
       "currency": "SGD",
       "allowed_evidence_sets": [
         [
-          "DOC-H3ZQMW483F",
-          "GL-X7UM7TARV"
+          "DOC-HUVM3RPH54",
+          "GL-59UDQ892S"
         ],
         [
-          "DOC-H3ZQMW483F",
-          "GL-UFS85PPVP"
+          "DOC-HUVM3RPH54",
+          "GL-NWLSPHQ4G"
+        ]
+      ],
+      "scenario": "single"
+    },
+    {
+      "issue_id": "ISS-WGB3UD8MUD",
+      "type": "period_attribution",
+      "affected_ids": [
+        "PAY-32YG7CZ5"
+      ],
+      "expected_amount_minor": 462124,
+      "currency": "SGD",
+      "allowed_evidence_sets": [
+        [
+          "DOC-U9RLWKACZT",
+          "GL-FFYZSUM4G"
         ]
       ],
       "scenario": "single"

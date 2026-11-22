@@ -65,6 +65,8 @@ class ErrorInjector:
         for d in world.distractors:
             if d["kind"] in ("reversed_duplicate", "vendor_ref_collision"):
                 self.protected.update(d.get("invoices", []))
+            if d["kind"] == "correct_refund":  # the refund and the refunded payment stay correct (D03)
+                self.protected.update(d.get("payments", []))
 
     # ------------------------------------------------------------------ driver
     def run(self, config: EpisodeConfig) -> list[InjectedIssue]:
@@ -76,15 +78,25 @@ class ErrorInjector:
             self.issues.extend(self.scenario_fx_partial_payment_boundary(self.rng.child(f"s1/{i}"), c))
         for i, c in enumerate(x for x in w.scenario_carriers if x["scenario"] == "fx_invoice_unapplied_payment"):
             self.issues.extend(self.scenario_fx_invoice_unapplied_payment(self.rng.child(f"s2/{i}"), c))
+        mode = config.allocation_mode
+        alloc_carriers = [c for c in w.scenario_carriers if c["scenario"] == f"allocation_{mode}"]
+
+        def allocation(r: DeterministicRng, i: int) -> InjectedIssue:
+            if mode == "auto":
+                return self.payment_allocation(r)
+            c = alloc_carriers[i]  # an explicit mode never falls back to random selection
+            return self.payment_allocation(r, payment_key=c["payment"], invoice_key=r.choice(c["invoices"]),
+                                           required_kind=mode)
+
         plan = [
-            ("duplicate_invoice", config.errors.duplicate_invoice, self.duplicate_invoice),
-            ("payment_allocation", config.errors.payment_allocation, self.payment_allocation),
-            ("fx_rate", config.errors.fx_rate, self.fx_rate),
-            ("period_attribution", config.errors.period_attribution, self.period_attribution),
+            ("duplicate_invoice", config.errors.duplicate_invoice, lambda r, i: self.duplicate_invoice(r)),
+            ("payment_allocation", config.errors.payment_allocation, allocation),
+            ("fx_rate", config.errors.fx_rate, lambda r, i: self.fx_rate(r)),
+            ("period_attribution", config.errors.period_attribution, lambda r, i: self.period_attribution(r)),
         ]
         for name, count, fn in plan:
             for i in range(count):
-                self.issues.append(fn(self.rng.child(f"{name}/{i}")))
+                self.issues.append(fn(self.rng.child(f"{name}/{i}"), i))
         return self.issues
 
     # ------------------------------------------------------------------ helpers
@@ -157,13 +169,20 @@ class ErrorInjector:
 
     # ------------------------------------------------------------------ type 2
     def payment_allocation(self, r: DeterministicRng, payment_key: str | None = None,
-                           invoice_key: str | None = None, scenario: str = "single") -> InjectedIssue:
+                           invoice_key: str | None = None, scenario: str = "single",
+                           required_kind: str | None = None) -> InjectedIssue:
         """A remittance line is not applied to its invoice; the money is parked in Suspense.
 
-        Single-line payment -> missing allocation; multi-line payment -> partial allocation.
+        Single-line payment -> missing allocation (nothing applied); multi-line payment -> partial
+        allocation (0 < applied < amount). ``required_kind`` ("missing"/"partial") is enforced: a payment of
+        the wrong shape raises instead of silently producing the other kind.
         Misstatement = AP of the invoice left uncleared = line amount at the invoice's policy rate.
         """
         w = self.world
+        if required_kind is not None and payment_key is not None:
+            n_lines = len(w.payments[payment_key].refs or [])
+            if (required_kind == "missing") != (n_lines == 1) or n_lines == 0:
+                raise GenerationError(f"carrier cannot produce a {required_kind} allocation")
         if payment_key is None:
             candidates = []
             for p in w.postings:

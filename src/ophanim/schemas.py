@@ -89,6 +89,11 @@ class EpisodeConfig(StrictModel):
     scenarios: ScenarioCounts = Field(default_factory=ScenarioCounts)
     distractors: Literal["low", "normal", "high"] = "normal"
     presentation: Presentation = Field(default_factory=Presentation)
+    # Shape of the injected payment_allocation errors (official D09-D11):
+    #   "missing" - a one-line payment whose only line is not applied (applied = 0);
+    #   "partial" - a two-line payment with one line not applied (0 < applied < payment amount);
+    #   "auto"    - historical behaviour: a random payment with remittance is chosen.
+    allocation_mode: Literal["auto", "missing", "partial"] = "auto"
 
     @model_validator(mode="after")
     def _check_total(self) -> "EpisodeConfig":

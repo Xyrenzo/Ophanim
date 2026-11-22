@@ -1,83 +1,83 @@
 {
   "schema_version": "1.0",
-  "episode_id": "EP-8103D14F4488",
+  "episode_id": "EP-CB871A5715B9",
   "base_currency": "CHF",
   "tolerance_minor": 0,
   "issues": [
     {
-      "issue_id": "ISS-H5RX9V3SHV",
-      "type": "payment_allocation",
-      "affected_ids": [
-        "INV-B4Y876MN",
-        "PAY-52F2TPJ3"
-      ],
-      "expected_amount_minor": 2251935,
-      "currency": "CHF",
-      "allowed_evidence_sets": [
-        [
-          "2026-07-07:USD:CHF",
-          "DOC-FCCUPQEHKM",
-          "DOC-HWFK3F9BWD",
-          "GL-7SRGPPBYC"
-        ]
-      ],
-      "scenario": "fx_invoice_unapplied_payment"
-    },
-    {
-      "issue_id": "ISS-KB9VTVS654",
-      "type": "payment_allocation",
-      "affected_ids": [
-        "INV-JAHJHJ2T",
-        "PAY-2QDF3VF5"
-      ],
-      "expected_amount_minor": 3471056,
-      "currency": "CHF",
-      "allowed_evidence_sets": [
-        [
-          "2026-06-11:JPY:CHF",
-          "DOC-6WHRNVTCNP",
-          "DOC-ZSG4WPFTNG",
-          "GL-54TKYZNJH",
-          "GL-D7MZPLH3E"
-        ]
-      ],
-      "scenario": "fx_partial_payment_boundary"
-    },
-    {
-      "issue_id": "ISS-N7D3SFZTEN",
+      "issue_id": "ISS-7AELKJ8EJZ",
       "type": "fx_rate",
       "affected_ids": [
-        "PAY-2QDF3VF5"
+        "PAY-4VJ9ZATX"
       ],
       "expected_amount_minor": 9928,
       "currency": "CHF",
       "allowed_evidence_sets": [
         [
           "2026-07-01:JPY:CHF",
-          "DOC-6WHRNVTCNP",
-          "GL-NHUC35VFV"
+          "DOC-AMXQN7QRA3",
+          "GL-2TWL8YYNE"
         ]
       ],
       "scenario": "fx_partial_payment_boundary"
     },
     {
-      "issue_id": "ISS-Y3ZNQ3NMNX",
+      "issue_id": "ISS-N9HWKSMT6A",
       "type": "fx_rate",
       "affected_ids": [
-        "INV-B4Y876MN"
+        "INV-ELS9D4M6"
       ],
       "expected_amount_minor": 2291,
       "currency": "CHF",
       "allowed_evidence_sets": [
         [
           "2026-07-07:USD:CHF",
-          "DOC-FCCUPQEHKM",
-          "GL-7FR7288YS"
+          "DOC-LHWSZGYZPP",
+          "GL-EVLTS7F8P"
         ],
         [
           "2026-07-07:USD:CHF",
-          "DOC-FCCUPQEHKM",
-          "GL-57ARH9DAY"
+          "DOC-LHWSZGYZPP",
+          "GL-7C7JW64VM"
+        ]
+      ],
+      "scenario": "fx_invoice_unapplied_payment"
+    },
+    {
+      "issue_id": "ISS-Q9VENTSC99",
+      "type": "payment_allocation",
+      "affected_ids": [
+        "INV-359EB68T",
+        "PAY-4VJ9ZATX"
+      ],
+      "expected_amount_minor": 3471056,
+      "currency": "CHF",
+      "allowed_evidence_sets": [
+        [
+          "2026-06-11:JPY:CHF",
+          "DOC-AMXQN7QRA3",
+          "DOC-ZLNUNYCEYF",
+          "GL-J9HNESA5J",
+          "GL-WF4JNZSGA"
+        ]
+      ],
+      "scenario": "fx_partial_payment_boundary"
+    },
+    {
+      "issue_id": "ISS-X466VYEXGZ",
+      "type": "payment_allocation",
+      "affected_ids": [
+        "INV-ELS9D4M6",
+        "PAY-UKQRBKG2"
+      ],
+      "expected_amount_minor": 2251935,
+      "currency": "CHF",
+      "allowed_evidence_sets": [
+        [
+          "2026-07-07:USD:CHF",
+          "DOC-848VHB4UZ9",
+          "DOC-LHWSZGYZPP",
+          "GL-KWVGQ3WXT"
         ]
       ],
       "scenario": "fx_invoice_unapplied_payment"

@@ -1,61 +1,60 @@
 {
   "schema_version": "1.0",
-  "episode_id": "EP-A89F92652F58",
+  "episode_id": "EP-EBF2C162DD3F",
   "base_currency": "EUR",
   "tolerance_minor": 0,
   "issues": [
     {
-      "issue_id": "ISS-669H83BA56",
+      "issue_id": "ISS-BPXN2UJ52H",
       "type": "payment_allocation",
       "affected_ids": [
-        "INV-6V2NHSDS",
-        "PAY-Y96UKWJ7"
+        "INV-XK7MR95Z",
+        "PAY-TNPB76EX"
       ],
-      "expected_amount_minor": 842486,
+      "expected_amount_minor": 320222,
       "currency": "EUR",
       "allowed_evidence_sets": [
         [
-          "DOC-ELHGDS3U8G",
-          "DOC-WAAY5FCDTW",
-          "GL-7F8CDHMDU"
+          "DOC-6KHP6Q68BC",
+          "DOC-PRGSBNCVTZ",
+          "GL-DZZNTUATC"
         ]
       ],
       "scenario": "single"
     },
     {
-      "issue_id": "ISS-BGP285A85U",
+      "issue_id": "ISS-BZX6GL2X7M",
       "type": "payment_allocation",
       "affected_ids": [
-        "INV-NBB6Y7PL",
-        "PAY-ETJDKJBT"
+        "INV-WNJ4RAHR",
+        "PAY-FY9C42EQ"
       ],
       "expected_amount_minor": 554575,
       "currency": "EUR",
       "allowed_evidence_sets": [
         [
           "2025-12-25:GBP:EUR",
-          "DOC-6KJFCL6P82",
-          "DOC-CPEPRXU4PC",
-          "GL-8XVZEDLYA"
+          "DOC-G3VQYKS37Z",
+          "DOC-J68ASSCVUC",
+          "GL-NXRARW7K9"
         ]
       ],
       "scenario": "single"
     },
     {
-      "issue_id": "ISS-XY8H5CA7HU",
+      "issue_id": "ISS-P7TJ4YP46T",
       "type": "payment_allocation",
       "affected_ids": [
-        "INV-BAZHDDH5",
-        "PAY-NC3ZATYK"
+        "INV-KTUJ5WW5",
+        "PAY-BYLJH2WW"
       ],
-      "expected_amount_minor": 113325,
+      "expected_amount_minor": 842486,
       "currency": "EUR",
       "allowed_evidence_sets": [
         [
-          "2025-12-13:SGD:EUR",
-          "DOC-DTREC2W4UY",
-          "DOC-EPYLQE4DKJ",
-          "GL-8SAPY7RSY"
+          "DOC-9EGAKZWFBU",
+          "DOC-FLQHYCHQE9",
+          "GL-UQ4UEMQ93"
         ]
       ],
       "scenario": "single"

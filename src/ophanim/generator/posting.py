@@ -87,7 +87,36 @@ def fx_balancing_row(world: World, pay: Payment, bank: int, applied: int) -> Row
     return _row(world, pay.timestamp, ACCOUNT_FX, 0, -diff, pay.supplier_key, None, pay.key, "fx")
 
 
+def refund_suspense_amount(world: World, refund: Payment) -> int:
+    """Suspense carried for the refunded payment = what it was parked at (its policy-rate base amount)."""
+    original = world.payments[refund.refund_of]
+    return payment_base_amount(world, original)
+
+
+def post_refund(world: World, refund: Payment) -> Posting:
+    """Supplier refund of a payment that had no remittance information (parked in Suspense).
+
+        Dr 1000 Bank        convert(amount, rate(refund date))       money comes back
+        Cr 2090 Suspense    the refunded payment's Suspense amount   clears the parked item
+        Dr/Cr 7900 FX       difference                                only if non-zero
+    """
+    bank = payment_base_amount(world, refund)
+    cleared = refund_suspense_amount(world, refund)
+    rows = [
+        _row(world, refund.timestamp, ACCOUNT_BANK, bank, 0, refund.supplier_key, None, refund.key, "bank"),
+        _row(world, refund.timestamp, ACCOUNT_SUSPENSE, 0, cleared, refund.supplier_key, None, refund.key, "suspense_refund"),
+    ]
+    diff = cleared - bank  # Suspense carried more than the bank received -> exchange loss (debit)
+    if diff > 0:
+        rows.append(_row(world, refund.timestamp, ACCOUNT_FX, diff, 0, refund.supplier_key, None, refund.key, "fx"))
+    elif diff < 0:
+        rows.append(_row(world, refund.timestamp, ACCOUNT_FX, 0, -diff, refund.supplier_key, None, refund.key, "fx"))
+    return Posting(key=f"post:{refund.key}", kind="payment", source_key=refund.key, rows=rows)
+
+
 def post_payment(world: World, pay: Payment) -> Posting:
+    if pay.direction == "inbound":
+        return post_refund(world, pay)
     bank = payment_base_amount(world, pay)
     rows: list[Row] = []
     if pay.refs is None:
@@ -142,6 +171,20 @@ def validate_world(world: World) -> list[str]:
             ap = sum(r.credit_minor for r in p.rows if r.role == "ap")
             if ap != expected:
                 problems.append(f"{p.key}: AP {ap} != expected {expected}")
+        if p.kind == "payment" and world.payments[p.source_key].direction == "inbound":
+            refund = world.payments[p.source_key]
+            original = world.payments.get(refund.refund_of or "")
+            bank_in = sum(r.debit_minor - r.credit_minor for r in p.rows if r.role == "bank")
+            cleared = sum(r.credit_minor for r in p.rows if r.role == "suspense_refund")
+            if original is None or original.refs is not None or original.direction != "outbound":
+                problems.append(f"{p.key}: refund must refund an outbound payment without remittance")
+            elif (original.supplier_key, original.currency, original.amount_minor) != (refund.supplier_key, refund.currency, refund.amount_minor):
+                problems.append(f"{p.key}: refund does not match the refunded payment")
+            elif not original.timestamp < refund.timestamp:
+                problems.append(f"{p.key}: refund precedes the refunded payment")
+            if bank_in != payment_base_amount(world, refund) or (original is not None and cleared != payment_base_amount(world, original)):
+                problems.append(f"{p.key}: refund amounts inconsistent")
+            continue
         if p.kind == "payment":
             pay = world.payments[p.source_key]
             bank = sum(r.credit_minor for r in p.rows if r.role == "bank")

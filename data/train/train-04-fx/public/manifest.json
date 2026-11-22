@@ -1,20 +1,20 @@
 {
   "schema_version": "1.0",
-  "env_version": "0.1.0",
-  "episode_id": "EP-C58ACE2DDA42",
-  "company_name": "Heluwen Retail B.V.",
+  "env_version": "0.3.0",
+  "episode_id": "EP-5891F9DE4E9F",
+  "company_name": "Briorix Trading House LLP",
   "company_profile": "Manufacturing company",
   "base_currency": "KZT",
   "period_start": "2025-04-01",
   "period_end": "2025-04-30",
   "timezone": "+05:30",
   "record_counts": {
-    "ledger": 278,
+    "ledger": 281,
     "invoices": 84,
-    "payments": 53,
+    "payments": 54,
     "fx": 450
   },
-  "document_count": 137,
+  "document_count": 138,
   "rounding": {
     "mode": "ROUND_HALF_UP",
     "currency_exponents": {

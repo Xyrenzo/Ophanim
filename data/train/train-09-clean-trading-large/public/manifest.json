@@ -1,20 +1,20 @@
 {
   "schema_version": "1.0",
-  "env_version": "0.1.0",
-  "episode_id": "EP-6ABE794BAE8D",
-  "company_name": "Rosadar Trading House Inc.",
+  "env_version": "0.3.0",
+  "episode_id": "EP-05009892733B",
+  "company_name": "Doradex Group GmbH",
   "company_profile": "International trading company",
   "base_currency": "EUR",
   "period_start": "2025-09-01",
   "period_end": "2025-09-30",
   "timezone": "+06:00",
   "record_counts": {
-    "ledger": 391,
-    "invoices": 102,
-    "payments": 77,
+    "ledger": 395,
+    "invoices": 103,
+    "payments": 80,
     "fx": 450
   },
-  "document_count": 179,
+  "document_count": 183,
   "rounding": {
     "mode": "ROUND_HALF_UP",
     "currency_exponents": {

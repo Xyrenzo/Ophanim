@@ -112,6 +112,8 @@ class HistoryBuilder:
         self._build_invoices(self.rng.child("invoices"))
         self._build_payments(self.rng.child("payments"))
         self._plant_document_distractors(self.rng.child("distractors"))
+        self._guarantee_split_payment(self.rng.child("split_guarantee"))
+        self._plant_refund(self.rng.child("refunds"))
         return world
 
     # ------------------------------------------------------------------ fx
@@ -220,9 +222,12 @@ class HistoryBuilder:
             day = w.period_start + timedelta(days=r.randint(0, period_days - 1))
             self._new_invoice(r, s, doc_time(r, day, w.offset_minutes, odd_pct), make_lines(r, self._category(s), s.currency, None), "period")
 
-        # Boundary red herring: a legitimate in-period invoice whose UTC date is in the adjacent month.
+        # Boundary red herring (D05): a legitimate in-period FOREIGN-currency invoice whose UTC date is in the
+        # adjacent month. Correct treatment needs the company-time accounting date for both the period and
+        # the FX rate (the rate of the UTC date would be wrong).
         if w.offset_minutes != 0 and self.level >= 1:
-            s = r.choice([x for x in suppliers if not x.recurring] or suppliers)
+            foreign = [x for x in suppliers if x.currency != w.base_currency]
+            s = r.choice([x for x in foreign if not x.recurring] or foreign or suppliers)
             day = w.period_start if w.offset_minutes > 0 else w.period_end
             inv = self._new_invoice(r, s, utc_date_shift_time(r, day, w.offset_minutes), make_lines(r, self._category(s), s.currency, None), "period")
             w.distractors.append({"kind": "boundary_utc_date", "invoices": [inv.key],
@@ -376,6 +381,62 @@ class HistoryBuilder:
             w.distractors.append({"kind": "reversed_duplicate", "invoices": [src.key, copy.key],
                                   "note": "Captured twice, then the second capture was reversed in the same period."})
 
+    # ------------------------------------------------------------------ guaranteed red herrings (D02, D03)
+    def _guarantee_split_payment(self, r: DeterministicRng) -> None:
+        """D02: at distractor levels normal/high there is always at least one legitimately split invoice."""
+        w = self.world
+        if self.level < 1 or any(d["kind"] == "split_payment" for d in w.distractors):
+            return
+        off = w.offset_minutes
+        suppliers = [w.suppliers[k] for k in sorted(w.suppliers)]
+        s = r.choice([x for x in suppliers if not x.recurring] or suppliers)
+        days = (w.period_end - w.period_start).days + 1
+        inv_day = w.period_start + timedelta(days=r.randint(0, max(0, days - 3)))
+        lines = make_lines(r, self._category(s), s.currency, None)
+        if sum(l.amount_minor for l in lines) < 2:
+            lines[0] = LineItem(lines[0].description, lines[0].quantity * 2, lines[0].unit_price_minor, lines[0].service_period)
+        inv = self._new_invoice(r, s, business_time(r, inv_day, off), lines, "period")
+        total = inv.total_minor
+        d1 = inv_day + timedelta(days=1)
+        d2 = d1 + timedelta(days=r.randint(1, max(1, (w.period_end - d1).days))) if d1 < w.period_end else d1
+        a1 = min(max(total * r.randint(30, 70) // 100, 1), total - 1)
+        p1 = self._new_payment(s.key, business_time(r, d1, off), s.currency, a1, [Allocation(inv.key, a1)])
+        p2 = self._new_payment(s.key, business_time(r, d2, off), s.currency, total - a1, [Allocation(inv.key, total - a1)])
+        w.distractors.append({"kind": "split_payment", "invoices": [inv.key], "payments": [p1.key, p2.key],
+                              "note": "One invoice settled by two payments; both fully applied."})
+
+    def _plant_refund(self, r: DeterministicRng) -> None:
+        """D03: a correct supplier refund (guaranteed at distractor levels normal/high).
+
+        The supplier returns in full a payment we made without remittance information (parked in Suspense).
+        The refund is an inbound payment document (``direction = "inbound"``, ``refund_of`` = the original
+        payment) posted Dr Bank / Cr Suspense; it is legitimate and must never be reported.
+        """
+        w = self.world
+        if self.level < 1:
+            return
+        off = w.offset_minutes
+        candidates = [p for _, p in sorted(w.payments.items()) if p.refs is None and p.direction == "outbound"
+                      and p.origin == "period" and w.accounting_date(p.timestamp) < w.period_end]
+        if not candidates:  # plant the item that will be refunded (same kind as the unidentified red herring)
+            s = r.choice([w.suppliers[k] for k in sorted(w.suppliers)])
+            day = w.period_start + timedelta(days=r.randint(0, max(0, (w.period_end - w.period_start).days - 1)))
+            p = self._new_payment(s.key, business_time(r, day, off), s.currency,
+                                  usd_cents_to_minor(r.randint(5000, 200000), s.currency), None)
+            w.distractors.append({"kind": "unidentified_payment", "payments": [p.key],
+                                  "note": "No remittance information; correctly posted to Suspense pending identification."})
+            candidates = [p]
+        original = r.choice(candidates)
+        first = w.accounting_date(original.timestamp) + timedelta(days=1)
+        day = first + timedelta(days=r.randint(0, (w.period_end - first).days))
+        refund = self._new_payment(original.supplier_key, business_time(r, day, off), original.currency,
+                                   original.amount_minor, None)
+        refund.direction = "inbound"
+        refund.refund_of = original.key
+        w.distractors.append({"kind": "correct_refund", "payments": [original.key, refund.key],
+                              "note": "The supplier returned an unidentified payment in full; posted Dr Bank / "
+                                      "Cr Suspense (difference to FX). Correct treatment, not an error."})
+
     def _is_referenced(self, invoice_key: str) -> bool:
         for p in self.world.payments.values():
             if p.refs and any(a.invoice_key == invoice_key for a in p.refs):
@@ -464,6 +525,28 @@ def plant_scenario_carriers(world: World, rng: DeterministicRng, config: Episode
                           [Allocation(inv.key, inv.total_minor)])
         w.scenario_carriers.append({"scenario": "fx_invoice_unapplied_payment", "payment": pay.key,
                                     "invoices": [inv.key]})
+
+    # Explicit allocation mode (D09-D11): one correct carrier payment per requested allocation error.
+    # missing -> a one-line payment (nothing will be applied); partial -> a two-line payment (one line
+    # will stay applied, so 0 < applied < amount). "auto" keeps the historical random selection.
+    mode = config.allocation_mode
+    if mode != "auto":
+        suppliers = [w.suppliers[k] for k in sorted(w.suppliers)]
+        for i in range(config.errors.payment_allocation):
+            r = rng.child(f"allocation/{mode}/{i}")
+            s = r.choice(suppliers)
+            category = next(c for c in PROFILES[w.profile_name].categories if c.name == s.category)
+            n_lines = 1 if mode == "missing" else 2
+            inv_days = [w.period_start + timedelta(days=r.randint(0, max(0, days - 4))) for _ in range(n_lines)]
+            invs = [new_invoice(w, r, s, business_time(r, d, off), make_lines(r, category, s.currency, None), "period")
+                    for d in inv_days]
+            first = max(inv_days) + timedelta(days=1)
+            pay_day = first + timedelta(days=r.randint(0, max(0, (w.period_end - first).days)))
+            refs = [Allocation(inv.key, inv.total_minor) for inv in invs]
+            pay = new_payment(w, s.key, business_time(r, pay_day, off), s.currency,
+                              sum(a.amount_minor for a in refs), refs)
+            w.scenario_carriers.append({"scenario": f"allocation_{mode}", "payment": pay.key,
+                                        "invoices": [inv.key for inv in invs]})
 
 
 def profile_for(world: World) -> Profile:

@@ -85,7 +85,8 @@ def build_data(out: Path) -> dict:
             ep.write(out / split / e["id"])
             index.append({"id": e["id"], "category": e["category"], "seed": e["seed"], "config": e["config"],
                           "episode_id": ep.public.episode_id, "issues": len(ep.sealed.truth.issues)})
-        (out / split / "index.json").write_text(json.dumps(index, indent=2) + "\n", encoding="utf-8")
+        with open(out / split / "index.json", "w", encoding="utf-8", newline="\n") as fh:  # LF on every OS
+            fh.write(json.dumps(index, indent=2) + "\n")
         summary[split] = len(index)
     # Public training trajectories: agent-side policies only (never the oracle), open mode.
     path = out / "trajectories.jsonl"

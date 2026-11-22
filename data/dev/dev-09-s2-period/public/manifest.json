@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
-  "env_version": "0.1.0",
-  "episode_id": "EP-61BFEF14C901",
-  "company_name": "Istilan Group Ltd",
+  "env_version": "0.3.0",
+  "episode_id": "EP-C9E1B1C8D8DD",
+  "company_name": "Quinaerath Retail Co.",
   "company_profile": "Small retail company",
   "base_currency": "USD",
   "period_start": "2025-10-01",
@@ -10,11 +10,11 @@
   "timezone": "-03:00",
   "record_counts": {
     "ledger": 288,
-    "invoices": 76,
-    "payments": 64,
+    "invoices": 77,
+    "payments": 66,
     "fx": 182
   },
-  "document_count": 140,
+  "document_count": 143,
   "rounding": {
     "mode": "ROUND_HALF_UP",
     "currency_exponents": {

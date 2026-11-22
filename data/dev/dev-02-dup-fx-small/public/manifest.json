@@ -1,20 +1,20 @@
 {
   "schema_version": "1.0",
-  "env_version": "0.1.0",
-  "episode_id": "EP-ED2085DAA240",
-  "company_name": "Astewen Holdings Ltd",
+  "env_version": "0.3.0",
+  "episode_id": "EP-7EF382CBAA4A",
+  "company_name": "Astimont Digital B.V.",
   "company_profile": "Small retail company",
   "base_currency": "USD",
   "period_start": "2026-12-01",
   "period_end": "2026-12-31",
   "timezone": "+05:00",
   "record_counts": {
-    "ledger": 179,
-    "invoices": 50,
-    "payments": 34,
+    "ledger": 190,
+    "invoices": 52,
+    "payments": 37,
     "fx": 182
   },
-  "document_count": 84,
+  "document_count": 89,
   "rounding": {
     "mode": "ROUND_HALF_UP",
     "currency_exponents": {

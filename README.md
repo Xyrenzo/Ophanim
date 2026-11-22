@@ -33,6 +33,67 @@ python -m ophanim verify                               # tests + data + trajecto
 `verify` prints `OPHANIM VERIFY: PASS` and exits 0 only if every check passes. Runtime dependency:
 Pydantic only. No network, GPU or paid API is used at run time.
 
+## Official judge adapter (Genesis FinTech check definitions)
+
+**Working directory:** the repository root (`/app` in the Docker image). **Entry point:**
+`judge_adapter.py`, a thin re-export of `src/ophanim/adapter.py`. Gymnasium is not used.
+
+```python
+import judge_adapter as ja
+
+ja.generate_episode(seed, config, output_dir)        # config = team configuration (see below)
+env = ja.make_env()
+obs, info = env.reset(seed, {"mode": "closed", "episode_dir": output_dir, "team_config": {}})
+obs, reward, terminated, truncated, info = env.step({"name": "list_records",
+                                                     "args": {"table": "ledger", "cursor": None, "limit": 50}})
+scores = ja.score_episode(output_dir, findings, inspection_steps)
+```
+
+Self-check: `python judge_adapter.py --smoke`. In Docker:
+`docker run --rm --network none --entrypoint python ophanim judge_adapter.py --smoke`.
+
+| entry point | behaviour |
+|---|---|
+| `generate_episode(seed, config, output_dir)` | Writes `output_dir/public/{manifest.json, policy.json, ledger.csv, invoices.jsonl, payments.jsonl, fx.csv}` and `output_dir/evaluator/{truth.json, provenance.json}`. It is deterministic in (seed, config, version). `config` is the team configuration (keys `profile`, `size`, `errors`, `scenarios`, `distractors`, `presentation`, `allocation_mode`; see `schemas.EpisodeConfig`. Official scenarios: D02 split payment, D03 correct refund and D05 foreign FX/period boundary are guaranteed in clean episodes with `distractors` `normal` (default) or `high`; D09-D11 use `{"errors": {"payment_allocation": n}, "allocation_mode": "missing" | "partial"}`), given bare or as `{"team_config": {...}}`. |
+| `reset(seed, config)` or `reset(seed=…, options=config)` | `{"mode": "closed", "episode_dir": d}` loads `d/public` exactly as stored, with the same ids and record order and no regeneration. No truth is loaded, and every reward is 0.0, including at termination. A repeated reset starts the same episode again. `{"mode": "train", "episode_dir": d}` loads `d/public` and `d/evaluator`, and the terminal reward is returned. `{"mode": "train", "team_config": {...}}` generates from `seed`. |
+| `step({"name", "args"})` | Names: `list_records` (`table`, `cursor`, `limit` ≤ 50), `get_record` (`table`, `id`), `get_document` (`doc_id`), `calculator` (`expression`), `submit` (`findings`). Unknown names and malformed envelopes are bounded errors that consume a step. |
+| `score_episode(episode_dir, findings, inspection_steps)` | Evaluator side. Returns `{tp, fp, fn, precision, recall, f1, return}`. A structurally invalid submission returns `return = -1` with the other fields `null`; the reason goes to the logger `ophanim.judge_adapter`. |
+
+**Observations:**
+* After reset: `{"task", "manifest", "policy", "remaining_steps": 100}`.
+* After each step: `{"result", "error", "remaining_steps"}`.
+* `error` is `null` or `{"code", "message"}`, with a public code and fixed text.
+
+**Results per action:**
+
+| action | result |
+|---|---|
+| `list_records` | `{"records": [...], "next_cursor": string or null}` |
+| `get_record`, `get_document` | the record or document object |
+| `calculator` | a decimal string (`"0.1+0.2"` → `"0.3"`) |
+| `submit` | `{"accepted": true}`, or the error `invalid_submission` |
+
+**Tables and identifiers:**
+* Tables are `ledger`, `invoices`, `payments`, `fx`.
+* Record ids are `row_id` (ledger), `invoice_id`, `payment_id`, and the FX key `"YYYY-MM-DD:SRC:TGT"`, which is a natural key and not a surrogate id.
+* Id-bearing fields for consistent replacement: `row_id`, `doc_id`, `invoice_id`, `payment_id`, `entity_id`, `invoice_refs[].invoice_id`, `refund_of` (payments; null except for refunds), and in `truth.json`: `affected_ids`, `allowed_evidence_sets`.
+* In `provenance.json`, the id-bearing fields are `id_map` values and the ids inside `pre_mutation.tables`.
+
+**Limits:**
+* 100 actions including submit; submit is not an inspection step.
+* 99 inspection actions followed by a submit is accepted; 100 inspection actions truncate with empty findings.
+* 60 s per episode from reset.
+
+**Error types (the `type` values):**
+* `duplicate_invoice`: duplicate invoices.
+* `payment_allocation`: missing or partial payment allocation.
+* `fx_rate`: wrong FX date or rate.
+* `period_attribution`: reporting-period error.
+
+The amount tolerance τ is read from `evaluator/truth.json` (`tolerance_minor`, mirrored in `policy.json`).
+Compliance status against the check definitions is tracked in `docs/research/p6_traceability_matrix.md`;
+Phase 1 report: `docs/research/p6c_phase1_adapter_report.md`.
+
 ## The environment in 20 lines
 
 ```python

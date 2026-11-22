@@ -1,20 +1,20 @@
 {
   "schema_version": "1.0",
-  "env_version": "0.1.0",
-  "episode_id": "EP-661E89702686",
-  "company_name": "Celidex Trading House Inc.",
+  "env_version": "0.3.0",
+  "episode_id": "EP-4B7AE0978B02",
+  "company_name": "Orvardex Retail AG",
   "company_profile": "International trading company",
   "base_currency": "EUR",
   "period_start": "2026-09-01",
   "period_end": "2026-09-30",
   "timezone": "+06:00",
   "record_counts": {
-    "ledger": 281,
+    "ledger": 284,
     "invoices": 76,
-    "payments": 56,
+    "payments": 57,
     "fx": 450
   },
-  "document_count": 132,
+  "document_count": 133,
   "rounding": {
     "mode": "ROUND_HALF_UP",
     "currency_exponents": {

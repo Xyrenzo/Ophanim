@@ -1,20 +1,20 @@
 {
   "schema_version": "1.0",
-  "env_version": "0.1.0",
-  "episode_id": "EP-FEF8113A6B4D",
-  "company_name": "Toriorath Holdings Inc.",
+  "env_version": "0.3.0",
+  "episode_id": "EP-0FD7E753C290",
+  "company_name": "Celordex Group LLP",
   "company_profile": "Software services company",
   "base_currency": "GBP",
   "period_start": "2025-12-01",
   "period_end": "2025-12-31",
   "timezone": "+01:00",
   "record_counts": {
-    "ledger": 366,
+    "ledger": 369,
     "invoices": 103,
-    "payments": 79,
+    "payments": 80,
     "fx": 364
   },
-  "document_count": 182,
+  "document_count": 183,
   "rounding": {
     "mode": "ROUND_HALF_UP",
     "currency_exponents": {

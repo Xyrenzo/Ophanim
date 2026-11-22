@@ -1,20 +1,20 @@
 {
   "schema_version": "1.0",
-  "env_version": "0.1.0",
-  "episode_id": "EP-8103D14F4488",
-  "company_name": "Jorunor Trading House AG",
+  "env_version": "0.3.0",
+  "episode_id": "EP-CB871A5715B9",
+  "company_name": "Galiolis Group Co.",
   "company_profile": "Manufacturing company",
   "base_currency": "CHF",
   "period_start": "2026-07-01",
   "period_end": "2026-07-31",
   "timezone": "+06:00",
   "record_counts": {
-    "ledger": 298,
-    "invoices": 85,
-    "payments": 66,
+    "ledger": 289,
+    "invoices": 81,
+    "payments": 62,
     "fx": 364
   },
-  "document_count": 151,
+  "document_count": 143,
   "rounding": {
     "mode": "ROUND_HALF_UP",
     "currency_exponents": {

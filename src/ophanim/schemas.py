@@ -28,9 +28,8 @@ ErrorType = Literal["duplicate_invoice", "payment_allocation", "fx_rate", "perio
 MAX_TOTAL_ISSUES = 12
 MAX_FINDINGS = 30
 MAX_EVIDENCE_IDS = 10
-MAX_EXPLANATION_CHARS = 1000
-MAX_AFFECTED_IDS = 20
-MAX_ID_CHARS = 64
+MAX_EXPLANATION_CHARS = 1000  # Unicode code points (Python len), not UTF-8 bytes
+MAX_ID_CHARS = 64  # limit for *tool arguments* only (lookups); findings ids are not length-limited
 
 IdStr = Annotated[str, StringConstraints(min_length=1, max_length=MAX_ID_CHARS)]
 
@@ -90,6 +89,11 @@ class EpisodeConfig(StrictModel):
     scenarios: ScenarioCounts = Field(default_factory=ScenarioCounts)
     distractors: Literal["low", "normal", "high"] = "normal"
     presentation: Presentation = Field(default_factory=Presentation)
+    # Shape of the injected payment_allocation errors (official D09-D11):
+    #   "missing" - a one-line payment whose only line is not applied (applied = 0);
+    #   "partial" - a two-line payment with one line not applied (0 < applied < payment amount);
+    #   "auto"    - historical behaviour: a random payment with remittance is chosen.
+    allocation_mode: Literal["auto", "missing", "partial"] = "auto"
 
     @model_validator(mode="after")
     def _check_total(self) -> "EpisodeConfig":
@@ -106,16 +110,26 @@ class EpisodeConfig(StrictModel):
 
 # --------------------------------------------------------------------------- findings
 class Finding(StrictModel):
-    type: ErrorType
-    affected_ids: list[IdStr] = Field(min_length=1, max_length=MAX_AFFECTED_IDS)
-    claimed_amount_minor: int = Field(ge=0, le=10**15)
-    currency: str = Field(pattern=r"^[A-Z]{3}$")
-    evidence_ids: list[IdStr] = Field(max_length=MAX_EVIDENCE_IDS)
+    """STRUCTURE of one finding (official matcher conventions, fintech-checks.txt).
+
+    Structure errors (whole submission -> reward -1) are only: missing required fields, wrong JSON value
+    types (e.g. a bool/string/float amount, a number where an id string is expected), unknown fields, and
+    the published limits (30 findings, 10 evidence ids, 1000 code points of explanation), checked on the
+    raw lists before any set conversion. Everything else - an unknown type string, a currency differing
+    in case or whitespace, a negative amount, an empty or unknown id list - is structurally valid and is
+    judged by the matcher (it simply cannot match, i.e. a false positive).
+    """
+
+    type: str
+    affected_ids: list[str]
+    claimed_amount_minor: int
+    currency: str
+    evidence_ids: list[str] = Field(max_length=MAX_EVIDENCE_IDS)
     explanation: str = Field(max_length=MAX_EXPLANATION_CHARS)
 
 
 class FindingsSubmission(StrictModel):
-    episode_id: IdStr
+    episode_id: str
     findings: list[Finding] = Field(max_length=MAX_FINDINGS)
 
 
@@ -166,12 +180,16 @@ class TruthIssue(StrictModel):
     expected_amount_minor: int = Field(ge=0)
     currency: str
     allowed_evidence_sets: list[list[str]] = Field(min_length=1)
-    scenario: str  # "single" or the interacting-scenario name
+    # "single" or the interacting-scenario name. Optional so that a minimal truth file containing only
+    # the officially listed fields (jury fixtures) still loads.
+    scenario: str = "single"
 
 
 class TruthFile(StrictModel):
     schema_version: str
     episode_id: str
     base_currency: str
-    tolerance_minor: int
+    # Amount tolerance tau in minor units: exact (0) unless a fixed non-negative integer is published
+    # for the episode. Never inferred; negative or non-integer values are rejected.
+    tolerance_minor: int = Field(0, ge=0)
     issues: list[TruthIssue]

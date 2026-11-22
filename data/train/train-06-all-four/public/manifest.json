@@ -1,20 +1,20 @@
 {
   "schema_version": "1.0",
-  "env_version": "0.1.0",
-  "episode_id": "EP-B93B0DEF0B44",
-  "company_name": "Fenorquill Retail LLP",
+  "env_version": "0.3.0",
+  "episode_id": "EP-72D64E64263F",
+  "company_name": "Galaevale Trading House GmbH",
   "company_profile": "Consulting company",
   "base_currency": "EUR",
   "period_start": "2025-11-01",
   "period_end": "2025-11-30",
   "timezone": "+03:00",
   "record_counts": {
-    "ledger": 305,
-    "invoices": 82,
-    "payments": 68,
+    "ledger": 319,
+    "invoices": 85,
+    "payments": 74,
     "fx": 360
   },
-  "document_count": 150,
+  "document_count": 159,
   "rounding": {
     "mode": "ROUND_HALF_UP",
     "currency_exponents": {

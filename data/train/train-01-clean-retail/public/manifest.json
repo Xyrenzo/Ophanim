@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
-  "env_version": "0.1.0",
-  "episode_id": "EP-E23C88503192",
-  "company_name": "Wynaedex Group B.V.",
+  "env_version": "0.3.0",
+  "episode_id": "EP-9316CF04BC27",
+  "company_name": "Istavale Group LLP",
   "company_profile": "Small retail company",
   "base_currency": "EUR",
   "period_start": "2025-03-01",
@@ -10,11 +10,11 @@
   "timezone": "-05:00",
   "record_counts": {
     "ledger": 193,
-    "invoices": 53,
-    "payments": 39,
+    "invoices": 50,
+    "payments": 38,
     "fx": 182
   },
-  "document_count": 92,
+  "document_count": 88,
   "rounding": {
     "mode": "ROUND_HALF_UP",
     "currency_exponents": {

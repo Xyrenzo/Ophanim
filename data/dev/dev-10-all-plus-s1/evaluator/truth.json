@@ -1,129 +1,130 @@
 {
   "schema_version": "1.0",
-  "episode_id": "EP-01D37A2560AB",
+  "episode_id": "EP-132009C7CC1C",
   "base_currency": "AED",
-  "tolerance_minor": 1,
+  "tolerance_minor": 0,
   "issues": [
     {
-      "issue_id": "ISS-3WJ2CPJC68",
-      "type": "duplicate_invoice",
-      "affected_ids": [
-        "INV-KJJ5GRZZ",
-        "INV-UDUHZ4GW"
-      ],
-      "expected_amount_minor": 12903261,
-      "currency": "AED",
-      "allowed_evidence_sets": [
-        [
-          "DOC-JFU7W6YPVB",
-          "DOC-UTNJVFVHKW",
-          "GL-HY2Y6WAKT"
-        ],
-        [
-          "DOC-JFU7W6YPVB",
-          "DOC-UTNJVFVHKW",
-          "GL-8U3E68E9P"
-        ],
-        [
-          "DOC-JFU7W6YPVB",
-          "DOC-UTNJVFVHKW",
-          "GL-ELTEMTGNA"
-        ],
-        [
-          "DOC-JFU7W6YPVB",
-          "DOC-UTNJVFVHKW",
-          "GL-526STAU46"
-        ]
-      ],
-      "scenario": "single"
-    },
-    {
-      "issue_id": "ISS-AMDLHRWVQ6",
+      "issue_id": "ISS-6RY32AD8TU",
       "type": "payment_allocation",
       "affected_ids": [
-        "INV-GB99ESYQ",
-        "PAY-ETDYDFA8"
+        "INV-K7U898Y8",
+        "PAY-354XHTEX"
       ],
       "expected_amount_minor": 2725181,
       "currency": "AED",
       "allowed_evidence_sets": [
         [
           "2026-09-17:CNY:AED",
-          "DOC-E3SDRQP45P",
-          "DOC-KTSX473BTV",
-          "GL-68QGH5UZV",
-          "GL-ABHAUEXQQ"
+          "DOC-SVUAKC85ER",
+          "DOC-Y7KZRYTRKF",
+          "GL-6AFM4FSW4",
+          "GL-V2SYSN3JM"
         ]
       ],
       "scenario": "fx_partial_payment_boundary"
     },
     {
-      "issue_id": "ISS-M99HDY39DY",
-      "type": "period_attribution",
-      "affected_ids": [
-        "PAY-2YSTHK69"
-      ],
-      "expected_amount_minor": 10748693,
-      "currency": "AED",
-      "allowed_evidence_sets": [
-        [
-          "DOC-3ZVG2ZR5AD",
-          "GL-3QTK7W3VP"
-        ]
-      ],
-      "scenario": "single"
-    },
-    {
-      "issue_id": "ISS-NE2KNYF247",
-      "type": "payment_allocation",
-      "affected_ids": [
-        "INV-CAL25HUE",
-        "PAY-H886E8UU"
-      ],
-      "expected_amount_minor": 1168113,
-      "currency": "AED",
-      "allowed_evidence_sets": [
-        [
-          "DOC-FM4GB2Y55F",
-          "DOC-GQ4LUWCN5W",
-          "GL-JJ3D5TVHB"
-        ]
-      ],
-      "scenario": "single"
-    },
-    {
-      "issue_id": "ISS-TFUA4D2Y2T",
+      "issue_id": "ISS-7E3ZJLRWV8",
       "type": "fx_rate",
       "affected_ids": [
-        "PAY-3TJS5SYQ"
+        "PAY-LZKSN4TQ"
       ],
       "expected_amount_minor": 3790,
       "currency": "AED",
       "allowed_evidence_sets": [
         [
           "2026-10-20:CNY:AED",
-          "DOC-BCEK8NRJ7V",
-          "GL-QU9ZRXUUG"
+          "DOC-RST5CG9R73",
+          "GL-5SF4FXHHL"
         ]
       ],
       "scenario": "single"
     },
     {
-      "issue_id": "ISS-VXFCQ7JBFQ",
+      "issue_id": "ISS-82YD25A2D5",
+      "type": "duplicate_invoice",
+      "affected_ids": [
+        "INV-7XKZN4QR",
+        "INV-VAB6AJTP"
+      ],
+      "expected_amount_minor": 2017977,
+      "currency": "AED",
+      "allowed_evidence_sets": [
+        [
+          "DOC-CT9VUAC2GA",
+          "DOC-PAKMQFW9QX",
+          "GL-VB4ZPSC44"
+        ],
+        [
+          "DOC-CT9VUAC2GA",
+          "DOC-PAKMQFW9QX",
+          "GL-MFVJGX3XT"
+        ],
+        [
+          "DOC-CT9VUAC2GA",
+          "DOC-PAKMQFW9QX",
+          "GL-F9YWU5GVM"
+        ],
+        [
+          "DOC-CT9VUAC2GA",
+          "DOC-PAKMQFW9QX",
+          "GL-USP5X8U7Y"
+        ]
+      ],
+      "scenario": "single"
+    },
+    {
+      "issue_id": "ISS-FRYFS4ZZLY",
       "type": "fx_rate",
       "affected_ids": [
-        "PAY-ETDYDFA8"
+        "PAY-354XHTEX"
       ],
       "expected_amount_minor": 26310,
       "currency": "AED",
       "allowed_evidence_sets": [
         [
           "2026-10-01:CNY:AED",
-          "DOC-KTSX473BTV",
-          "GL-VS3K4SP73"
+          "DOC-Y7KZRYTRKF",
+          "GL-DD6W3ND2Y"
         ]
       ],
       "scenario": "fx_partial_payment_boundary"
+    },
+    {
+      "issue_id": "ISS-UY25B3S499",
+      "type": "period_attribution",
+      "affected_ids": [
+        "PAY-SSBV64RS"
+      ],
+      "expected_amount_minor": 10748693,
+      "currency": "AED",
+      "allowed_evidence_sets": [
+        [
+          "DOC-NRP7DATJAP",
+          "GL-GAQPXES3H"
+        ]
+      ],
+      "scenario": "single"
+    },
+    {
+      "issue_id": "ISS-WXVXNB42BV",
+      "type": "payment_allocation",
+      "affected_ids": [
+        "INV-PRAJXHKZ",
+        "PAY-WGBQLAAN"
+      ],
+      "expected_amount_minor": 1764668,
+      "currency": "AED",
+      "allowed_evidence_sets": [
+        [
+          "2026-08-21:EUR:AED",
+          "DOC-SVU48X4DVX",
+          "DOC-V9RD3XH85R",
+          "GL-XFTPL6RM6"
+        ]
+      ],
+      "scenario": "single"
     }
   ]
 }

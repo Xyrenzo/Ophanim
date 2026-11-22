@@ -110,6 +110,14 @@ def check_formats(ds: PublicDataset) -> list[str]:
             for x in refs:
                 if x.get("invoice_id") not in inv_ids:
                     p.append(f"payment {d.get('payment_id')}: references an invoice not in invoices.jsonl")
+        if d.get("direction") not in ("outbound", "inbound"):
+            p.append(f"payment {d.get('payment_id')}: direction must be 'outbound' or 'inbound'")
+        if (d.get("direction") == "inbound") != (d.get("refund_of") is not None):
+            p.append(f"payment {d.get('payment_id')}: refund_of is set exactly for inbound refunds (else explicit null)")
+    payment_ids = {d.get("payment_id") for d in ds.payments}
+    for d in ds.payments:
+        if d.get("refund_of") is not None and d["refund_of"] not in payment_ids:
+            p.append(f"payment {d.get('payment_id')}: refund_of references a payment not in payments.jsonl")
 
     fx_seen = set()
     for r in ds.fx:

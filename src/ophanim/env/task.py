@@ -42,10 +42,13 @@ tolerance +/- policy.tolerance_minor) and `currency` must be the base currency c
    with this type. affected_ids: [invoice_id] or [payment_id]. amount: the AP credit (invoice)
    or Bank credit (payment) as booked. evidence: the doc_id and the AP (or expense) / Bank row.
 
-Evidence ids are row_id (ledger), doc_id (documents) or FX keys "date:source:target". Every
-evidence id must exist. Findings are matched one-to-one against the hidden answer on type,
-affected_ids (as a set), amount within tolerance, currency and a complete evidence set.
-Repeated findings count as false positives. Explanations are not scored.
+Evidence sets use row_id (ledger), doc_id (documents) and FX keys "date:source:target"; every
+cited id must be an existing id the tools return. Ids, types and currency codes are compared
+EXACTLY as written (case and whitespace matter); copy them from the records. Findings are matched
+one-to-one against the hidden answer on type, affected_ids (as a set), amount within tolerance,
+currency and a complete evidence set. Repeated findings count as false positives. A wrong value
+only makes a finding unmatched; a malformed structure (wrong JSON types, missing fields, limits
+exceeded) ends the episode with -1. Explanations are not scored.
 
 Reward = clip(2*F1 - 1 - 0.002*inspection_steps, -1, 1), where inspection_steps counts every
 step before submit (including invalid actions). Malformed findings end the episode with -1.

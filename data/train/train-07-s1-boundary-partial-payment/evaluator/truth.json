@@ -1,42 +1,42 @@
 {
   "schema_version": "1.0",
-  "episode_id": "EP-661E89702686",
+  "episode_id": "EP-4B7AE0978B02",
   "base_currency": "EUR",
-  "tolerance_minor": 1,
+  "tolerance_minor": 0,
   "issues": [
     {
-      "issue_id": "ISS-24PMBGWMQR",
+      "issue_id": "ISS-DQTYGHWRCB",
       "type": "fx_rate",
       "affected_ids": [
-        "PAY-Z9YWVNEF"
+        "PAY-XZJGCJW5"
       ],
       "expected_amount_minor": 1131,
       "currency": "EUR",
       "allowed_evidence_sets": [
         [
           "2026-09-01:GBP:EUR",
-          "DOC-9NPGXLGDU8",
-          "GL-22EZFTPCE"
+          "DOC-E8QE5YH83M",
+          "GL-VLHR2EY4R"
         ]
       ],
       "scenario": "fx_partial_payment_boundary"
     },
     {
-      "issue_id": "ISS-9LQKC4FRMC",
+      "issue_id": "ISS-GBAFWF9HKN",
       "type": "payment_allocation",
       "affected_ids": [
-        "INV-CZTEUSG5",
-        "PAY-Z9YWVNEF"
+        "INV-KSM5ZQJP",
+        "PAY-XZJGCJW5"
       ],
       "expected_amount_minor": 289228,
       "currency": "EUR",
       "allowed_evidence_sets": [
         [
           "2026-08-18:GBP:EUR",
-          "DOC-8HPSB2RCNJ",
-          "DOC-9NPGXLGDU8",
-          "GL-6TMVJ83WQ",
-          "GL-ZD5XZLGCP"
+          "DOC-E8QE5YH83M",
+          "DOC-RAS3HAHCR9",
+          "GL-J2NP9SDJE",
+          "GL-YNZTNY5NR"
         ]
       ],
       "scenario": "fx_partial_payment_boundary"

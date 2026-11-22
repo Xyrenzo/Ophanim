@@ -1,0 +1,60 @@
+PASS  1 one correct F                                                got=(1, 0, 0, 0.98) expected=(1, 0, 0, 0.98)
+PASS  2 empty findings                                               got=(0, 0, 1, -1.0) expected=(0, 0, 1, -1.0)
+PASS  3 empty truth, empty findings                                  got=(0, 0, 0, 0.98) expected=(0, 0, 0, 0.98)
+PASS  4 empty truth, one false finding                               got=(0, 1, 0, -1.0) expected=(0, 1, 0, -1.0)
+PASS  5 two identical F                                              got=(1, 1, 0, 0.3133333333) expected=(1, 1, 0, 0.3133333333)
+PASS  6 wrong type                                                   got=(0, 1, 1, -1.0) expected=(0, 1, 1, -1.0)
+PASS  7 other existing record in affected_ids                        got=(0, 1, 1, -1.0) expected=(0, 1, 1, -1.0)
+PASS  8 amount 10001 with tau=0                                      got=(0, 1, 1, -1.0) expected=(0, 1, 1, -1.0)
+PASS  9 other currency                                               got=(0, 1, 1, -1.0) expected=(0, 1, 1, -1.0)
+PASS  10 only D1                                                     got=(0, 1, 1, -1.0) expected=(0, 1, 1, -1.0)
+PASS  11 non-existent evidence instead of D2                         got=(0, 1, 1, -1.0) expected=(0, 1, 1, -1.0)
+PASS  12 mark 5 records x 4 types                                    got=(1, 19, 0, -0.8295238095) expected=(1, 19, 0, -0.8295238095)
+PASS  13 A and B, only F for A                                       got=(1, 0, 1, 0.3133333333) expected=(1, 0, 1, 0.3133333333)
+PASS  14 A and B, F for A + one false                                got=(1, 1, 1, -0.02) expected=(1, 1, 1, -0.02)
+PASS  15 steps=0                                                     got=(1, 0, 0, 1.0) expected=(1, 0, 0, 1.0)
+PASS  16 steps=50                                                    got=(1, 0, 0, 0.9) expected=(1, 0, 0, 0.9)
+PASS  17 steps=100                                                   got=(1, 0, 0, 0.8) expected=(1, 0, 0, 0.8)
+PASS  18 31 findings                                                 got=('INVALID', -1.0) expected=('INVALID', -1.0)
+PASS  19 11 distinct evidence ids                                    got=('INVALID', -1.0) expected=('INVALID', -1.0)
+PASS  20 explanation 1001 ASCII                                      got=('INVALID', -1.0) expected=('INVALID', -1.0)
+Block 3: 20/20 pass
+
+PASS  M01 affected [R2,R1,R1]                                        got=(1, 0, 0, 0.98) expected=(1, 0, 0, 0.98)
+PASS  M02 affected [R1,R2,R3]                                        got=(0, 1, 1, -1.0) expected=(0, 1, 1, -1.0)
+PASS  M03 evidence [D2,D1,D3]                                        got=(1, 0, 0, 0.98) expected=(1, 0, 0, 0.98)
+PASS  M04 evidence [D1,D2,U]                                         got=(0, 1, 1, -1.0) expected=(0, 1, 1, -1.0)
+PASS  M05 11 evidence ids (10x D1)                                   got=('INVALID', -1.0) expected=('INVALID', -1.0)
+PASS  M06a currency 'kzt' (case)                                     got=(0, 1, 1, -1.0) expected=(0, 1, 1, -1.0)
+PASS  M06b currency ' KZT' (space)                                   got=(0, 1, 1, -1.0) expected=(0, 1, 1, -1.0)
+PASS  M07 amount 10001, tau=0                                        got=(0, 1, 1, -1.0) expected=(0, 1, 1, -1.0)
+PASS  M08a tau=1, amount 10001                                       got=(1, 0, 0, 0.98) expected=(1, 0, 0, 0.98)
+PASS  M08b tau=1, amount 10002                                       got=(0, 1, 1, -1.0) expected=(0, 1, 1, -1.0)
+PASS  M09a amount '10000' string                                     got=('INVALID', -1.0) expected=('INVALID', -1.0)
+PASS  M09b amount true                                               got=('INVALID', -1.0) expected=('INVALID', -1.0)
+PASS  M10 augmenting path F1->A, F0->B                               got=(2, 0, 0, 0.98) expected=(2, 0, 0, 0.98)
+     M10 pairs: [(0, 'B'), (1, 'A')]
+PASS  M11 TP=2                                                       got=(2, 0, 0, 0.98) expected=(2, 0, 0, 0.98)
+     M11 pairs (finding, issue): got [(0, 'A'), (1, 'B')], spec requires [(0, 'A'), (1, 'B')] -> PASS
+PASS  M12 two identical correct                                      got=(1, 1, 0, 0.3133333333) expected=(1, 1, 0, 0.3133333333)
+M01-M12 (incl. split cases): 15/15 pass
+
+== exact-match / structure rules from the 'exact matcher conventions' section ==
+PASS  ID case: affected ['r1'-style lowercase] must be FP            got=(0, 1, 1, -1.0) expected=(0, 1, 1, -1.0)
+PASS  ID whitespace: affected [' R1'] must be FP                     got=(0, 1, 1, -1.0) expected=(0, 1, 1, -1.0)
+PASS  unknown type string 'fraud' must be FP (not structural)        got=(0, 1, 1, -1.0) expected=(0, 1, 1, -1.0)
+PASS  negative integer amount must be FP (valid JSON int)            got=(0, 1, 1, -1.0) expected=(0, 1, 1, -1.0)
+PASS  empty affected_ids must be FP (not a listed limit)             got=(0, 1, 1, -1.0) expected=(0, 1, 1, -1.0)
+PASS  21 affected ids must be FP (not a listed limit)                got=(0, 1, 1, -1.0) expected=(0, 1, 1, -1.0)
+PASS  65-char id must be FP (not a listed limit)                     got=(0, 1, 1, -1.0) expected=(0, 1, 1, -1.0)
+PASS  evidence cites invoice ids (accessible via get_record)         got=(1, 0, 0, 0.98) expected=(1, 0, 0, 0.98)
+PASS  1000 non-ASCII code points accepted                            got=(1, 0, 0, 0.98) expected=(1, 0, 0, 0.98)
+
+== contract checks on the current environment ==
+C02 first-observation keys: ['manifest', 'policy', 'remaining_steps', 'task', 'time_budget_seconds', 'tools']
+C11 get_record with a case-variant of an existing id (absent from data as a string): ok = False -> PASS
+C07 get_record result shape: ['record', 'table'] (spec: the record object itself)
+C05 list_records result keys: ['next_cursor', 'records', 'table', 'total'] (spec: records, next_cursor)
+C09 calculator result: {'result': '0.3'} (spec: decimal string)
+Envelope {'name','args'} accepted natively: False (needs judge_adapter translation)
+reset(config with mode/episode_dir/team_config): ValidationError -> loading an episode_dir is NOT supported

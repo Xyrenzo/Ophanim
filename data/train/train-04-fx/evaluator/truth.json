@@ -1,49 +1,49 @@
 {
   "schema_version": "1.0",
-  "episode_id": "EP-C58ACE2DDA42",
+  "episode_id": "EP-5891F9DE4E9F",
   "base_currency": "KZT",
-  "tolerance_minor": 1,
+  "tolerance_minor": 0,
   "issues": [
     {
-      "issue_id": "ISS-369QQ79BFU",
+      "issue_id": "ISS-GPFP37XBJZ",
       "type": "fx_rate",
       "affected_ids": [
-        "INV-FV2HLHYM"
+        "INV-XWFLUPN9"
       ],
-      "expected_amount_minor": 29599792,
+      "expected_amount_minor": 12759544,
       "currency": "KZT",
       "allowed_evidence_sets": [
         [
-          "2025-04-26:JPY:KZT",
-          "DOC-HYWVUSVZSL",
-          "GL-CM8YXZ4AX"
+          "2025-04-19:JPY:KZT",
+          "DOC-B4DMN5QDUQ",
+          "GL-76KVFH8AS"
         ],
         [
-          "2025-04-26:JPY:KZT",
-          "DOC-HYWVUSVZSL",
-          "GL-P78JRFV3F"
+          "2025-04-19:JPY:KZT",
+          "DOC-B4DMN5QDUQ",
+          "GL-TEF2XF644"
         ]
       ],
       "scenario": "single"
     },
     {
-      "issue_id": "ISS-AJ89WEQJSA",
+      "issue_id": "ISS-S2XY4PBKRH",
       "type": "fx_rate",
       "affected_ids": [
-        "INV-Q9SWU59U"
+        "INV-XSJSTBBF"
       ],
-      "expected_amount_minor": 49315921,
+      "expected_amount_minor": 76872200,
       "currency": "KZT",
       "allowed_evidence_sets": [
         [
-          "2025-04-05:CHF:KZT",
-          "DOC-3CPGHZ4HQS",
-          "GL-RMXXP7ZC6"
+          "2025-04-09:CHF:KZT",
+          "DOC-9Z8Y2AM53S",
+          "GL-8FNENTBJM"
         ],
         [
-          "2025-04-05:CHF:KZT",
-          "DOC-3CPGHZ4HQS",
-          "GL-92HYQGD4T"
+          "2025-04-09:CHF:KZT",
+          "DOC-9Z8Y2AM53S",
+          "GL-CUAJSKAFW"
         ]
       ],
       "scenario": "single"

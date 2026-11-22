@@ -1,20 +1,20 @@
 {
   "schema_version": "1.0",
-  "env_version": "0.1.0",
-  "episode_id": "EP-654AE038F5D9",
-  "company_name": "Uliovale Trading House Inc.",
+  "env_version": "0.3.0",
+  "episode_id": "EP-7DF4F243413E",
+  "company_name": "Briarrix Holdings AG",
   "company_profile": "Software services company",
   "base_currency": "USD",
   "period_start": "2026-06-01",
   "period_end": "2026-06-30",
   "timezone": "+05:30",
   "record_counts": {
-    "ledger": 275,
-    "invoices": 70,
-    "payments": 63,
+    "ledger": 270,
+    "invoices": 69,
+    "payments": 62,
     "fx": 360
   },
-  "document_count": 133,
+  "document_count": 131,
   "rounding": {
     "mode": "ROUND_HALF_UP",
     "currency_exponents": {

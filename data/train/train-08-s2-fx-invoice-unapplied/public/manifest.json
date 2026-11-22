@@ -1,20 +1,20 @@
 {
   "schema_version": "1.0",
-  "env_version": "0.1.0",
-  "episode_id": "EP-67DB3E6EE773",
-  "company_name": "Quinenor Trading House Inc.",
+  "env_version": "0.3.0",
+  "episode_id": "EP-B9FE753C8635",
+  "company_name": "Astemar Digital Ltd",
   "company_profile": "Small retail company",
   "base_currency": "USD",
   "period_start": "2026-11-01",
   "period_end": "2026-11-30",
   "timezone": "+06:00",
   "record_counts": {
-    "ledger": 252,
-    "invoices": 71,
+    "ledger": 251,
+    "invoices": 70,
     "payments": 57,
     "fx": 180
   },
-  "document_count": 128,
+  "document_count": 127,
   "rounding": {
     "mode": "ROUND_HALF_UP",
     "currency_exponents": {

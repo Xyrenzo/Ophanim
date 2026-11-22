@@ -12,7 +12,6 @@
 <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-64748B?style=flat-square" alt="MIT"></a>
 
 **Воспроизводимая среда обучения с подкреплением (RL) для аудита кредиторской задолженности.**<br>
-Genesis Hackathon 2026.
 
 </div>
 

@@ -139,10 +139,11 @@ def test_incorrect_currency_receives_no_credit(seed, cfg):
 
 
 @pytest.mark.parametrize("seed,cfg", CASES)
-def test_amount_tolerance_is_exactly_one_minor_unit(seed, cfg):
+def test_amount_tolerance_is_exactly_zero_by_default(seed, cfg):
+    """Official default tau = 0: only the exact amount matches (ENV_VERSION 0.2.0; was +/-1)."""
     good = oracle(seed, cfg)
-    for delta, expected_tp in ((1, 3), (-1, 3), (2, 0), (-2, 0), (10**12, 0)):
-        findings = [dict(f, claimed_amount_minor=max(0, f["claimed_amount_minor"] + delta)) for f in good]
+    for delta, expected_tp in ((0, 3), (1, 0), (-1, 0), (2, 0), (10**12, 0)):
+        findings = [dict(f, claimed_amount_minor=f["claimed_amount_minor"] + delta) for f in good]
         _, _, out = play(seed, cfg, findings)
         assert out.tp == expected_tp, delta
 
@@ -161,12 +162,8 @@ def _invalid_payloads(episode_id, good):
         "string_amount": {"episode_id": episode_id, "findings": [dict(f, claimed_amount_minor=str(f["claimed_amount_minor"]))]},
         "float_amount": {"episode_id": episode_id, "findings": [dict(f, claimed_amount_minor=float(f["claimed_amount_minor"]))]},
         "bool_amount": {"episode_id": episode_id, "findings": [dict(f, claimed_amount_minor=True)]},
-        "negative_amount": {"episode_id": episode_id, "findings": [dict(f, claimed_amount_minor=-5)]},
-        "lowercase_currency": {"episode_id": episode_id, "findings": [dict(f, currency=f["currency"].lower())]},
-        "unknown_type": {"episode_id": episode_id, "findings": [dict(f, type="fraud")]},
         "extra_finding_field": {"episode_id": episode_id, "findings": [dict(f, confidence=0.99)]},
         "missing_field": {"episode_id": episode_id, "findings": [{k: v for k, v in f.items() if k != "evidence_ids"}]},
-        "empty_affected": {"episode_id": episode_id, "findings": [dict(f, affected_ids=[])]},
     }
 
 
@@ -178,6 +175,29 @@ def test_invalid_input_gives_minus_one_and_terminates(case):
     payload = _invalid_payloads(ep.public.episode_id, oracle(seed, DIRTY))[case]
     r, terminated, out = play(seed, DIRTY, payload, raw=True)
     assert r == -1.0 and terminated and out.valid is False
+
+
+SEMANTIC_MISMATCHES = {
+    # Structurally valid values that are simply wrong: official rules make them unmatched findings
+    # (false positives), NOT a structure error of the whole submission.
+    "negative_amount": lambda f: dict(f, claimed_amount_minor=-5),
+    "lowercase_currency": lambda f: dict(f, currency=f["currency"].lower()),
+    "padded_currency": lambda f: dict(f, currency=" " + f["currency"]),
+    "unknown_type": lambda f: dict(f, type="fraud"),
+    "type_case": lambda f: dict(f, type=f["type"].upper()),
+    "empty_affected": lambda f: dict(f, affected_ids=[]),
+    "lowercased_ids": lambda f: dict(f, affected_ids=[x.lower() for x in f["affected_ids"]]),
+}
+
+
+@pytest.mark.parametrize("case", sorted(SEMANTIC_MISMATCHES))
+def test_semantic_mismatch_is_a_false_positive_not_a_structure_error(case):
+    seed = 105
+    good = oracle(seed, DIRTY)
+    bad = SEMANTIC_MISMATCHES[case](good[0])
+    r, terminated, out = play(seed, DIRTY, [bad] + good[1:])
+    assert terminated and out.valid is True                      # the submission is accepted
+    assert (out.tp, out.fp, out.fn) == (len(good) - 1, 1, 1)      # only the corrupted finding misses
 
 
 def test_invalid_submission_is_logged_evaluator_side_only():

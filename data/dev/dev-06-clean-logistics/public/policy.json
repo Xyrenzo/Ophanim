@@ -44,5 +44,5 @@
   },
   "allocation": "Every remittance line (invoice_refs) of a payment must be applied in full to the referenced invoice's AP. Suspense is only for payments without remittance information.",
   "duplicates": "A supplier invoice is identified by (entity_id, vendor_ref). It may be recorded at most once, net of reversals. Equal amounts or equal vendor_ref across different suppliers are not duplicates.",
-  "tolerance_minor": 1
+  "tolerance_minor": 0
 }

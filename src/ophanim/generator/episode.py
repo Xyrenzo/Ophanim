@@ -62,10 +62,13 @@ class PublicEpisode:
         return self.manifest["episode_id"]
 
     def evidence_universe(self) -> frozenset[str]:
-        """Every id that may be cited as evidence: row_ids, doc_ids and FX keys."""
+        """Every existing id the tools can return, i.e. every id that may be cited as evidence:
+        row_id, doc_id, invoice_id, payment_id and FX keys (exact strings). entity_id is not retrievable
+        through any tool and is therefore not accessible evidence."""
         ids = {r["row_id"] for r in self.tables["ledger"]}
-        ids.update(d["doc_id"] for d in self.tables["invoices"])
-        ids.update(d["doc_id"] for d in self.tables["payments"])
+        for table, key in (("invoices", "invoice_id"), ("payments", "payment_id")):
+            ids.update(d["doc_id"] for d in self.tables[table])
+            ids.update(d[key] for d in self.tables[table])
         ids.update(fx_key(r) for r in self.tables["fx"])
         return frozenset(ids)
 

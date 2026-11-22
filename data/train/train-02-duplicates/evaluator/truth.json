@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "episode_id": "EP-4E958D774EE5",
   "base_currency": "GBP",
-  "tolerance_minor": 1,
+  "tolerance_minor": 0,
   "issues": [
     {
       "issue_id": "ISS-FES4CNFH7A",

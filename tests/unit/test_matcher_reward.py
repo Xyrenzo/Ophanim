@@ -49,10 +49,12 @@ def test_eligibility_requires_every_field():
     assert "evidence_unknown_id" in eligibility(finding(evidence=("DOC-A", "DOC-B", "GL-1", "GL-FAKE")), t, UNIVERSE, 1)
 
 
-def test_id_normalisation_and_set_semantics():
+def test_ids_are_exact_and_compared_as_sets():
     t = issue()
-    f = finding(ids=(" inv-2 ", "INV-1", "inv-1"), evidence=("doc-b", "DOC-A ", "gl-1", "GL-2"))
-    assert eligibility(f, t, UNIVERSE, 1) == []
+    assert eligibility(finding(ids=("INV-2", "INV-1", "INV-1"), evidence=("DOC-B", "DOC-A", "GL-1", "GL-1")), t, UNIVERSE, 1) == []
+    assert "affected_ids" in eligibility(finding(ids=(" INV-2", "INV-1")), t, UNIVERSE, 1)
+    assert "affected_ids" in eligibility(finding(ids=("inv-2", "INV-1")), t, UNIVERSE, 1)
+    assert "evidence_unknown_id" in eligibility(finding(evidence=("doc-a", "DOC-B", "GL-1")), t, UNIVERSE, 1)
 
 
 # ----------------------------------------------------------------------------- matching

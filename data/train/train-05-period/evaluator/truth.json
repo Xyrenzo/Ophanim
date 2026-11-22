@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "episode_id": "EP-A922F32F9A0F",
   "base_currency": "SGD",
-  "tolerance_minor": 1,
+  "tolerance_minor": 0,
   "issues": [
     {
       "issue_id": "ISS-JRVDTNEXUH",

@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "episode_id": "EP-8103D14F4488",
   "base_currency": "CHF",
-  "tolerance_minor": 1,
+  "tolerance_minor": 0,
   "issues": [
     {
       "issue_id": "ISS-H5RX9V3SHV",

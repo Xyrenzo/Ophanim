@@ -163,3 +163,35 @@ not the mechanism the jury uses.
 | 4 Pairs P01–P20 | 15 | 0/20 (no `episode_dir` loading) | 20/20 expected if jury ids differ only as tokens; exact-id fix (N1) removes case-collision risk | 20/20 expected |
 
 "Expected" values are predictions from the verified core behaviour, not results of an official run.
+
+## Phase status updates
+
+The tables above record the **P6 audit baseline (2026-11-21)** and are kept unchanged as history.
+
+### P6-C Phase 1 — jury adapter (commit `6dadbed`)
+
+A1–A14 implemented (`judge_adapter.py`, `src/ophanim/adapter.py`): `generate_episode`, `make_env`,
+closed loading from `episode_dir` without truth, the `{"name","args"}` envelope, the official observation
+and result shapes, and `score_episode`. The "Adapter" column of rows C01–C20, D01–D20, tests 1–20 and
+P01–P20 is now reachable. Report: `p6c_phase1_adapter_report.md`.
+
+### P6-C Phase 2 — exact matcher and lookups (working tree, ENV_VERSION 0.2.0)
+
+| ID | new status | evidence |
+|---|---|---|
+| C11, C12 | VERIFIED | `tests/integration/test_exact_semantics.py::test_c11_c12_variants_of_real_ids_are_unknown` |
+| M06 | VERIFIED (FP) | `test_published_examples_m01_to_m09_and_m12` |
+| M11 / N11 | VERIFIED (A→F0, B→F1) | `test_published_examples_m10_m11_through_the_episode_files`; exhaustive cross-check on 300 random graphs |
+| N1 exact ids | VERIFIED | `tests/unit/test_matcher_exact.py` (id variants, numeric ids) |
+| N2 affected ids without extra limits | VERIFIED | `test_semantic_mismatches_are_structurally_valid` |
+| N3 evidence = tool-accessible ids | VERIFIED | `test_tool_accessible_ids_are_valid_extra_evidence_entity_ids_are_not` |
+| N4 type exact, unknown → FP | VERIFIED | `test_type_is_compared_exactly_without_aliases` |
+| N5 currency exact | VERIFIED | `test_currency_is_compared_exactly_and_never_a_structure_error` |
+| N6 amount = JSON int, no bounds | VERIFIED | `test_amount_must_be_a_json_integer`, `test_amount_semantics` |
+| N8 structure vs semantics | VERIFIED | `test_structure_errors_return_minus_one_and_nulls`, `test_semantic_mismatch_counts_as_fp_fn` |
+| N9 τ = 0 default, validated | VERIFIED | `test_default_tolerance_is_zero`, `test_invalid_tolerance_configuration_is_rejected`, `test_generated_episodes_use_exact_amounts_by_default` |
+| Block 3 test 8 / M07 with our own default | VERIFIED | same |
+
+Unmodified P6 harness: 34 PASS / 10 FAIL → 44 PASS / 0 FAIL
+(`evidence/p6c_phase2_official_checks.out.txt`). Still open (Phase 3): D02, D03, D05, D09–D11, DC1, T1.
+Report: `p6c_phase2_matcher_report.md`.

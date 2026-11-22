@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "episode_id": "EP-01D37A2560AB",
   "base_currency": "AED",
-  "tolerance_minor": 1,
+  "tolerance_minor": 0,
   "issues": [
     {
       "issue_id": "ISS-3WJ2CPJC68",

@@ -6,6 +6,9 @@ valid or malicious - can reach evaluator data. Every record returned is a
 fresh deep copy; the agent cannot mutate environment state.
 
 Errors use fixed codes and fixed messages; agent input is never echoed back.
+
+Lookups are EXACT (official matcher conventions): ids are matched as stored, case- and
+whitespace-sensitive. A case or whitespace variant of a real id is an unknown id.
 """
 
 from __future__ import annotations
@@ -48,10 +51,6 @@ class ToolError(Exception):
         self.message = ERROR_MESSAGES[code]
 
 
-def _norm(value: str) -> str:
-    return value.strip().upper()
-
-
 def _fx_key(row: dict) -> str:
     return f"{row['date']}:{row['source_currency']}:{row['target_currency']}"
 
@@ -83,16 +82,16 @@ class Toolbox:
         # Private copies: later mutation of the caller's objects cannot affect us.
         self._tables = {name: copy.deepcopy(tables[name]) for name in TABLES}
         self._index = {
-            "ledger": {_norm(r["row_id"]): r for r in self._tables["ledger"]},
-            "invoices": {_norm(r["invoice_id"]): r for r in self._tables["invoices"]},
-            "payments": {_norm(r["payment_id"]): r for r in self._tables["payments"]},
-            "fx": {_norm(_fx_key(r)): r for r in self._tables["fx"]},
+            "ledger": {r["row_id"]: r for r in self._tables["ledger"]},
+            "invoices": {r["invoice_id"]: r for r in self._tables["invoices"]},
+            "payments": {r["payment_id"]: r for r in self._tables["payments"]},
+            "fx": {_fx_key(r): r for r in self._tables["fx"]},
         }
         self._documents: dict[str, tuple[str, dict]] = {}
         for d in self._tables["invoices"]:
-            self._documents[_norm(d["doc_id"])] = ("invoice", d)
+            self._documents[d["doc_id"]] = ("invoice", d)
         for d in self._tables["payments"]:
-            self._documents[_norm(d["doc_id"])] = ("payment", d)
+            self._documents[d["doc_id"]] = ("payment", d)
 
     def list_records(self, table: str, cursor: str | None, limit: int) -> dict:
         if table not in TABLES:
@@ -115,7 +114,7 @@ class Toolbox:
             raise ToolError("unknown_table")
         if not isinstance(record_id, str):
             raise ToolError("unknown_id")
-        rec = self._index[table].get(_norm(record_id))
+        rec = self._index[table].get(record_id)
         if rec is None:
             raise ToolError("unknown_id")
         return {"table": table, "record": copy.deepcopy(rec)}
@@ -123,7 +122,7 @@ class Toolbox:
     def get_document(self, doc_id: str) -> dict:
         if not isinstance(doc_id, str):
             raise ToolError("unknown_document")
-        hit = self._documents.get(_norm(doc_id))
+        hit = self._documents.get(doc_id)
         if hit is None:
             raise ToolError("unknown_document")
         kind, doc = hit

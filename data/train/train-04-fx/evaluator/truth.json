@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "episode_id": "EP-C58ACE2DDA42",
   "base_currency": "KZT",
-  "tolerance_minor": 1,
+  "tolerance_minor": 0,
   "issues": [
     {
       "issue_id": "ISS-369QQ79BFU",

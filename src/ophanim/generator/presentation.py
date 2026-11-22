@@ -22,7 +22,7 @@ from ophanim.rng import DeterministicRng
 from ophanim.timeutil import format_ts, offset_minutes_to_str, parse_ts
 from ophanim.version import ENV_VERSION, SCHEMA_VERSION
 
-TOLERANCE_MINOR = 1
+TOLERANCE_MINOR = 0  # tau: exact amounts by default (official matcher conventions)
 
 LEDGER_COLUMNS = ("row_id", "timestamp", "account", "debit_minor", "credit_minor", "currency", "entity_id", "invoice_id", "payment_id")
 FX_COLUMNS = ("date", "source_currency", "target_currency", "rate")

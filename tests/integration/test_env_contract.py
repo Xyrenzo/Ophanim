@@ -101,8 +101,9 @@ def test_get_record_and_get_document():
     inv = page["result"]["records"][0]
     o, *_ = env.step({"action": "get_record", "table": "invoices", "id": inv["invoice_id"]})
     assert o["result"]["record"] == inv
-    o, *_ = env.step({"action": "get_record", "table": "invoices", "id": " " + inv["invoice_id"].lower()})
-    assert o["ok"]
+    for variant in (" " + inv["invoice_id"], inv["invoice_id"] + " ", inv["invoice_id"].lower()):
+        o, *_ = env.step({"action": "get_record", "table": "invoices", "id": variant})
+        assert o["error"]["code"] == "unknown_id"                   # exact lookup: no case/space folding
     o, *_ = env.step({"action": "get_document", "doc_id": inv["doc_id"]})
     assert o["result"] == {"doc_type": "invoice", "document": inv}
     fxp, *_ = env.step(listing("fx", None, 1))

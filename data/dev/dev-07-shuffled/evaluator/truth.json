@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "episode_id": "EP-654AE038F5D9",
   "base_currency": "USD",
-  "tolerance_minor": 1,
+  "tolerance_minor": 0,
   "issues": [
     {
       "issue_id": "ISS-44SMRJWSTZ",

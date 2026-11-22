@@ -2,6 +2,6 @@
   "schema_version": "1.0",
   "episode_id": "EP-6ABE794BAE8D",
   "base_currency": "EUR",
-  "tolerance_minor": 1,
+  "tolerance_minor": 0,
   "issues": []
 }

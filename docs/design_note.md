@@ -37,7 +37,7 @@ shows the truth is recoverable from accessible records and that no unavailable f
 
 ## Why the reward is hard to game
 
-Findings are matched one-to-one on type, exact id set, amount within ±1 minor unit, exact currency and a
+Findings are matched one-to-one on exact type, exact id set, exact amount (τ = 0 by default), exact currency and a
 complete evidence set of existing ids; explanations are ignored; repeats are false positives; malformed
 input is −1. The tests in `tests/adversarial` reproduce each attack from the case (silence, false
 accusations, duplicates, mark-everything, guessed ids, fabricated evidence, wrong currency, invalid input,

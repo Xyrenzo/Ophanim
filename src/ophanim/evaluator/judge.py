@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 
 from pydantic import ValidationError
 
-from ophanim.evaluator.matcher import MatchResult, match, normalize_id
+from ophanim.evaluator.matcher import MatchResult, match
 from ophanim.evaluator.reward import INVALID_SUBMISSION_REWARD, f1, official_reward, precision, recall
 from ophanim.schemas import FindingsSubmission
 
@@ -28,7 +28,7 @@ def validate_submission(raw_findings: object, expected_episode_id: str) -> tuple
         submission = FindingsSubmission.model_validate(raw_findings)
     except ValidationError as exc:
         return None, [f"{'.'.join(map(str, e['loc']))}: {e['type']}" for e in exc.errors()][:20]
-    if normalize_id(submission.episode_id) != normalize_id(expected_episode_id):
+    if submission.episode_id != expected_episode_id:  # exact, like every other id
         return None, ["episode_id: does not match the current episode"]
     return submission, []
 

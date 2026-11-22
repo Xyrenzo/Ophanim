@@ -218,7 +218,7 @@ class ErrorInjector:
         )
 
     # ------------------------------------------------------------------ type 3
-    MIN_FX_DELTA = 3  # minor units: always clearly outside the +/-1 matching tolerance
+    MIN_FX_DELTA = 3  # minor units: an injected FX error is always a clearly visible discrepancy
 
     def _wrong_rate_options(self, currency: str, moment, amount_minor: int, due_at=None,
                             force: str | None = None) -> list[tuple[str, date, Decimal, int]]:

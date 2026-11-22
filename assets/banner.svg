@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="360" viewBox="0 0 1280 360" font-family="'Segoe UI', Inter, 'Helvetica Neue', Arial, 'DejaVu Sans', sans-serif">
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#0B1020"/><stop offset="1" stop-color="#161B3D"/>
+  </linearGradient>
+  <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+    <path d="M32 0H0V32" fill="none" stroke="#FFFFFF" stroke-opacity=".035"/>
+  </pattern>
+  <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#7C6CF6"/><stop offset="1" stop-color="#14B8A6"/>
+  </linearGradient>
+</defs>
+<rect width="1280" height="360" rx="18" fill="url(#bg)"/><rect width="1280" height="360" rx="18" fill="url(#grid)"/>
+
+<g fill="none">
+  <circle cx="230" cy="180" r="140" stroke="#7C6CF6" stroke-opacity=".18"/>
+  <circle cx="230" cy="180" r="112" stroke="url(#ring)" stroke-width="3"/>
+  <ellipse cx="230" cy="180" rx="112" ry="40" stroke="#7C6CF6" stroke-width="2" stroke-opacity=".8" transform="rotate(35 230 180)"/>
+  <ellipse cx="230" cy="180" rx="112" ry="40" stroke="#14B8A6" stroke-width="2" stroke-opacity=".8" transform="rotate(-35 230 180)"/>
+  <circle cx="230" cy="180" r="72" stroke="#FFFFFF" stroke-opacity=".08" stroke-dasharray="3 7"/>
+  <circle cx="342.0" cy="180.0" r="9" fill="#0B1020" stroke="url(#ring)" stroke-width="2"/><circle cx="342.0" cy="180.0" r="3.4" fill="#7C6CF6"/><circle cx="327.0" cy="236.0" r="9" fill="#0B1020" stroke="url(#ring)" stroke-width="2"/><circle cx="327.0" cy="236.0" r="3.4" fill="#14B8A6"/><circle cx="286.0" cy="277.0" r="9" fill="#0B1020" stroke="url(#ring)" stroke-width="2"/><circle cx="286.0" cy="277.0" r="3.4" fill="#7C6CF6"/><circle cx="230.0" cy="292.0" r="9" fill="#0B1020" stroke="url(#ring)" stroke-width="2"/><circle cx="230.0" cy="292.0" r="3.4" fill="#14B8A6"/><circle cx="174.0" cy="277.0" r="9" fill="#0B1020" stroke="url(#ring)" stroke-width="2"/><circle cx="174.0" cy="277.0" r="3.4" fill="#7C6CF6"/><circle cx="133.0" cy="236.0" r="9" fill="#0B1020" stroke="url(#ring)" stroke-width="2"/><circle cx="133.0" cy="236.0" r="3.4" fill="#14B8A6"/><circle cx="118.0" cy="180.0" r="9" fill="#0B1020" stroke="url(#ring)" stroke-width="2"/><circle cx="118.0" cy="180.0" r="3.4" fill="#7C6CF6"/><circle cx="133.0" cy="124.0" r="9" fill="#0B1020" stroke="url(#ring)" stroke-width="2"/><circle cx="133.0" cy="124.0" r="3.4" fill="#14B8A6"/><circle cx="174.0" cy="83.0" r="9" fill="#0B1020" stroke="url(#ring)" stroke-width="2"/><circle cx="174.0" cy="83.0" r="3.4" fill="#7C6CF6"/><circle cx="230.0" cy="68.0" r="9" fill="#0B1020" stroke="url(#ring)" stroke-width="2"/><circle cx="230.0" cy="68.0" r="3.4" fill="#14B8A6"/><circle cx="286.0" cy="83.0" r="9" fill="#0B1020" stroke="url(#ring)" stroke-width="2"/><circle cx="286.0" cy="83.0" r="3.4" fill="#7C6CF6"/><circle cx="327.0" cy="124.0" r="9" fill="#0B1020" stroke="url(#ring)" stroke-width="2"/><circle cx="327.0" cy="124.0" r="3.4" fill="#14B8A6"/>
+  <path d="M186 180 Q230 146 274 180 Q230 214 186 180Z" fill="#0B1020" stroke="#FFFFFF" stroke-width="2.4"/>
+  <circle cx="230" cy="180" r="15" fill="url(#ring)"/>
+  <circle cx="230" cy="180" r="6" fill="#0B1020"/>
+  <circle cx="235" cy="175" r="2.4" fill="#FFFFFF"/>
+</g>
+<text x="436" y="140" font-size="96" font-weight="800" fill="#FFFFFF" letter-spacing="12">OPHANIM</text>
+<text x="440" y="182" font-size="24" font-weight="600" fill="#A5B4FC" letter-spacing="9">FINANCIAL FORENSICS LAB</text>
+<rect x="440" y="204" width="64" height="3" rx="1.5" fill="#14B8A6"/>
+<text x="440" y="240" font-size="20" fill="#CBD5E1">Воспроизводимая RL-среда для аудита кредиторской задолженности</text>
+<rect x="440" y="262" width="215" height="32" rx="16" fill="#7C6CF6" fill-opacity=".14" stroke="#7C6CF6" stroke-opacity=".55"/><text x="547" y="283" text-anchor="middle" font-size="14" font-weight="600" fill="#E2E8F0" letter-spacing=".5">Genesis Hackathon 2026</text><rect x="666.8" y="262" width="89" height="32" rx="16" fill="#14B8A6" fill-opacity=".14" stroke="#14B8A6" stroke-opacity=".55"/><text x="711" y="283" text-anchor="middle" font-size="14" font-weight="600" fill="#E2E8F0" letter-spacing=".5">FinTech</text><rect x="767.5999999999999" y="262" width="106" height="32" rx="16" fill="#7C6CF6" fill-opacity=".14" stroke="#7C6CF6" stroke-opacity=".55"/><text x="820" y="283" text-anchor="middle" font-size="14" font-weight="600" fill="#E2E8F0" letter-spacing=".5">ENV 0.3.0</text><rect x="885.1999999999999" y="262" width="257" height="32" rx="16" fill="#14B8A6" fill-opacity=".14" stroke="#14B8A6" stroke-opacity=".55"/><text x="1014" y="283" text-anchor="middle" font-size="14" font-weight="600" fill="#E2E8F0" letter-spacing=".5">Python 3.11 · CPU · offline</text>
+</svg>

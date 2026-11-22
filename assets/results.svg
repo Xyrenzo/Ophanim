@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="344" viewBox="0 0 1200 344" font-family="'Segoe UI', Inter, 'Helvetica Neue', Arial, 'DejaVu Sans', sans-serif">
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#0B1020"/><stop offset="1" stop-color="#161B3D"/>
+  </linearGradient>
+  <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+    <path d="M32 0H0V32" fill="none" stroke="#FFFFFF" stroke-opacity=".035"/>
+  </pattern>
+  <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#7C6CF6"/><stop offset="1" stop-color="#14B8A6"/>
+  </linearGradient>
+</defs>
+<rect width="1200" height="344" rx="18" fill="url(#bg)"/><rect width="1200" height="344" rx="18" fill="url(#grid)"/>
+<text x="40" y="46" font-size="17" font-weight="700" fill="#FFFFFF">Средняя награда<tspan dx="14" font-size="14" font-weight="400" fill="#94A3B8">закрытая оценка ENV 0.3.0 · 20 эпизодов · без секрета</tspan></text>
+<path d="M380 70V300" stroke="#FFFFFF" stroke-opacity="0.08"/><text x="380" y="322" text-anchor="middle" font-size="12.5" fill="#64748B">-1.0</text>
+<path d="M550.0 70V300" stroke="#FFFFFF" stroke-opacity="0.08"/><text x="550.0" y="322" text-anchor="middle" font-size="12.5" fill="#64748B">-0.5</text>
+<path d="M720 70V300" stroke="#FFFFFF" stroke-opacity="0.35"/><text x="720" y="322" text-anchor="middle" font-size="12.5" fill="#64748B">0</text>
+<path d="M890.0 70V300" stroke="#FFFFFF" stroke-opacity="0.08"/><text x="890.0" y="322" text-anchor="middle" font-size="12.5" fill="#64748B">+0.5</text>
+<path d="M1060 70V300" stroke="#FFFFFF" stroke-opacity="0.08"/><text x="1060" y="322" text-anchor="middle" font-size="12.5" fill="#64748B">+1.0</text>
+<text x="40" y="99" font-size="15" fill="#E2E8F0">случайный исследователь</text><rect x="445.8" y="84" width="274.2" height="22" rx="5" fill="#FB7185" fill-opacity=".85"/>
+<text x="435.8" y="100" text-anchor="end" font-size="13.5" font-weight="700" fill="#FB7185">-0.8065</text>
+<text x="40" y="143" font-size="15" fill="#E2E8F0">простая сверка</text><rect x="509.2" y="128" width="210.8" height="22" rx="5" fill="#FB7185" fill-opacity=".85"/>
+<text x="499.2" y="144" text-anchor="end" font-size="13.5" font-weight="700" fill="#FB7185">-0.6199</text>
+<text x="40" y="187" font-size="15" fill="#E2E8F0">пометить всё</text><rect x="380.0" y="172" width="340.0" height="22" rx="5" fill="#FB7185" fill-opacity=".85"/>
+<text x="370.0" y="188" text-anchor="end" font-size="13.5" font-weight="700" fill="#FB7185">-1.0000</text>
+<text x="40" y="231" font-size="15" fill="#E2E8F0">reference auditor</text><rect x="720.0" y="216" width="326.8" height="22" rx="5" fill="#14B8A6" fill-opacity=".85"/>
+<text x="1056.8" y="232" font-size="13.5" font-weight="700" fill="#14B8A6">+0.9613</text>
+<text x="40" y="275" font-size="15" fill="#E2E8F0">oracle</text><rect x="720.0" y="260" width="340.0" height="22" rx="5" fill="#7C6CF6" fill-opacity=".85"/>
+<text x="1070.0" y="276" font-size="13.5" font-weight="700" fill="#7C6CF6">+1.0000</text>
+</svg>

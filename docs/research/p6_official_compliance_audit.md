@@ -1,123 +1,126 @@
-# P6 — Official compliance audit (Genesis FinTech check definitions, 2026-11-20)
+# P6 — аудит соответствия официальным определениям проверок (Genesis FinTech, 2026-11-20)
 
-The official check definitions (`fintech-checks.txt`, "Genesis FinTech: определения проверок") are
-binding. They keep the case requirements and fix three things the case left open: **how** the jury
-connects (a thin `judge_adapter.py`), **which** episodes and tests make up the four blocks, and the
-**exact matcher conventions**. This audit compares them with the working tree. The full row-by-row
-mapping is in `p6_traceability_matrix.md`; the evidence script and its output are in
-`docs/research/evidence/`.
+> Исторический документ: состояние кода на этапе P6 (до адаптера жюри). Все перечисленные здесь пробелы
+> закрыты на этапах P6-C 1–3; текущие статусы — в разделе «Обновления статуса по этапам»
+> `p6_traceability_matrix.md`.
 
-## 1. Method
+Официальные определения проверок (`fintech-checks.txt`, «Genesis FinTech: определения проверок»)
+обязательны. Они сохраняют требования кейса и уточняют три вещи, которые кейс оставил открытыми: **как**
+подключается жюри (тонкий `judge_adapter.py`), **какие** эпизоды и тесты составляют четыре блока и
+**точные соглашения matcher**. Этот аудит сравнивает их с рабочим деревом. Полное построчное соответствие —
+в `p6_traceability_matrix.md`; скрипт с доказательствами и его вывод — в `docs/research/evidence/`.
 
-* Read the definitions completely (adapter, isolation boundary, paired-check transport, fixtures C/E/L/U,
-  Blocks 1–4, engineering anchors, matcher conventions, M01–M12).
-* Executed the 20 Block-3 tests and the M01–M12 examples against the existing judge, using in-memory
-  fixtures built from real episode ids (`p6_official_checks.py`). Result file:
-  `p6_official_checks.out.txt` (34 PASS, 10 FAIL lines).
-* Probed the environment for the C-test behaviours, the action envelope and `episode_dir` loading.
-* Measured generator properties the D-matrix depends on (red-herring frequencies over 60 episodes;
-  allocation sub-kind over 40 seeds).
+## 1. Метод
 
-## 2. Findings
+* Определения прочитаны полностью (адаптер, граница изоляции, способ подачи парных проверок, фикстуры
+  C/E/L/U, блоки 1–4, инженерные критерии, соглашения matcher, M01–M12).
+* 20 тестов блока 3 и примеры M01–M12 выполнены на существующем судье с фикстурами в памяти, построенными
+  из настоящих идентификаторов эпизода (`p6_official_checks.py`). Файл результата:
+  `p6_official_checks.out.txt` (34 строки PASS, 10 строк FAIL).
+* Окружение проверено на поведение из C-тестов, оболочку действий и загрузку `episode_dir`.
+* Измерены свойства генератора, от которых зависит D-матрица (частоты ложных следов на 60 эпизодах; вид
+  распределения платежа на 40 seed).
 
-### 2.1 Blocking (P0): the official integration does not exist
+## 2. Результаты
 
-The jury calls `generate_episode(seed, config, output_dir)`, `make_env()`,
-`env.reset(seed, {"mode", "episode_dir", "team_config"})`, `env.step({"name", "args"})` and
-`score_episode(episode_dir, findings, inspection_steps)`. None of these entry points exists:
+### 2.1 Блокирующее (P0): официальной интеграции нет
 
-* the environment can only **generate** an episode from a seed. It cannot **load** an episode
-  directory, which is how the jury supplies its own fixtures and the transformed copies for the paired
-  checks;
-* the action envelope `{"name", "args"}` is not accepted (native format: `{"action": …, …}`);
-* there is no file-based scoring entry point; the judge works only on in-memory objects;
-* the README does not document an adapter, its result schema, working directory or launch command.
+Жюри вызывает `generate_episode(seed, config, output_dir)`, `make_env()`,
+`env.reset(seed, {"mode", "episode_dir", "team_config"})`, `env.step({"name", "args"})` и
+`score_episode(episode_dir, findings, inspection_steps)`. Ни одной из этих точек входа нет:
 
-Consequence: today the jury cannot execute Block 1, Block 3 or Block 4, nor generate the Block-2 episodes
-through the agreed interface, **even though the underlying behaviour is almost entirely correct**.
+* окружение умеет только **генерировать** эпизод по seed. Оно не умеет **загружать** каталог эпизода, а
+  именно так жюри передаёт свои фикстуры и преобразованные копии для парных проверок;
+* оболочка действия `{"name", "args"}` не принимается (нативный формат — `{"action": …, …}`);
+* нет точки входа для оценки по файлам; судья работает только с объектами в памяти;
+* README не описывает адаптер, схему его результатов, рабочий каталог и команду запуска.
 
-### 2.2 The core is largely compliant (verified)
+Следствие: сегодня жюри не может выполнить блоки 1, 3 и 4 и не может сгенерировать эпизоды блока 2 через
+согласованный интерфейс, **хотя нижележащее поведение почти полностью правильное**.
 
-* **Block 3 logic: 20/20.** Every expected TP/FP/FN and reward value matched exactly, including
-  47/150 ≈ 0.3133, −871/1050 ≈ −0.8295 and −0.02, plus the structure errors for 31 findings, 11 evidence
-  ids and a 1001-character explanation.
-* **M01–M05, M07–M10, M12:** sets of affected ids and evidence ids, raw limits before deduplication,
-  τ = 0 and τ = 1 boundaries, string/bool amounts, maximum-cardinality matching, and duplicate findings
-  kept separate.
-* **Contract behaviour:** 18 of the 20 C-tests pass at core level; C11 and C12 are the exceptions. Already
-  covered by tests: pagination, stable cursors, the safe calculator, the 99+submit and 100-action
-  boundaries, the time limit, closed-mode zero rewards, and the leak scans.
-* **Block 2:** all four error types and both interaction scenarios are independently verified (clean
-  before mutation, exactly the declared discrepancy after, sufficient evidence, §03 formats).
+### 2.2 Ядро в основном соответствует (проверено)
 
-### 2.3 Non-compliant matcher and tool conventions (P1)
+* **Логика блока 3: 20/20.** Все ожидаемые TP/FP/FN и награды совпали точно, в том числе
+  47/150 ≈ 0.3133, −871/1050 ≈ −0.8295 и −0.02, а также ошибки структуры для 31 вывода, 11
+  идентификаторов доказательств и объяснения из 1001 символа.
+* **M01–M05, M07–M10, M12:** множества затронутых идентификаторов и доказательств, лимиты на исходных
+  списках до удаления повторов, границы τ = 0 и τ = 1, суммы строкой и bool, паросочетание максимальной
+  мощности и раздельный учёт дублирующихся выводов.
+* **Контракт:** 18 из 20 C-тестов проходят на уровне ядра; исключения — C11 и C12. Уже покрыты тестами:
+  постраничный вывод, стабильные курсоры, безопасный калькулятор, границы «99 + submit» и «100 действий»,
+  лимит времени, нулевая награда в закрытом режиме и проверки утечек.
+* **Блок 2:** все четыре типа ошибок и оба сценария взаимодействия независимо проверены (чисто до
+  изменения, ровно заявленное расхождение после, достаточные доказательства, форматы §03).
 
-| rule | current behaviour | definition |
+### 2.3 Несоответствующие соглашения matcher и инструментов (P1)
+
+| правило | текущее поведение | определение |
 |---|---|---|
-| ids | upper-cased and stripped before comparison and lookup | exact, case- and whitespace-sensitive |
-| unknown `type` string | structure error (−1) | not matchable → FP |
-| currency | must match `^[A-Z]{3}$`, else −1 | exact comparison; a case/space difference is an FP (M06) |
-| `affected_ids` length, id length, amount sign and bounds | own limits → −1 | only type errors, missing fields and the three published limits are structure errors |
-| evidence universe | row_id, doc_id, FX key | every id accessible through the tools (also invoice_id, payment_id) |
-| default tolerance | τ = 1 for every type | τ = 0 unless a fixed, documented per-type τ is justified by rounding |
-| tie-break | augmenting-path order (F0→B, F1→A in M11) | lexicographic over (issue_id, finding index) → A→F0, B→F1 |
-| `get_record` / `get_document` | case-insensitive lookup returns a record for a case variant | an id absent from the data is an error (C11/C12) |
+| идентификаторы | перед сравнением и поиском переводятся в верхний регистр и обрезаются | точное сравнение с учётом регистра и пробелов |
+| неизвестная строка `type` | ошибка структуры (−1) | не сопоставляется → FP |
+| валюта | должна соответствовать `^[A-Z]{3}$`, иначе −1 | точное сравнение; отличие в регистре или пробеле — FP (M06) |
+| длина `affected_ids`, длина идентификатора, знак и границы суммы | собственные лимиты → −1 | ошибки структуры — только ошибки типа, отсутствующие поля и три опубликованных лимита |
+| универсум доказательств | row_id, doc_id, ключ курса | любой идентификатор, доступный через инструменты (в том числе invoice_id, payment_id) |
+| допуск по умолчанию | τ = 1 для каждого типа | τ = 0, если фиксированный документированный τ для типа не обоснован округлением |
+| tie-break | порядок увеличивающих путей (F0→B, F1→A в M11) | лексикографический по (issue_id, индекс вывода) → A→F0, B→F1 |
+| `get_record` / `get_document` | поиск без учёта регистра возвращает запись для варианта в другом регистре | отсутствующий в данных идентификатор — ошибка (C11/C12) |
 
-Only the tie-break leaves the scores unchanged; the other rules can turn a false positive into −1, or the
-reverse.
+Оценки не меняет только tie-break; остальные правила могут превратить FP в −1 или наоборот.
 
-### 2.4 Generator gaps against the D-matrix (P1)
+### 2.4 Пробелы генератора относительно D-матрицы (P1)
 
-* **D03 (correct refund) is missing:** there is no refund concept in the code. The case itself lists
-  refunds among the legitimate distractors.
-* **D09–D11 need at least one *partial* allocation:** requesting one allocation error produced a
-  *missing* allocation in 40/40 seeds, and the partial sub-case exists only inside scenario S1. It must be
-  requestable through a documented setting.
-* **D02 and D05** are present in practice (split payments 60/60, boundary documents 60/60) but are not
-  guaranteed by a documented setting.
+* **Нет D03 (корректный возврат):** понятия возврата в коде нет, хотя сам кейс называет возвраты среди
+  законных ложных следов.
+* **D09–D11 требуют хотя бы одного *частичного* распределения:** запрос одной ошибки распределения дал
+  *отсутствующее* распределение в 40/40 seed, а частичный случай есть только внутри сценария S1. Его нужно
+  сделать запрашиваемым через документированную настройку.
+* **D02 и D05** на практике есть (разделённые платежи 60/60, документы у границы 60/60), но не
+  гарантированы документированной настройкой.
 
-### 2.5 Open interpretation questions (decide before the fix)
+### 2.5 Открытые вопросы толкования (решить до исправления)
 
-* **O1: unknown extra fields in a finding.** The definitions list type errors, missing fields and the three
-  limits as structure errors; extra fields are not mentioned. The current code rejects them (−1).
-  Proposal: keep rejecting them. No published test relies on extra fields.
-* **O2: `episode_id` mismatch in findings.** The current judge returns −1. The jury's id replacement list
-  does not include `episode_id`, so its paired copies keep it. Proposal: keep −1, and document that
-  `episode_id` must equal `manifest.episode_id`.
+* **O1: неизвестные лишние поля в выводе.** Определения называют ошибками структуры ошибки типа,
+  отсутствующие поля и три лимита; о лишних полях не сказано. Текущий код их отклоняет (−1). Предложение:
+  продолжать отклонять. Ни один опубликованный тест на лишние поля не опирается.
+* **O2: несовпадение `episode_id` в выводах.** Текущий судья возвращает −1. В списке заменяемых жюри
+  идентификаторов `episode_id` нет, поэтому в парных копиях он сохраняется. Предложение: оставить −1 и
+  задокументировать, что `episode_id` должен совпадать с `manifest.episode_id`.
 
-## 3. What does not need to change
+## 3. Что менять не нужно
 
-* The official reward formula and its implementation; inspection-step accounting; maximum matching.
-* Closed-mode semantics (zero reward, no diagnostics) — only the mode name must be mapped
+* Официальную формулу награды и её реализацию; учёт шагов проверки; максимальное паросочетание.
+* Семантику закрытого режима (нулевая награда, без диагностики) — нужно только отобразить имя режима
   (`closed` → `eval`).
-* The independent auditor, the verifier and the existing tests (some adversarial tests must be updated
-  where they encode the old −1 behaviour, e.g. `unknown_type`, `lowercase_currency`,
-  `negative_amount`, `empty_affected`, and the ±1 tolerance test).
-* Gymnasium inheritance — not required by the definitions.
+* Независимый аудитор, верификатор и существующие тесты (часть состязательных тестов нужно обновить там,
+  где они закрепляют старое поведение −1: `unknown_type`, `lowercase_currency`, `negative_amount`,
+  `empty_affected` и тест допуска ±1).
+* Наследование от Gymnasium — определения его не требуют.
 
-## 4. Recommended fix order (requires approval; not started)
+## 4. Рекомендуемый порядок исправлений (требует одобрения; не начато)
 
-1. **P0 adapter (one module + loader):** `judge_adapter.py` with the five entry points;
-   episode-directory loader built on the existing `PublicDataset.from_directory` (tables in file order);
-   envelope translation; result/observation shaping; `score_episode` reusing the existing judge;
-   closed-mode env that holds no truth; README section.
-2. **P1 exactness:** exact ids in matcher and tools; any-string type; exact currency; remove extra
-   structural limits; extended evidence universe; τ = 0 by default; then update the affected adversarial
-   tests, regenerate `data/`, bump `ENV_VERSION`.
-3. **P1 generator:** legitimate refund red herring (with auditor support and verification); documented
-   setting for partial vs missing allocation; documented guarantees for split payments and boundary
-   documents.
-4. **P2:** lexicographic tie-break; provenance format documentation; complete id-field list for the
-   jury's file transformations.
-5. **Verification:** an adapter test suite replaying C01–C20 (fixtures C/E/L/U), the 20 Block-3 tests
-   through `score_episode` on episode directories, M01–M12, and file-level paired checks (permutation
-   and bijective id replacement performed by a test harness on a copy, exactly as the jury describes).
+1. **P0, адаптер (один модуль и загрузчик):** `judge_adapter.py` с пятью точками входа; загрузчик каталога
+   эпизода на основе существующего `PublicDataset.from_directory` (таблицы в порядке файла); перевод
+   оболочки; приведение результатов и наблюдений к нужной форме; `score_episode` на существующем судье;
+   окружение закрытого режима без эталона; раздел в README.
+2. **P1, точность:** точные идентификаторы в matcher и инструментах; тип — любая строка; точная валюта;
+   убрать лишние структурные лимиты; расширенный универсум доказательств; τ = 0 по умолчанию; затем
+   обновить затронутые состязательные тесты, перегенерировать `data/`, повысить `ENV_VERSION`.
+3. **P1, генератор:** законный ложный след «возврат» (с поддержкой в аудиторе и верификации);
+   документированная настройка частичного или отсутствующего распределения; документированные гарантии
+   для разделённых платежей и документов у границы.
+4. **P2:** лексикографический tie-break; документация формата provenance; полный список полей с
+   идентификаторами для преобразований файлов жюри.
+5. **Проверка:** набор тестов адаптера, который повторяет C01–C20 (фикстуры C/E/L/U), 20 тестов блока 3
+   через `score_episode` на каталогах эпизодов, M01–M12 и парные проверки на уровне файлов (перестановка и
+   взаимно однозначная замена идентификаторов, которые тестовая обвязка выполняет на копии — ровно так, как
+   описывает жюри).
 
-## 5. Interaction with the research programme
+## 5. Связь с исследовательской программой
 
-These fixes concern the official benchmark (P0–P5 scope), not P7–P13. The research documents are
-updated to treat the adapter interface as the binding agent interface
-(`p6_architecture_constraints.md`). Two research conclusions are strengthened:
+Эти исправления касаются официального бенчмарка (объём этапов P0–P5), а не P7–P13. Исследовательские
+документы обновлены так, чтобы интерфейс адаптера считался обязательным интерфейсом агента
+(`p6_architecture_constraints.md`). Два исследовательских вывода усиливаются:
 
-* exact ids and τ = 0 make symbolic arithmetic and copy-exact id handling mandatory;
-* learning runs in train mode only, because closed mode returns no reward by design.
+* точные идентификаторы и τ = 0 делают обязательными символьную арифметику и копирование
+  идентификаторов без изменений;
+* обучение идёт только в режиме train, потому что закрытый режим по замыслу не возвращает награду.

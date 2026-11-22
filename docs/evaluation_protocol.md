@@ -1,39 +1,58 @@
-# Evaluation protocol
+# Протокол оценки
 
-## Splits and seeds
+## Выборки и seed
 
-| split | where | seeds | purpose |
+| выборка | где | seed | назначение |
 |---|---|---|---|
-| train | `configs/train/suite.json` → `data/train/` | explicit, 1001–1010 | open training episodes (truth published) |
-| dev | `configs/dev/suite.json` → `data/dev/` | explicit, 2001–2010 | open development episodes, different parameter combinations |
-| eval | `configs/eval/official_suite.json` | **derived at run time**: `int(sha256(f"{seed_base}|eval|{i}")[:15], 16)` | closed evaluation; seeds never stored in the repo |
+| train | `configs/train/suite.json` → `data/train/` | явные, 1001–1010 | открытые обучающие эпизоды (эталон опубликован) |
+| dev | `configs/dev/suite.json` → `data/dev/` | явные, 2001–2010 | открытые отладочные эпизоды с другими комбинациями параметров |
+| eval | `configs/eval/official_suite.json` | **вычисляются во время запуска**: `int(sha256(f"{seed_base}|eval|{i}")[:15], 16)` | закрытая оценка; seed в репозитории не хранятся |
 
-Closed runs additionally key generation with `OPHANIM_EVAL_SECRET` (HMAC). Hidden seeds alone are not the
-only defence against over-fitting: the evaluation suite uses **parameter combinations that appear in
-neither train nor dev** (test-enforced) and **harmless transformations** (shuffled order, company-offset
-timestamps). Error types are fixed and public; no new type is ever added.
+Закрытые прогоны дополнительно подписывают генерацию ключом `OPHANIM_EVAL_SECRET` (HMAC). Скрытые seed —
+не единственная защита от переобучения: в наборе оценки используются **комбинации параметров, которых нет
+ни в train, ни в dev** (проверяется тестом), и **безвредные преобразования** (перемешанный порядок, время в
+смещении компании). Типы ошибок фиксированы и опубликованы; новых типов не добавляется.
 
-## Official structure (`ophanim evaluate`)
+## Секрет и seed base в командах
 
-1. **20 episodes** — 5 clean, 5 with interacting errors (S1, S2, S1+S2, S1+fx+period, S2+dup+alloc),
-   10 mixed (every mandatory type appears in ≥ 5 of them; up to 12 issues). Each is independently
-   verified (`audit/`): clean before mutation, exactly the declared issues after, sufficient evidence.
-2. **The same four baselines on the same 20 episodes**, closed mode, same versions, same machine:
-   * random explorer (policy seed 0), simple reconciliation, mark-everything — each run as a separate
-     agent process through `agent_runtime.py`;
-   * oracle — evaluator-side only, submits the truth with valid evidence and 0 inspection steps.
-   * (extra row) reference auditor — scripted public-data solver.
-3. **20 metamorphic pairs** — each eval config with an independently derived seed, paired with a variant
-   that changes record order and every public id, and names and/or timestamp representation. Checks: ids
-   really changed; truth equivalent after id mapping; both variants verify; the mapped oracle answer earns
-   1.0 in both; the reference auditor earns the same reward with the same steps/TP/FP.
-4. **Exact reproducibility** — every episode replayed with the same seed/config/actions (random explorer
-   and reference auditor) must give byte-identical trajectories.
-5. **Report** — `report.json`, `report.md`, public trajectories per policy, evaluator-only judge log.
+| команда | seed base | секрет |
+|---|---|---|
+| `evaluate` | `--seed-base`, иначе `OPHANIM_SEED_BASE`, иначе публичное значение по умолчанию | `OPHANIM_EVAL_SECRET`; если не задан — без секрета (`secret_used = false`) |
+| `verify` | `OPHANIM_SEED_BASE`, иначе публичное значение по умолчанию | `OPHANIM_EVAL_SECRET`; если не задан — встроенное открытое значение `ophanim-verify-local-secret` |
 
-## Plugging in other policies (organisers)
+Секрет меняет сами эпизоды, поэтому цифры `verify` и `evaluate` без секрета различаются. Измеренные
+значения обоих вариантов приведены в `docs/results.md`.
 
-Any executable that speaks the JSON-lines protocol can be evaluated (see `src/ophanim/agent_runtime.py`):
+## Официальная структура (`ophanim evaluate`)
+
+1. **20 эпизодов**: 5 чистых, 5 со взаимодействующими ошибками (S1, S2, S1+S2, S1+fx+period,
+   S2+dup+alloc) и 10 смешанных (каждый обязательный тип встречается не менее чем в 5 из них; до 12
+   проблем). Каждый эпизод независимо проверяется (`audit/`): чистые книги до внесения ошибок, ровно
+   заявленные проблемы после, достаточные доказательства.
+2. **Одни и те же четыре базовые политики на одних и тех же 20 эпизодах**, в закрытом режиме, с одними и
+   теми же версиями, на одной машине:
+   * случайный исследователь (seed политики 0), простая сверка, «пометить всё» — каждая запускается как
+     отдельный процесс агента через `agent_runtime.py`;
+   * oracle — только на стороне оценщика, отправляет эталон с допустимыми доказательствами и нулём шагов
+     проверки;
+   * (дополнительная строка) reference auditor — заранее написанная программа, решающая задачу по
+     публичным данным; это не обученная модель.
+3. **20 метаморфных пар**: каждая конфигурация оценки с независимо вычисленным seed в паре с вариантом, в
+   котором изменены порядок записей, все публичные идентификаторы, а также имена и/или форма записи
+   времени. Проверяется, что идентификаторы действительно изменились; эталон эквивалентен после
+   отображения идентификаторов; оба варианта проходят верификацию; отображённый ответ oracle получает 1.0
+   в обоих; reference auditor получает ту же награду при тех же шагах и TP/FP.
+4. **Точная воспроизводимость**: каждый эпизод повторяется с тем же seed, конфигурацией и действиями
+   (случайный исследователь и reference auditor) и должен дать побайтно идентичные траектории.
+5. **Отчёт**: `report.json`, `report.md`, публичные траектории каждой политики и журнал судьи (только для
+   оценщика).
+
+Это внутренний протокол команды; он воспроизводит структуру, описанную в кейсе, но не заменяет
+официальную проверку жюри.
+
+## Подключение других политик (для организаторов)
+
+Оценить можно любую программу, которая говорит на протоколе JSON lines (см. `src/ophanim/agent_runtime.py`):
 
 ```
 evaluator -> agent  {"type": "reset", "observation": {...}, "info": {...}}
@@ -43,14 +62,16 @@ evaluator -> agent  {"type": "step", "observation": {...}, "reward": 0.0, "termi
 evaluator -> agent  {"type": "end"}
 ```
 
-In Python: `run_episode_isolated(OphanimEnv(mode="eval", secret=...), ["python", "my_agent.py"], seed, config)`
-or in-process `run_episode(env, policy, seed, config)` for any object with `reset(obs, info)` and `act(obs)`.
+На Python: `run_episode_isolated(OphanimEnv(mode="eval", secret=...), ["python", "my_agent.py"], seed, config)`
+или внутри процесса `run_episode(env, policy, seed, config)` для любого объекта с методами
+`reset(obs, info)` и `act(obs)`.
 
-## Commands
+## Команды
 
 ```bash
-python -m ophanim verify                                   # tests + published data + trajectories + closed evaluation
+python -m ophanim verify                                   # тесты + опубликованные данные + траектории + закрытая оценка
 OPHANIM_EVAL_SECRET=<secret> python -m ophanim evaluate --seed-base <hidden-base>
+python -m ophanim evaluate --out artifacts/eval-env-0.3.0  # без секрета: воспроизводит docs/results.md, раздел 1
 python -m ophanim verify-episode data/train/train-06-all-four
-python -m ophanim build-data                               # regenerate data/ (byte-identical)
+python -m ophanim build-data                               # заново сгенерировать data/ (побайтно идентично)
 ```

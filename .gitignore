@@ -8,3 +8,5 @@ build/
 dist/
 runs/
 .coverage
+# evaluation outputs: reports, judge logs and the oracle trajectory are evaluator-only
+artifacts/

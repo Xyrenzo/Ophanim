@@ -1,95 +1,99 @@
-# P6 — Binding architecture constraints (from the official check definitions)
+# P6 — обязательные архитектурные ограничения (по официальным определениям проверок)
 
-Every future component (P7–P13) and every compliance fix must satisfy these constraints. They take
-precedence over convenience, framework conventions and the earlier P6 proposals; where
-`p6_agent_architecture.md` differs, this document wins.
+Каждый будущий компонент (P7–P13) и каждое исправление соответствия обязаны выполнять эти ограничения. Они
+важнее удобства, соглашений фреймворков и прежних предложений P6; если `p6_agent_architecture.md`
+расходится с этим документом, прав этот документ.
 
-## 1. Integration surface (official)
+## 1. Поверхность интеграции (официальная)
 
-| entry point | contract | consequence for our design |
+| точка входа | контракт | следствие для нашего проекта |
 |---|---|---|
-| `generate_episode(seed, config, output_dir)` | wraps the team generator; writes manifest, ledger, invoices, payments, fx, policy and closed truth/provenance | the existing generator stays the single source of episodes; the directory layout is documented and stable |
-| `make_env()` | returns an object with `reset`, `step` | thin adapter over `OphanimEnv`; **no Gymnasium inheritance** |
-| `reset(seed, config)` | `config = {"mode": "closed"\|"train", "episode_dir"?, "team_config"?}`; with `episode_dir` the given episode is **loaded as-is** (no regeneration, no id change); repeated reset restarts it | the environment must support *load from directory* as a first-class path; records are served **in file order**, so a jury permutation is visible |
-| `step({"name", "args"})` | five names; unknown names are ordinary invalid actions that consume a step | the envelope is translated in the adapter; validation stays inside the environment |
-| observations | first: `{task, manifest, policy, remaining_steps}`; then `{result, error, remaining_steps}`; results: `{records, next_cursor}`, record object, document object, decimal string, `{"accepted": true}` | the adapter shapes outputs; the native environment may keep its richer format |
-| `score_episode(episode_dir, findings, inspection_steps)` | closed evaluator call → `{tp, fp, fn, precision, recall, f1, return}`; invalid → `return = -1`, others `null` | scoring is a pure function of the episode directory, the findings and the step count, reusing the shared judge and matcher |
+| `generate_episode(seed, config, output_dir)` | обёртка над генератором команды; записывает manifest, ledger, invoices, payments, fx, policy и закрытые truth/provenance | существующий генератор остаётся единственным источником эпизодов; структура каталогов документирована и стабильна |
+| `make_env()` | возвращает объект с `reset`, `step` | тонкий адаптер над `OphanimEnv`; **без наследования от Gymnasium** |
+| `reset(seed, config)` | `config = {"mode": "closed"\|"train", "episode_dir"?, "team_config"?}`; с `episode_dir` переданный эпизод **загружается как есть** (без повторной генерации и смены идентификаторов); повторный reset начинает его заново | окружение должно поддерживать *загрузку из каталога* как полноценный путь; записи отдаются **в порядке файла**, чтобы перестановка жюри была видна |
+| `step({"name", "args"})` | пять имён; неизвестные имена — обычные невалидные действия, которые тратят шаг | оболочка переводится в адаптере; проверка остаётся внутри окружения |
+| наблюдения | первое: `{task, manifest, policy, remaining_steps}`; далее `{result, error, remaining_steps}`; результаты: `{records, next_cursor}`, объект записи, объект документа, десятичная строка, `{"accepted": true}` | адаптер формирует выходные данные; нативное окружение может сохранить свой более подробный формат |
+| `score_episode(episode_dir, findings, inspection_steps)` | закрытый вызов оценщика → `{tp, fp, fn, precision, recall, f1, return}`; невалидный ответ → `return = -1`, остальные `null` | оценка — чистая функция от каталога эпизода, выводов и числа шагов на общем судье и matcher |
 
-## 2. Isolation
+## 2. Изоляция
 
-1. The policy runs in a separate, restricted process. It receives only observations and the step result,
-   never imports the evaluator, and never sees `episode_dir`, paths, seeds or configs.
-2. "Hiding fields in a Python object is not isolation." In closed mode the environment object built by
-   `make_env` **does not load truth or provenance**: scoring happens only in `score_episode`, in the
-   jury's evaluator process.
-3. Closed mode: reward 0 at every step, **including termination**; `info` contains nothing derived from
-   truth; submit returns only `{"accepted": true}` or a bounded structure error.
-4. Train mode may return the terminal reward. Learning is therefore possible **only in train mode**;
-   closed mode carries no learning signal by design.
-5. The oracle stays evaluator-side and submits through an ordinary submit; its existence grants nothing
-   to other policies.
-6. Error messages contain a public code and a short fixed text; no paths, seeds or hidden data.
+1. Политика работает в отдельном ограниченном процессе. Она получает только наблюдения и результат шага,
+   никогда не импортирует оценщик и никогда не видит `episode_dir`, пути, seed и конфигурации.
+2. «Скрытие полей в объекте Python — не изоляция». В закрытом режиме объект окружения, созданный
+   `make_env`, **не загружает эталон и provenance**: оценка происходит только в `score_episode`, в процессе
+   оценщика жюри.
+3. Закрытый режим: награда 0 на каждом шаге, **включая завершение**; в `info` нет ничего, что выведено из
+   эталона; submit возвращает только `{"accepted": true}` или ограниченную ошибку структуры.
+4. Режим train может возвращать итоговую награду. Поэтому обучение возможно **только в режиме train**;
+   закрытый режим по замыслу не несёт обучающего сигнала.
+5. Oracle остаётся на стороне оценщика и отправляет ответ обычным submit; его существование ничего не даёт
+   другим политикам.
+6. Сообщения об ошибках содержат публичный код и короткий фиксированный текст; без путей, seed и скрытых
+   данных.
 
-## 3. Exact matcher semantics (shared by evaluator, tests and any research metric)
+## 3. Точная семантика matcher (общая для оценщика, тестов и любых исследовательских метрик)
 
-* ids: exact string comparison (case and whitespace significant); no normalisation, prefix stripping or
-  fuzzy matching; tool lookups are exact as well;
-* `affected_ids`, `evidence_ids`: sets of exact ids, formed **after** the raw structural limits;
-* evidence: at least one complete allowed set; any non-existent or inaccessible id → the finding is not
-  matched (FP);
-* `type`: exact string; unknown strings are unmatched (FP), not structure errors;
-* currency: exact string; no conversion, case folding or trimming; no ISO requirement;
-* amount: a JSON integer (not bool, string or float); `|claimed − expected| ≤ τ` with **τ = 0 by default**,
-  or a fixed, pre-published per-type τ justified by documented rounding;
-* structure errors (→ −1) are only: wrong value types, missing required fields, more than 30 findings,
-  more than 10 evidence ids in a finding, explanation longer than 1000 Unicode code points.
-  **Open interpretation (O1):** the definitions do not mention *unknown extra fields*. The current code
-  rejects them (−1). The proposal is to keep rejecting them, because the case calls a wrong structure
-  "неверная структура" and no published test relies on extra fields. The team should confirm this, and
-  agents must never add fields to findings;
-* maximum-cardinality bipartite matching; ties broken lexicographically over (issue_id by code point,
-  finding index); duplicate findings remain separate vertices;
-* numeric results compared to 1e-9; money and steps compared exactly as integers.
+* идентификаторы: точное сравнение строк (регистр и пробелы важны); без нормализации, отбрасывания
+  префиксов и нечёткого сопоставления; поиск в инструментах тоже точный;
+* `affected_ids`, `evidence_ids`: множества точных идентификаторов, которые формируются **после** проверки
+  структурных лимитов на исходных списках;
+* доказательства: хотя бы один полный допустимый набор; любой несуществующий или недоступный идентификатор
+  → вывод не сопоставляется (FP);
+* `type`: точная строка; неизвестные строки не сопоставляются (FP), это не ошибка структуры;
+* валюта: точная строка; без пересчёта, приведения регистра и обрезки; без требования ISO;
+* сумма: целое JSON (не bool, не строка, не float); `|claimed − expected| ≤ τ`, где **τ = 0 по
+  умолчанию** или фиксированный, заранее опубликованный τ для типа, обоснованный документированным
+  округлением;
+* ошибки структуры (→ −1) — только неверные типы значений, отсутствующие обязательные поля, больше 30
+  выводов, больше 10 идентификаторов доказательств в выводе, объяснение длиннее 1000 кодовых точек
+  Unicode. **Открытый вопрос толкования (O1):** о *неизвестных лишних полях* определения не говорят.
+  Текущий код их отклоняет (−1). Предлагается продолжать отклонять, потому что кейс называет неверную
+  структуру «неверная структура» и ни один опубликованный тест на лишние поля не опирается. Команде нужно
+  это подтвердить, а агенты никогда не должны добавлять поля в выводы;
+* паросочетание максимальной мощности в двудольном графе; неоднозначность разрешается лексикографически
+  по (issue_id по кодовым точкам, индекс вывода); дублирующиеся выводы остаются отдельными вершинами;
+* числовые результаты сравниваются с точностью 1e-9; деньги и шаги сравниваются точно как целые.
 
-## 4. Episode data and paired checks
+## 4. Данные эпизода и парные проверки
 
-* The jury transforms **files** (record permutation, bijective id replacement in all data and
-  references, matching edits in truth/provenance) and loads each copy through `reset(episode_dir)`.
-  The team does not provide a transform switch.
-* Our data must therefore be transformable by documentation alone. Every id-bearing field per file must be
-  listed: `row_id`, `doc_id`, `invoice_id`, `payment_id`, `entity_id`, `invoice_refs[].invoice_id`,
-  `affected_ids`, `evidence_ids`, provenance `id_map` values and `pre_mutation.tables`.
-* FX keys `date:SRC:TGT` are natural keys and are not replaced.
-* `line_items` order is not assumed harmless; nothing may depend on file order except the order in which
-  `list_records` returns records.
-* Replay of the same (episode, actions) must reproduce records, transitions and rewards exactly
-  (JSON-value equality).
+* Жюри преобразует **файлы** (перестановка записей, взаимно однозначная замена идентификаторов во всех
+  данных и ссылках, согласованные правки в truth и provenance) и загружает каждую копию через
+  `reset(episode_dir)`. Переключатель преобразований команда не предоставляет.
+* Поэтому наши данные должны быть преобразуемы по одной лишь документации. Нужно перечислить каждое поле с
+  идентификатором в каждом файле: `row_id`, `doc_id`, `invoice_id`, `payment_id`, `entity_id`,
+  `invoice_refs[].invoice_id`, `affected_ids`, `evidence_ids`, значения `id_map` в provenance и
+  `pre_mutation.tables`. (С ENV 0.3.0 к ним добавилось поле `refund_of` у платежей.)
+* Ключи курса `date:SRC:TGT` — естественные ключи, они не заменяются.
+* Порядок `line_items` не считается безвредным; от порядка в файле не может зависеть ничего, кроме порядка,
+  в котором `list_records` возвращает записи.
+* Повтор того же (эпизод, действия) должен точно воспроизводить записи, переходы и награды (равенство
+  значений JSON).
 
-## 5. Episode-time and budget rules
+## 5. Правила времени эпизода и бюджета
 
-* 100 actions including submit; submit is not an inspection step; invalid actions are inspection steps;
-  99 inspection actions + submit is accepted; 100 inspection actions truncate with empty findings.
-* 60 s from the start of reset to the end of the episode, **including policy compute**. This sets a
-  latency budget for learned agents: about 0.6 s per action at the full 100 actions, about 3 s per action
-  for a ~20-step full scan (derived from the rule, not measured).
+* 100 действий вместе с submit; submit не шаг проверки; невалидные действия — шаги проверки; 99 действий
+  проверки и submit принимаются; 100 действий проверки обрывают эпизод с пустыми выводами.
+* 60 с от начала reset до конца эпизода, **включая вычисления политики**. Это задаёт бюджет задержки для
+  обучаемых агентов: около 0.6 с на действие при всех 100 действиях и около 3 с на действие при полном
+  проходе примерно за 20 шагов (выведено из правила, не измерено).
 
-## 6. Consequences for the research architecture
+## 6. Следствия для исследовательской архитектуры
 
-1. **The agent interface is the adapter envelope.** Research action adapters emit
-   `{"name", "args"}` actions (or native actions translated 1:1). No research component may require a
-   different environment API.
-2. **No framework drives the design.** Gymnasium, SB3 and others may wrap the adapter for experiments, but
-   the official path never depends on them.
-3. **Exact ids ⇒ copy, never generate.** Learned components must select ids from observed records
-   (pointer or candidate selection) and copy them byte-for-byte; any normalisation inside an agent is a
-   bug.
-4. **τ = 0 ⇒ symbolic arithmetic is mandatory** for amounts, which reinforces the neuro-symbolic split
-   (learned decisions, exact computation).
-5. **Unknown types are FP, not −1** (after the fix): a malformed *field value* is cheap; a malformed
-   *structure* is catastrophic. Agents must validate structure before submit (the finding builder's
-   schema check).
-6. **Training data can be stored as episode directories.** The same loader serves research datasets,
-   fixtures and jury copies. Research splits stay in their own seed namespaces, and the official
-   directories are never used for training.
-7. **Evaluation of any learned agent** uses the same two-process setup (policy process + evaluator
-   process with `score_episode`) as the official checks.
+1. **Интерфейс агента — оболочка адаптера.** Исследовательские адаптеры действий выдают действия
+   `{"name", "args"}` (или нативные действия, переводимые один к одному). Ни один исследовательский
+   компонент не может требовать другого API окружения.
+2. **Проект не подстраивается под фреймворк.** Gymnasium, SB3 и другие могут оборачивать адаптер для
+   экспериментов, но официальный путь от них не зависит.
+3. **Точные идентификаторы ⇒ копировать, а не генерировать.** Обучаемые компоненты должны выбирать
+   идентификаторы из увиденных записей (указатель или выбор кандидата) и копировать их побайтно; любая
+   нормализация внутри агента — ошибка.
+4. **τ = 0 ⇒ символьная арифметика для сумм обязательна**, что подкрепляет нейросимвольное разделение
+   (решения обучаются, вычисления точные).
+5. **Неизвестные типы — FP, а не −1** (после исправления): неверное *значение поля* обходится дёшево,
+   неверная *структура* катастрофична. Агенты должны проверять структуру перед submit (проверка схемы в
+   сборщике выводов).
+6. **Обучающие данные можно хранить как каталоги эпизодов.** Один и тот же загрузчик обслуживает
+   исследовательские наборы данных, фикстуры и копии жюри. Исследовательские выборки остаются в своих
+   пространствах seed, а официальные каталоги для обучения не используются никогда.
+7. **Оценка любого обучаемого агента** использует ту же схему из двух процессов (процесс политики и процесс
+   оценщика с `score_episode`), что и официальные проверки.

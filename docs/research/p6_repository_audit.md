@@ -1,186 +1,197 @@
-# P6.1 — Repository and environment audit
+# P6.1 — аудит репозитория и окружения
 
-Status: research document, P6. Nothing in the official environment, evaluator, reward, schemas or
-baselines was modified to produce it.
+Статус: исследовательский документ этапа P6. Для его подготовки официальное окружение, оценщик, награда,
+схемы и базовые политики не менялись. Номера строк (`L123`), размеры и цифры описывают код на 2026-11-21
+(ENV 0.1.0).
 
-> **Read together with `p6_official_compliance_audit.md` and `p6_traceability_matrix.md`.** The official
-> check definitions (published 2026-11-20) add an adapter interface and exact matcher conventions. Against
-> those, several behaviours described below as implemented are non-compliant:
-> * case- and whitespace-insensitive id lookup and matching;
-> * τ = 1 by default;
-> * extra structural limits that turn false positives into −1.
+> **Читать вместе с `p6_official_compliance_audit.md` и `p6_traceability_matrix.md`.** Официальные
+> определения проверок (опубликованы 2026-11-20) добавляют интерфейс адаптера и точные соглашения matcher.
+> По сравнению с ними несколько описанных ниже как реализованные особенностей поведения не соответствуют
+> требованиям:
 >
-> The official integration entry points are also missing.
+> * поиск и сопоставление идентификаторов без учёта регистра и пробелов;
+> * τ = 1 по умолчанию;
+> * дополнительные структурные лимиты, превращающие ложные срабатывания в −1.
+>
+> Кроме того, отсутствуют официальные точки входа интеграции. Всё это исправлено на этапах P6-C 1–3.
 
-## 1. Method
+## 1. Метод
 
-Inspected on 2026-11-21 (working tree, no commits yet): `pyproject.toml`, `requirements.lock`, `README.md`,
-`docs/*.md`, `configs/*/suite.json`, every module in `src/ophanim/`, every test module in `tests/`, and the
-evaluation outputs in `runs/`. Claims below cite the code line that implements them. Measurements were
-taken with a read-only script that imports the package and runs episodes; it writes nothing to the
-repository (script kept outside the repo; its outputs are quoted in §9).
+Проверено 2026-11-21 (рабочее дерево, коммитов ещё нет): `pyproject.toml`, `requirements.lock`, `README.md`,
+`docs/*.md`, `configs/*/suite.json`, каждый модуль в `src/ophanim/`, каждый тестовый модуль в `tests/` и
+результаты оценки в `runs/`. Утверждения ниже ссылаются на строку кода, которая их реализует. Измерения
+сделаны скриптом только для чтения, который импортирует пакет и прогоняет эпизоды; в репозиторий он ничего
+не пишет (скрипт хранится вне репозитория, его результаты приведены в §9).
 
-## 2. Architecture snapshot
+## 2. Снимок архитектуры
 
-| package / module | lines | role (verified in code) |
+| пакет / модуль | строк | роль (проверено в коде) |
 |---|---:|---|
-| `env/environment.py` | 208 | `OphanimEnv`: `reset` L80, `step` L109, evaluator-only accessors L134–L160 |
-| `env/tools.py` | 136 | read-only `Toolbox` over public tables: `list_records` L97, `get_record` L113, `get_document` L123, `calculator` L132 |
-| `env/calculator.py` | 139 | hand-written decimal parser, limits L20–L24 |
-| `env/task.py` | 79 | task text `TASK_TEXT` L10, tool specs `TOOL_SPECS` L57 |
-| `schemas.py` | 177 | strict Pydantic models: actions L123–L152, `Finding` L108, `FindingsSubmission` L117 |
-| `evaluator/judge.py` | 84 | scoring: `submit` L65, `empty_answer` L74, `_invalid` L78 |
-| `evaluator/matcher.py` | 120 | `eligibility` L53, one-to-one `match` L72 (augmenting paths L91) |
+| `env/environment.py` | 208 | `OphanimEnv`: `reset` L80, `step` L109, методы только для оценщика L134–L160 |
+| `env/tools.py` | 136 | `Toolbox` только для чтения поверх публичных таблиц: `list_records` L97, `get_record` L113, `get_document` L123, `calculator` L132 |
+| `env/calculator.py` | 139 | написанный вручную десятичный парсер, лимиты L20–L24 |
+| `env/task.py` | 79 | текст задачи `TASK_TEXT` L10, описания инструментов `TOOL_SPECS` L57 |
+| `schemas.py` | 177 | строгие модели Pydantic: действия L123–L152, `Finding` L108, `FindingsSubmission` L117 |
+| `evaluator/judge.py` | 84 | оценка: `submit` L65, `empty_answer` L74, `_invalid` L78 |
+| `evaluator/matcher.py` | 120 | `eligibility` L53, взаимно однозначное `match` L72 (увеличивающие пути L91) |
 | `evaluator/reward.py` | 48 | `official_reward` L44 (`INSPECTION_COST` L25) |
-| `evaluator/oracle.py` | 49 | evaluator-only oracle (`OraclePolicy` L36) |
-| `evaluator/process_runner.py` | 148 | agent as child process (`run_episode_isolated` L91, scrubbed env L44) |
-| `evaluator/evaluation.py` | 227 | closed evaluation suite (`run_evaluation` L90, `derive_seed` L45) |
-| `agent_runtime.py` | 64 | agent-side JSON-lines loop (`serve` L28) |
-| `analytics.py` | 48 | `TrajectoryLogger` (7 public fields) |
-| `audit/*` | ~600 | independent stdlib-only reconciliation of public data |
-| `generator/*` | ~1,500 | hidden history, postings, causal injection, presentation |
-| `policies/*` | ~350 | random explorer, simple reconciliation, mark-everything, reference auditor |
+| `evaluator/oracle.py` | 49 | oracle только для оценщика (`OraclePolicy` L36) |
+| `evaluator/process_runner.py` | 148 | агент как дочерний процесс (`run_episode_isolated` L91, очищенное окружение L44) |
+| `evaluator/evaluation.py` | 227 | набор закрытой оценки (`run_evaluation` L90, `derive_seed` L45) |
+| `agent_runtime.py` | 64 | цикл агента на JSON lines (`serve` L28) |
+| `analytics.py` | 48 | `TrajectoryLogger` (7 публичных полей) |
+| `audit/*` | ~600 | независимая сверка публичных данных, только stdlib |
+| `generator/*` | ~1 500 | скрытая история, проводки, причинное внесение ошибок, представление |
+| `policies/*` | ~350 | случайный исследователь, простая сверка, «пометить всё», reference auditor |
 
-Runtime dependency: Pydantic 2.14.4 only (`pyproject.toml`). No Gymnasium, NumPy or PyTorch.
+Зависимость времени выполнения — только Pydantic 2.14.4 (`pyproject.toml`). Ни Gymnasium, ни NumPy, ни
+PyTorch.
 
-## 3. Episode lifecycle
+## 3. Жизненный цикл эпизода
 
-1. `reset(seed, config, *, options)` (L80): validates `EpisodeConfig`, calls `generate_episode`, builds a
-   `Toolbox` from **public tables only** and a `Judge` holding the sealed truth, starts the wall clock.
-   `seed=None` draws a random seed (Gymnasium convention) and is therefore not reproducible.
-2. `step(action)` (L109): if finished → `episode_finished` error, reward 0, previous flags; if the wall clock
-   exceeds 60 s → truncation; otherwise consumes one step, dispatches, and truncates at 100 steps.
-3. `submit` (`_submit` L179): `inspection_steps = steps − 1`; the judge validates the findings
-   (invalid → −1); the episode terminates. `_truncate` (L193) scores an empty answer with
-   `inspection_steps = steps consumed`.
-4. Visible reward (`_visible_reward` L199): the true terminal reward in `mode="train"`, 0.0 in `mode="eval"`.
+1. `reset(seed, config, *, options)` (L80): проверяет `EpisodeConfig`, вызывает `generate_episode`, строит
+   `Toolbox` **только из публичных таблиц** и `Judge` с закрытым эталоном, запускает часы. `seed=None`
+   выбирает случайный seed (соглашение Gymnasium) и поэтому невоспроизводим.
+2. `step(action)` (L109): если эпизод завершён → ошибка `episode_finished`, награда 0, прежние флаги; если
+   часы показывают больше 60 с → обрыв; иначе тратится один шаг, выполняется действие, на 100 шагах эпизод
+   обрывается.
+3. `submit` (`_submit` L179): `inspection_steps = steps − 1`; судья проверяет выводы (невалидные → −1);
+   эпизод завершается. `_truncate` (L193) оценивает пустой ответ с `inspection_steps = потраченные шаги`.
+4. Видимая награда (`_visible_reward` L199): настоящая итоговая награда в `mode="train"`, 0.0 в
+   `mode="eval"`.
 
-## 4. What the agent observes
+## 4. Что видит агент
 
-**Reset observation** (L97–L104): `task` (≈5 KB text with the four error definitions, evidence rules and
-the reward formula), `manifest` (episode id, company name, profile label, base currency, period, offset,
-record counts, rounding), `policy` (`policy.json`: accounting-date rule, FX rule, rounding, accounts,
-posting rules, tolerance), `tools` (specs + examples), `remaining_steps` (100), `time_budget_seconds`.
-**Reset info**: `env_version`, `schema_version`, `mode`.
+**Наблюдение reset** (L97–L104): `task` (около 5 КБ текста с определениями четырёх типов ошибок, правилами
+доказательств и формулой награды), `manifest` (идентификатор эпизода, название компании, метка профиля,
+базовая валюта, период, смещение, число записей, округление), `policy` (`policy.json`: правило учётной
+даты, правило курса, округление, счета, правила проводок, допуск), `tools` (описания и примеры),
+`remaining_steps` (100), `time_budget_seconds`. **info reset**: `env_version`, `schema_version`, `mode`.
 
-**Step observation** (L126, L205): exactly `{ok, result, error{code, message}, remaining_steps}`.
-`result` is the tool output only. **Step info**: `{}` except at truncation
-(`{"truncation_reason", "final_answer": "empty"}`).
+**Наблюдение шага** (L126, L205): ровно `{ok, result, error{code, message}, remaining_steps}`. `result` —
+только вывод инструмента. **info шага**: `{}`, кроме обрыва (`{"truncation_reason", "final_answer": "empty"}`).
 
-Findings for learning research:
+Выводы для исследований обучения:
 
-* Observations are fully structured JSON, but **contain no history**: no previous actions, no previously
-  returned records, no running summary. Memory is entirely the agent's responsibility.
-* The environment is **deterministic** given (seed, config, secret, `ENV_VERSION`, action sequence);
-  tested at step level (`tests/integration/test_env_contract.py::test_same_seed_config_actions_reproduce_everything`)
-  and over whole trajectories (`tests/reproducibility/`). The only non-deterministic element is the
-  wall-clock limit.
-* The public dataset is **static** during an episode; only the step counter changes.
+* Наблюдения — полностью структурированный JSON, но **без истории**: нет прошлых действий, ранее
+  полученных записей, накопленной сводки. Память — целиком забота агента.
+* Окружение **детерминировано** при заданных (seed, config, секрет, `ENV_VERSION`, последовательность
+  действий); проверено на уровне шагов
+  (`tests/integration/test_env_contract.py::test_same_seed_config_actions_reproduce_everything`) и по целым
+  траекториям (`tests/reproducibility/`). Единственный недетерминированный элемент — лимит по часам.
+* Публичный набор данных во время эпизода **статичен**; меняется только счётчик шагов.
 
-**Hidden from the agent**: the sealed truth (issues, amounts, allowed evidence sets), provenance
-(seed, config, id map, clean snapshot, injections), the generation secret, the judge log and outcome, and
-in eval mode the reward. Partially observable: every public record not yet retrieved.
+**Скрыто от агента**: закрытый эталон (проблемы, суммы, допустимые наборы доказательств), provenance (seed,
+конфигурация, таблица идентификаторов, чистый снимок, внесённые ошибки), секрет генерации, журнал и исход
+судьи, а в режиме eval — награда. Частично наблюдаемо: каждая публичная запись, которую ещё не получили.
 
-## 5. The five tools
+## 5. Пять инструментов
 
-| tool | input (schema) | required / optional | output | errors (fixed codes) | step cost | information value | argument kinds |
+| инструмент | вход (схема) | обязательные / необязательные | выход | ошибки (фиксированные коды) | цена в шагах | информационная ценность | виды аргументов |
 |---|---|---|---|---|---|---|---|
-| `list_records` | `table: str≤32`, `cursor: str≤128 \| null`, `limit: int` (`ListRecordsAction` L123) | `table` required; `cursor` default null; `limit` default 50 | `{table, records[≤limit], next_cursor, total}` | `unknown_table`, `invalid_limit` (outside 1–50), `invalid_cursor`, `invalid_action` (type errors) | 1 | up to 50 complete records per step; the only way to *discover* ids | categorical (4 tables); opaque token obtained from the previous page; integer, dominated by 50 |
-| `get_record` | `table`, `id: str≤64` (L130) | both required | `{table, record}` | `unknown_table`, `unknown_id` | 1 | one record; ledger/invoice/payment ids must be discovered first; **FX keys are constructible** (`date:SRC:BASE`) from public dates and currencies, enabling targeted rate lookups without paging | categorical + pointer/string |
-| `get_document` | `doc_id: str≤64` (L136) | required | `{doc_type, document}` | `unknown_document` | 1 | one invoice or payment; identical content to the `invoices`/`payments` rows | pointer |
-| `calculator` | `expression: str≤512` (≤256 parsed, L20) | required | `{result}` exact decimal string | `invalid_expression`, `number_too_long`, `expression_too_long`, `expression_too_complex`, `division_by_zero`, `result_out_of_range` | 1 | **none about the hidden state** (pure function of its input); useful only to agents that cannot compute reliably themselves | grammar-constrained text |
-| `submit` | `findings` validated as `FindingsSubmission` (L117) | `findings` required, no other keys | `{status: "submitted"}` or `invalid_submission` | malformed → −1 and termination | ends episode (not an inspection step) | — | structured set: ≤30 × {type (4), affected id set (pointers), amount (exact integer), currency, evidence id set ≤10 (pointers + constructible FX keys), explanation (ignored)} |
+| `list_records` | `table: str≤32`, `cursor: str≤128 \| null`, `limit: int` (`ListRecordsAction` L123) | `table` обязателен; `cursor` по умолчанию null; `limit` по умолчанию 50 | `{table, records[≤limit], next_cursor, total}` | `unknown_table`, `invalid_limit` (вне 1–50), `invalid_cursor`, `invalid_action` (ошибки типа) | 1 | до 50 полных записей за шаг; единственный способ *узнать* идентификаторы | категориальный (4 таблицы); непрозрачный токен с предыдущей страницы; целое, разумно брать 50 |
+| `get_record` | `table`, `id: str≤64` (L130) | оба обязательны | `{table, record}` | `unknown_table`, `unknown_id` | 1 | одна запись; идентификаторы главной книги, счетов и платежей нужно сначала узнать; **ключи курса можно построить** (`date:SRC:BASE`) из публичных дат и валют, что позволяет точечно запрашивать курсы без постраничного обхода | категориальный + указатель/строка |
+| `get_document` | `doc_id: str≤64` (L136) | обязателен | `{doc_type, document}` | `unknown_document` | 1 | один счёт или платёж; содержимое совпадает со строками `invoices`/`payments` | указатель |
+| `calculator` | `expression: str≤512` (разбирается до 256, L20) | обязателен | `{result}` — точная десятичная строка | `invalid_expression`, `number_too_long`, `expression_too_long`, `expression_too_complex`, `division_by_zero`, `result_out_of_range` | 1 | **ничего о скрытом состоянии** (чистая функция входа); полезен только агентам, которые сами не умеют надёжно считать | текст, ограниченный грамматикой |
+| `submit` | `findings`, проверяется как `FindingsSubmission` (L117) | `findings` обязателен, других ключей нет | `{status: "submitted"}` или `invalid_submission` | неверная структура → −1 и завершение | завершает эпизод (не шаг проверки) | — | структурированное множество: до 30 × {тип (4), множество затронутых идентификаторов (указатели), сумма (точное целое), валюта, множество доказательств до 10 (указатели и построенные ключи курса), объяснение (не читается)} |
 
-Invalid action names or non-object actions → `invalid_action`, one step consumed (L163–L177). Agent input
-is never echoed in error messages.
+Неверные имена действий или действия не в виде объекта → `invalid_action`, тратится один шаг
+(L163–L177). Ввод агента никогда не повторяется в сообщениях об ошибках.
 
-**Action-space classification.** A union of five *parameterized* action families whose arguments are
-categorical, ordinal, opaque tokens, pointers into a **history-dependent, episode-specific id
-vocabulary**, free text (calculator), and a terminal **set-valued structured** action. It is not
-Discrete, MultiDiscrete or Box; it is a parameterized/hierarchical action space with pointer arguments
-and a combinatorial terminal action. Gymnasium does provide `Dict`, `Tuple`, `Sequence`, `Text`, `Graph`
-and `OneOf` spaces (official docs, see references), but Stable-Baselines3 supports only Box, Discrete,
-MultiDiscrete and MultiBinary **action** spaces (verified), so any off-the-shelf use requires an adapter.
+**Классификация пространства действий.** Объединение пяти *параметризованных* семейств действий,
+аргументы которых — категориальные и порядковые значения, непрозрачные токены, указатели в **зависящий от
+истории словарь идентификаторов конкретного эпизода**, свободный текст (калькулятор) и завершающее
+**структурированное действие со значением-множеством**. Это не Discrete, не MultiDiscrete и не Box, а
+параметризованное (иерархическое) пространство действий с аргументами-указателями и комбинаторным
+завершающим действием. В Gymnasium есть пространства `Dict`, `Tuple`, `Sequence`, `Text`, `Graph` и
+`OneOf` (официальная документация, см. источники), но Stable-Baselines3 поддерживает только пространства
+**действий** Box, Discrete, MultiDiscrete и MultiBinary (проверено), поэтому любое готовое решение требует
+адаптера.
 
-## 6. Reward
+## 6. Награда
 
-* Computed only in `Judge._score` (L46) via `matcher.match` and `reward.official_reward` (L44); at submit or
-  truncation. **No intermediate reward** (every exploration step returns 0.0, environment L131).
-* In `mode="eval"` the agent never sees a non-zero reward (L199); diagnostics stay in the judge log.
-* Sparse, terminal, set-valued, clipped: `clip(2·F1 − 1 − 0.002·k, −1, 1)`.
-* Incentives (derived, then measured in §9):
-  * **Premature empty submission** is attractive for weak agents: an empty answer at step 1 earns +1 on
-    clean books and −1 otherwise, i.e. `2·p_clean − 1`.
-  * **Clipping removes the step cost whenever F1 = 0** (`2·0 − 1 − 0.002k ≤ −1`), so failing agents get no
-    signal about exploration cost.
-  * A positive reward needs `F1 > 0.5 + 0.001k`; exploration is cheap (≤ 0.198 for 99 steps), so excessive
-    exploration is mildly penalised while missing an issue is heavily penalised.
+* Вычисляется только в `Judge._score` (L46) через `matcher.match` и `reward.official_reward` (L44); при
+  submit или обрыве. **Промежуточной награды нет** (каждый шаг исследования возвращает 0.0, окружение
+  L131).
+* В `mode="eval"` агент никогда не видит ненулевой награды (L199); диагностика остаётся в журнале судьи.
+* Редкая, итоговая, зависящая от множества, обрезанная: `clip(2·F1 − 1 − 0.002·k, −1, 1)`.
+* Стимулы (выведены, затем измерены в §9):
+  * **Преждевременная пустая отправка** привлекательна для слабых агентов: пустой ответ на шаге 1 даёт +1
+    на чистых книгах и −1 на остальных, то есть `2·p_clean − 1`.
+  * **Обрезка убирает стоимость шагов, когда F1 = 0** (`2·0 − 1 − 0.002k ≤ −1`), поэтому агенты, которые
+    ничего не находят, не получают сигнала о стоимости исследования.
+  * Для положительной награды нужно `F1 > 0.5 + 0.001k`; исследование дёшево (не больше 0.198 за 99
+    шагов), поэтому лишнее исследование штрафуется слабо, а пропуск проблемы — сильно.
 
-## 7. Baselines and their value as demonstrations
+## 7. Базовые политики и их ценность как демонстраций
 
-| baseline | actual behaviour (code) | usable as demonstration? |
+| политика | фактическое поведение (код) | годится как демонстрация? |
 |---|---|---|
-| Random explorer (`policies/random_explorer.py` L54, L73) | 5–40 random actions incl. invalid ones, then 0–3 random findings from seen ids; stream keyed by policy seed + episode id | No (as expert). Useful as exploration noise and as negative examples |
-| Simple reconciliation (`policies/simple_reconciliation.py` L55) | full scan, then naive rules (same supplier+total; Suspense present; date-as-written FX; UTC period check) | No (as expert): 225 FP vs 37 TP on the closed suite. Useful as *hard negatives* that expose red herrings |
-| Mark everything (`policies/mark_everything.py` L25) | lists invoices+payments, submits 30 findings | No; attack/negative only |
-| Reference auditor (`policies/reference_auditor.py` L34–L62) | pages every table in a **fixed order** (ledger, invoices, payments, fx) with limit 50, then runs `audit.reconcile` on what it saw and submits | Partly. Its *acquisition* actions are a deterministic function of table sizes — they contain **no decision content**. Its *submission* is a correct, observation-consistent label for the finding-construction sub-problem |
-| Oracle (`evaluator/oracle.py` L36–L49) | submits the sealed truth at step 1, with no inspection | **No.** Its action is not a function of anything the agent can observe (the ids were never revealed); imitating it would teach fabrication of ids. It must stay evaluator-only |
+| Случайный исследователь (`policies/random_explorer.py` L54, L73) | 5–40 случайных действий, включая невалидные, затем 0–3 случайных вывода из увиденных идентификаторов; поток привязан к seed политики и идентификатору эпизода | Нет (как эксперт). Полезен как шум исследования и как отрицательные примеры |
+| Простая сверка (`policies/simple_reconciliation.py` L55) | полный обход, затем наивные правила (тот же поставщик и итог; есть Suspense; курс по дате «как записано»; проверка периода по UTC) | Нет (как эксперт): 225 FP против 37 TP на закрытом наборе. Полезна как *трудные отрицательные примеры*, которые выявляют ложные следы |
+| Пометить всё (`policies/mark_everything.py` L25) | получает счета и платежи, отправляет 30 выводов | Нет; только атака или отрицательный пример |
+| Reference auditor (`policies/reference_auditor.py` L34–L62) | постранично обходит все таблицы в **фиксированном порядке** (ledger, invoices, payments, fx) с limit 50, затем запускает `audit.reconcile` на увиденном и отправляет ответ | Частично. Его действия *сбора информации* — детерминированная функция размеров таблиц, **решений в них нет**. Его *ответ* — правильная, согласованная с наблюдениями метка для подзадачи построения выводов |
+| Oracle (`evaluator/oracle.py` L36–L49) | отправляет закрытый эталон на шаге 1, без проверки данных | **Нет.** Его действие не является функцией от того, что может наблюдать агент (идентификаторы никогда не раскрывались); подражание ему научило бы выдумывать идентификаторы. Он должен оставаться только у оценщика |
 
-## 8. Isolation and evaluation (verified)
+## 8. Изоляция и оценка (проверено)
 
-* Closed evaluation runs each agent as a child process with a scrubbed environment (no `OPHANIM_*`), an
-  empty working directory, and writes on a separate thread (`process_runner.py` L44, L62, L91).
-* Generation is keyed by `HMAC(secret, seed)` in closed runs (`rng.py` L59); evaluator artefacts are written
-  only after all agents finish (`evaluation.py`).
-* **Relevant to future training code:** the in-process `OphanimEnv` exposes `evaluator_outcome()`,
-  `evaluator_log()`, `evaluator_abort()` (L134–L160) and holds the judge (with the truth) in `_state`. Any
-  learning code that holds an `OphanimEnv` object can reach evaluator data. This is acceptable for the
-  existing open-mode tests but is a **leak path for any future training adapter** (addressed in
+* Закрытая оценка запускает каждого агента как дочерний процесс с очищенным окружением (без `OPHANIM_*`),
+  пустым рабочим каталогом и записью в отдельном потоке (`process_runner.py` L44, L62, L91).
+* В закрытых прогонах генерация подписывается `HMAC(secret, seed)` (`rng.py` L59); файлы оценщика
+  записываются только после завершения всех агентов (`evaluation.py`).
+* **Важно для будущего кода обучения:** внутрипроцессный `OphanimEnv` предоставляет `evaluator_outcome()`,
+  `evaluator_log()`, `evaluator_abort()` (L134–L160) и держит судью (с эталоном) в `_state`. Любой код
+  обучения, у которого есть объект `OphanimEnv`, может добраться до данных оценщика. Для существующих тестов
+  открытого режима это допустимо, но для любого будущего адаптера обучения это **путь утечки** (решение — в
   `p6_agent_architecture.md`).
 
-## 9. Measurements (read-only, executed during P6)
+## 9. Измерения (только чтение, выполнены на этапе P6)
 
-| quantity | measured value | how |
+| величина | измеренное значение | как |
 |---|---|---|
-| Full-scan cost (pages of 50) | small 9–19 (median 14), **medium 12–22 (median 18)**, large 17–26 (median 22) | 60 seeds per size, default config |
-| Share of full-scan pages spent on `fx` | small 57 %, medium 44 %, large 38 % | same |
-| Ledger rows | small 149–222, medium 235–344, large 357–455 | same |
-| Pointer vocabulary (row/doc/invoice/payment ids + FX keys) | medium 659–1,178 (median 948) | same |
-| Observation volume of a full scan | reset 7.6 KB; full scan ≈ 150 KB of JSON (medium, seed 7) | serialized JSON bytes |
-| Reference auditor steps on the closed suite | 15–26 (median 20.5) | 20 episodes, verify settings |
-| **Silent policy** (submit `[]` immediately) on the closed suite | **mean −0.500** (clean +1.000, interacting −1.000, mixed −1.000) | 20 episodes, verify settings |
-| Random explorer returns on the 15 erroneous closed episodes | **all exactly −1.0** (zero variance) | `runs/verify/report.json` |
-| Issues per closed episode | 0 ×5, then 2–5, one with 12 | truth of the 20 episodes |
-| Minimal evidence-set size | duplicate 3; fx 3; period 2; allocation 3–5 | allowed sets in truth |
+| Стоимость полного обхода (страницы по 50) | small 9–19 (медиана 14), **medium 12–22 (медиана 18)**, large 17–26 (медиана 22) | 60 seed на размер, конфигурация по умолчанию |
+| Доля страниц полного обхода, приходящаяся на `fx` | small 57 %, medium 44 %, large 38 % | так же |
+| Строк главной книги | small 149–222, medium 235–344, large 357–455 | так же |
+| Словарь указателей (идентификаторы строк, документов, счетов, платежей и ключи курса) | medium 659–1 178 (медиана 948) | так же |
+| Объём наблюдений полного обхода | reset 7.6 КБ; полный обход ≈ 150 КБ JSON (medium, seed 7) | байты сериализованного JSON |
+| Шаги reference auditor на закрытом наборе | 15–26 (медиана 20.5) | 20 эпизодов, настройки verify |
+| **Молчащая политика** (сразу отправить `[]`) на закрытом наборе | **среднее −0.500** (чистые +1.000, взаимодействующие −1.000, смешанные −1.000) | 20 эпизодов, настройки verify |
+| Награды случайного исследователя на 15 закрытых эпизодах с ошибками | **все ровно −1.0** (нулевая дисперсия) | `runs/verify/report.json` |
+| Проблем в закрытом эпизоде | 0 ×5, затем 2–5, один эпизод с 12 | эталон 20 эпизодов |
+| Минимальный размер набора доказательств | дубль 3; курс 3; период 2; распределение 3–5 | допустимые наборы в эталоне |
 
-"Verify settings" = `DEFAULT_SEED_BASE` with secret `ophanim-verify-local-secret`, as used by `ophanim verify`.
+«Настройки verify» = `DEFAULT_SEED_BASE` с секретом `ophanim-verify-local-secret`, как в `ophanim verify`.
 
-## 10. Discrepancies found
+## 10. Найденные расхождения
 
-1. **Historical results.** −0.662 (simple reconciliation) and −0.805 (random explorer) come from
-   `runs/official-evaluation/report.json`, which was produced with a **different hidden seed base**
-   (hash `590f98b04d916134`) on Python 3.14.3 — not by any command in the P5 report. The P5/verify runs
-   (seed base hash `0fb6941e81197c8d`) give −0.599 and −0.806. Both are correct for their episode sets; the
-   gap is **episode-sampling variance across 20-episode suites**, which `docs/results.md` does not discuss.
-2. `runs/verify/report.json` was regenerated by a later run on Python 3.14.3 and is numerically identical to
-   the 3.11 report — evidence of cross-version evaluation determinism.
-3. **Analytics gap.** The original P0 specification (§2.6) asked for records inspected, documents inspected
-   and evidence validity. `EpisodeRecord` (`evaluator/runner.py` L17) has none of them; they are recoverable
-   from public trajectories and judge verdicts but are not computed.
-4. The original "investigation graph" (P0 §2.3) exists only implicitly (links inside the injector and the
-   auditor); there is no graph module. `docs/design_note.md` states this.
-5. Size ranges in `docs/data_model.md` (e.g. large 336–429 rows) predate the addition of three profiles;
-   measured ranges are in §9 (large 357–455).
-6. `OphanimEnv` follows Gymnasium semantics but defines no `action_space`/`observation_space` and no
-   `render`/`close` (allowed by the case; relevant for library adapters).
+1. **Исторические результаты.** −0.662 (простая сверка) и −0.805 (случайный исследователь) взяты из
+   `runs/official-evaluation/report.json`, полученного с **другим скрытым seed base** (хеш
+   `590f98b04d916134`) на Python 3.14.3, — не командой из отчёта P5. Прогоны P5/verify (хеш seed base
+   `0fb6941e81197c8d`) дают −0.599 и −0.806. Оба значения верны для своих наборов эпизодов; разница — это
+   **разброс выборки эпизодов между наборами из 20 эпизодов**, который `docs/results.md` не обсуждает.
+2. `runs/verify/report.json` перезаписан более поздним прогоном на Python 3.14.3 и численно идентичен
+   отчёту 3.11 — свидетельство детерминизма оценки между версиями.
+3. **Пробел в аналитике.** Исходная спецификация P0 (§2.6) просила просмотренные записи, просмотренные
+   документы и валидность доказательств. В `EpisodeRecord` (`evaluator/runner.py` L17) их нет; они
+   восстанавливаются из публичных траекторий и вердиктов судьи, но не вычисляются.
+4. Исходный «граф расследования» (P0 §2.3) существует только неявно (связи внутри модуля внесения ошибок и
+   аудитора); отдельного модуля графа нет. `docs/design_note.md` это указывает.
+5. Диапазоны размеров в `docs/data_model.md` (например, large 336–429 строк) появились до добавления трёх
+   профилей; измеренные диапазоны — в §9 (large 357–455). В ENV 0.3.0 `data_model.md` обновлён по
+   опубликованным эпизодам.
+6. `OphanimEnv` следует семантике Gymnasium, но не определяет `action_space`/`observation_space` и
+   `render`/`close` (кейс это допускает; важно для адаптеров библиотек).
 
-## 11. Limitations that matter for learning research
+## 11. Ограничения, важные для исследований обучения
 
-* No observation history → every learned agent needs explicit memory.
-* Pointer-valued arguments over an episode-specific vocabulary of ~10³ ids.
-* Terminal set-valued action with exact numeric fields (±1 minor unit).
-* Sparse, clipped reward with a flat −1 plateau for every policy that gets no true positive.
-* A cheap, near-optimal information-acquisition strategy (full scan, 12–22 steps on medium) exists, so the
-  official reward leaves little headroom for "smarter investigation" (≤ ≈0.044 on medium).
-* The in-process environment object exposes evaluator data; training code must not hold it.
-* The 60 s wall-clock budget constrains slow (e.g. LLM) agents; it is enforced in the official setting.
+* Нет истории наблюдений → каждому обучаемому агенту нужна явная память.
+* Аргументы-указатели в словаре конкретного эпизода размером около 10³ идентификаторов.
+* Завершающее действие-множество с точными числовыми полями (на этапе P6 — ±1 минимальная единица; с ENV
+  0.2.0 допуск τ = 0).
+* Редкая обрезанная награда с ровным плато −1 для каждой политики без true positive.
+* Существует дешёвая, близкая к оптимальной стратегия сбора информации (полный обход, 12–22 шага на
+  medium), поэтому официальная награда оставляет мало пространства для «более умного расследования»
+  (не больше ≈0.044 на medium).
+* Внутрипроцессный объект окружения раскрывает данные оценщика; код обучения не должен его держать.
+* Бюджет 60 с по часам ограничивает медленных агентов (например, LLM); в официальной постановке он
+  соблюдается.

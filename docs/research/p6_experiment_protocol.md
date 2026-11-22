@@ -1,181 +1,194 @@
-# P6.5–P6.7 — Experiment protocol
+# P6.5–P6.7 — протокол экспериментов
 
-The official reward and the official closed suite are **unchanged and evaluation-only**. Everything else
-in this document is research infrastructure that sits beside them.
+Официальная награда и официальный закрытый набор **не меняются и используются только для оценки**. Всё
+остальное в этом документе — исследовательская инфраструктура, которая существует рядом с ними.
 
-## 1. Data separation
+## 1. Разделение данных
 
-| set | source | seeds | use | never used for |
+| набор | источник | seed | использование | никогда не используется для |
 |---|---|---|---|---|
-| Official closed suite | `configs/eval/official_suite.json` + hidden seed base + secret | derived at run time, secret-keyed | milestone reporting only | training, tuning, model selection, early stopping |
-| Open published data | `data/train`, `data/dev` (20 episodes) | 1001–1010, 2001–2010 | debugging, demos, smoke tests | headline results (too small) |
-| `research/train` | procedural, sampled configs | namespace `research-train` | training, demonstrations | evaluation |
-| `research/val` | fixed 200 episodes | namespace `research-val` | hyper-parameters, early stopping | final claims |
-| `research/test-iid` | fixed 500 episodes | namespace `research-test` | final in-distribution results | anything before the final run |
-| `research/test-ood-*` | fixed 200 each (below) | own namespaces | generalisation results | training or tuning |
-| demonstrations | scripted demonstrators on `research/train` only | inherited | BC / DAgger | — |
+| Официальный закрытый набор | `configs/eval/official_suite.json` + скрытый seed base + секрет | вычисляются во время запуска, с секретным ключом | только отчёты по контрольным точкам | обучения, настройки, выбора модели, ранней остановки |
+| Открытые опубликованные данные | `data/train`, `data/dev` (20 эпизодов) | 1001–1010, 2001–2010 | отладка, демонстрации, smoke-тесты | главных результатов (слишком мало) |
+| `research/train` | процедурная генерация, выборка конфигураций | пространство `research-train` | обучение, демонстрации | оценки |
+| `research/val` | фиксированные 200 эпизодов | пространство `research-val` | гиперпараметры, ранняя остановка | итоговых заявлений |
+| `research/test-iid` | фиксированные 500 эпизодов | пространство `research-test` | итоговые результаты внутри распределения | чего-либо до финального прогона |
+| `research/test-ood-*` | по 200 фиксированных (ниже) | собственные пространства | результаты обобщения | обучения или настройки |
+| демонстрации | заранее написанные демонстраторы только на `research/train` | наследуются | BC / DAgger | — |
 
-Seeds come from `derive_seed(namespace, split, i)` (the existing function, `evaluator/evaluation.py` L45),
-so namespaces cannot collide with each other or with the official derivation. Every trajectory and
-dataset record carries its namespace and config fingerprint, and a P7 test asserts disjointness.
-Procedural generation gives effectively unlimited training episodes (21–43 ms each, measured), so small
-fixed training sets are unnecessary.
+Seed берутся из `derive_seed(namespace, split, i)` (существующая функция, `evaluator/evaluation.py` L45),
+поэтому пространства имён не могут пересечься ни друг с другом, ни с официальным выводом seed. Каждая
+траектория и каждая запись набора данных несёт своё пространство имён и отпечаток конфигурации, а тест на P7
+проверяет непересечение. Процедурная генерация даёт практически неограниченное число обучающих эпизодов
+(21–43 мс на эпизод, измерено), поэтому небольшие фиксированные обучающие наборы не нужны.
 
-**OOD test sets** (the training sampler excludes the held-out factor):
+**Наборы для проверки вне распределения (OOD)** (сэмплер обучения исключает отложенный фактор):
 
-| set | held-out factor |
+| набор | отложенный фактор |
 |---|---|
-| `ood-profile` | 2 of 6 company profiles (e.g. logistics, consulting) never seen in training |
-| `ood-combination` | type co-occurrences never seen together in training (e.g. `fx_rate`+`period_attribution`; scenario S2) |
-| `ood-size` | train small/medium, test large |
-| `ood-distractor` | train low/normal, test high red-herring density |
-| `presentation` | metamorphic variants of `test-iid` (shuffled order, new ids/names, company-offset timestamps) |
-| `scarcity` (research regime) | agent-side self-imposed budgets (e.g. ≤ 8 or ≤ 12 steps); official reward still computed by the official judge |
+| `ood-profile` | 2 из 6 профилей компаний (например, logistics, consulting) не встречаются при обучении |
+| `ood-combination` | сочетания типов, которые при обучении вместе не встречаются (например, `fx_rate`+`period_attribution`; сценарий S2) |
+| `ood-size` | обучение на small/medium, проверка на large |
+| `ood-distractor` | обучение на low/normal, проверка при высокой плотности ложных следов |
+| `presentation` | метаморфные варианты `test-iid` (перемешанный порядок, новые идентификаторы и имена, время в смещении компании) |
+| `scarcity` (исследовательский режим) | бюджеты, которые агент накладывает на себя сам (например, не больше 8 или 12 шагов); официальная награда по-прежнему считается официальным судьёй |
 
-## 2. Reference points (all on identical episodes)
+## 2. Точки отсчёта (все на одинаковых эпизодах)
 
-| reference | why it is reported |
+| точка отсчёта | зачем её приводить |
 |---|---|
-| silent (submit `[]` immediately) | the degenerate optimum for weak agents; **−0.500** on the current closed suite (measured), `2·p_clean − 1` in general |
-| random explorer, simple reconciliation, mark-everything | official baselines |
-| reference auditor | scripted, implements the published rules exactly; an *upper public-data reference*, not a learning baseline |
-| oracle | ceiling (evaluator-only); says nothing about difficulty |
+| молчание (сразу отправить `[]`) | вырожденный оптимум для слабых агентов; **−0.500** на текущем закрытом наборе (измерено), в общем случае `2·p_clean − 1` |
+| случайный исследователь, простая сверка, «пометить всё» | официальные базовые политики |
+| reference auditor | заранее написан, точно реализует опубликованные правила; *верхняя точка отсчёта по публичным данным*, а не базовая политика обучения |
+| oracle | потолок (только у оценщика); о сложности ничего не говорит |
 
-A learned agent can exceed the reference auditor on the official reward only by reading less (≤ ≈0.044 per
-medium episode). Learning claims are therefore made against the silent and simple-reconciliation
-references, as a gap to the reference auditor, and on OOD sets.
+Обучаемый агент может превзойти reference auditor по официальной награде только за счёт более короткого
+чтения (не больше ≈0.044 на эпизод medium). Поэтому заявления об обучении делаются относительно молчания и
+простой сверки, как разрыв до reference auditor и на наборах OOD.
 
-## 3. Metrics
+## 3. Метрики
 
-**Official (unchanged):** reward; P, R, F1, TP, FP, FN (judge).
+**Официальные (без изменений):** награда; P, R, F1, TP, FP, FN (судья).
 
-**Research metrics** (computed from public trajectories plus the judge log, never shown to the agent):
+**Исследовательские метрики** (вычисляются по публичным траекториям и журналу судьи, агенту никогда не
+показываются):
 
-| group | metric | definition |
+| группа | метрика | определение |
 |---|---|---|
-| audit quality | per-type TP / FP / FN | judge verdicts (`claimed_type`, unmatched issues) |
-| efficiency | steps; inspection steps; tool-call histogram | trajectory |
-| efficiency | records revealed, documents revealed, coverage per table | distinct ids returned in observations |
-| efficiency | redundant reads; invalid-action count; runtime | trajectory |
-| learning | return and F1 vs environment steps and episodes; area under the curve; episodes to reach val F1 ≥ 0.8 | training logs |
-| reliability | mean ± std across training seeds; IQM and 95 % interval estimates as recommended by Agarwal et al. (2021) — computed here with a percentile bootstrap (our choice); failure rate (R = −1), invalid-submission rate, truncation rate | evaluation |
-| generalisation | gap = metric(test-iid) − metric(test-ood-*), with paired bootstrap CI | evaluation |
-| evidence quality | valid-evidence rate (no unknown ids); unsupported-finding rate (`evidence_unknown_id` or `evidence_insufficient` as the best-candidate reason); evidence completeness among otherwise-correct findings | judge reasons |
-| near-miss profile | distribution of best-candidate rejection reasons (type / ids / amount / currency / evidence) | judge reasons |
-| calibration | expected calibration error and reliability diagrams of per-candidate confidences (Guo et al. 2017) | agent-side log + labels on research sets |
-| invariance | metamorphic agreement: identical decisions up to id mapping | paired runs |
+| качество аудита | TP / FP / FN по типам | вердикты судьи (`claimed_type`, несопоставленные проблемы) |
+| эффективность | шаги; шаги проверки; гистограмма вызовов инструментов | траектория |
+| эффективность | раскрытые записи, раскрытые документы, покрытие по таблицам | различные идентификаторы, возвращённые в наблюдениях |
+| эффективность | повторные чтения; число невалидных действий; время выполнения | траектория |
+| обучение | доход и F1 в зависимости от шагов и эпизодов окружения; площадь под кривой; эпизоды до val F1 ≥ 0.8 | журналы обучения |
+| надёжность | среднее ± стандартное отклонение по seed обучения; IQM и 95-процентные интервальные оценки по рекомендации Agarwal et al. (2021) — здесь считаются процентильным бутстрепом (наш выбор); доля неудач (R = −1), доля невалидных ответов, доля обрывов | оценка |
+| обобщение | разрыв = метрика(test-iid) − метрика(test-ood-*) с парным бутстреп-интервалом | оценка |
+| качество доказательств | доля валидных доказательств (без неизвестных идентификаторов); доля неподтверждённых выводов (`evidence_unknown_id` или `evidence_insufficient` как причина для ближайшего кандидата); полнота доказательств среди выводов, верных в остальном | причины судьи |
+| профиль промахов | распределение причин отклонения для ближайшего кандидата (тип / идентификаторы / сумма / валюта / доказательства) | причины судьи |
+| калибровка | ожидаемая ошибка калибровки и диаграммы надёжности для уверенности по кандидатам (Guo et al. 2017) | журнал агента + метки на исследовательских наборах |
+| инвариантность | метаморфное согласие: одинаковые решения с точностью до отображения идентификаторов | парные прогоны |
 
-Calibration uses an agent-side channel only. Confidences are never placed in the official findings: the
-current schema rejects extra fields (−1, covered by an adversarial test), and their treatment under the
-official definitions is an open interpretation question (`p6_architecture_constraints.md`, O1).
+Калибровка использует только канал на стороне агента. Уверенности никогда не помещаются в официальные
+выводы: текущая схема отклоняет лишние поля (−1, покрыто состязательным тестом), а их статус по официальным
+определениям — открытый вопрос толкования (`p6_architecture_constraints.md`, O1).
 
-## 4. Statistical procedure
+## 4. Статистическая процедура
 
-* **Paired design:** every condition is evaluated on the same episode lists, the same `ENV_VERSION`, the
-  same hardware class and the same evaluation budget.
-* **Seeds:** at least 5 independent training seeds per condition (minimum chosen for cost; report every
-  seed). Report per-seed curves, mean ± std, and IQM with 95 % bootstrap CIs over seeds × episodes.
-* **Episode-sampling variance is real.** Simple reconciliation scored −0.599 and −0.662 on two different
-  hidden 20-episode suites (`runs/verify`, `runs/official-evaluation`). Headline research numbers
-  therefore use ≥ 200-episode research test sets, with the 20-episode official suite as a secondary report.
-* **Tuning budget:** equal hyper-parameter search budget per method, on `research/val` only.
-* **Pre-registration:** hypotheses, primary metrics and decision thresholds below are fixed before running.
-  Test sets are evaluated once per final model.
-* **Reproducibility of training:** seeded environment, policy and data order; CPU deterministic
-  algorithms where available; library versions recorded; evaluation episodes replayed and compared
-  (the existing replay check).
-* **Reporting:** following Henderson et al. (2018) and Agarwal et al. (2021): curves with variability,
-  interval estimates rather than point estimates, all seeds, and all failures.
+* **Парный дизайн:** каждое условие оценивается на одних и тех же списках эпизодов, с тем же
+  `ENV_VERSION`, на оборудовании того же класса и с тем же бюджетом оценки.
+* **Seed:** не меньше 5 независимых seed обучения на условие (минимум выбран из соображений стоимости;
+  приводится каждый seed). Приводятся кривые по seed, среднее ± стандартное отклонение и IQM с 95-процентными
+  бутстреп-интервалами по seed × эпизодам.
+* **Разброс выборки эпизодов реален.** Простая сверка получила −0.599 и −0.662 на двух разных скрытых
+  наборах из 20 эпизодов (`runs/verify`, `runs/official-evaluation`). Поэтому главные исследовательские
+  цифры считаются на исследовательских тестовых наборах не меньше 200 эпизодов, а официальный набор из 20
+  эпизодов приводится как вторичный отчёт.
+* **Бюджет настройки:** одинаковый бюджет поиска гиперпараметров для каждого метода, только на
+  `research/val`.
+* **Предварительная регистрация:** гипотезы, основные метрики и пороги решений ниже фиксируются до запуска.
+  Тестовые наборы оцениваются один раз для каждой итоговой модели.
+* **Воспроизводимость обучения:** заданные seed окружения, политики и порядка данных; детерминированные
+  алгоритмы на CPU, где они есть; записанные версии библиотек; эпизоды оценки повторяются и сравниваются
+  (существующая проверка повтора).
+* **Отчётность:** по Henderson et al. (2018) и Agarwal et al. (2021): кривые с разбросом, интервальные
+  оценки вместо точечных, все seed и все неудачи.
 
-## 5. Research questions
+## 5. Исследовательские вопросы
 
-Format: **H** hypothesis · **IV** independent variable · **DV** dependent variables · **C** conditions ·
-**B** baselines · **L** limitations · **S/R** support / reject criterion. Unless stated otherwise, the
-primary DV is mean official reward on `research/test-iid`.
+Формат: **H** — гипотеза · **IV** — независимая переменная · **DV** — зависимые переменные · **C** —
+условия · **B** — базовые политики · **L** — ограничения · **S/R** — критерий подтверждения или
+опровержения. Если не сказано иное, основная DV — средняя официальная награда на `research/test-iid`.
 
-**RQ1 — Does BC improve RL sample efficiency?**
-H: PPO initialised from BC reaches val F1 ≥ 0.8 in fewer environment steps than PPO from scratch.
-IV: initialisation (BC vs random). DV: episodes-to-target, AUC, final reward. C: same architecture, budget,
-seeds. B: BC alone, silent. L: depends on demonstration diversity.
-S/R: supported if the 95 % CI of the step ratio is entirely below 1; rejected if it includes 1.
+**RQ1 — Улучшает ли BC эффективность RL по данным?**
+H: PPO, инициализированный из BC, достигает val F1 ≥ 0.8 за меньшее число шагов окружения, чем PPO с нуля.
+IV: инициализация (BC или случайная). DV: эпизоды до цели, AUC, итоговая награда. C: та же архитектура,
+бюджет, seed. B: только BC, молчание. L: зависит от разнообразия демонстраций.
+S/R: подтверждается, если 95-процентный интервал отношения шагов целиком ниже 1; опровергается, если
+включает 1.
 
-**RQ2 — PPO vs a value-based learner.**
-H: masked PPO outperforms DQN/QR-DQN (macro acquisition) + DRRN-style candidate scoring at equal sample
-budgets. IV: algorithm. DV: final reward, F1, stability across seeds. C: same adapter, features and budget.
-B: silent, reference auditor. L: the set-valued submission is unfavourable to factorised Q-values by design.
-S/R: supported if the paired IQM difference CI excludes 0 in PPO's favour.
+**RQ2 — PPO против агента на основе ценности.**
+H: PPO с масками превосходит DQN/QR-DQN (макродействия сбора информации) + оценку кандидатов в стиле DRRN
+при равных бюджетах данных. IV: алгоритм. DV: итоговая награда, F1, стабильность по seed. C: тот же адаптер,
+признаки и бюджет. B: молчание, reference auditor. L: ответ-множество по самой своей природе неудобен для
+факторизованных Q-значений.
+S/R: подтверждается, если интервал парной разности IQM исключает 0 в пользу PPO.
 
-**RQ3 — Does recurrent memory help?**
-H: with an explicit `RevealedStore`, an LSTM adds no significant benefit; without it, an LSTM helps.
-IV: memory type (explicit store / LSTM / both / none). DV: reward, F1, steps. C: 2×2 design.
-L: raw-JSON recurrence is expensive. S/R: supported if store-only is not significantly worse than
-store+LSTM and LSTM-only is significantly worse than store-only.
+**RQ3 — Помогает ли рекуррентная память?**
+H: при явном `RevealedStore` LSTM не даёт значимой пользы; без него LSTM помогает.
+IV: тип памяти (явное хранилище / LSTM / оба / ни одного). DV: награда, F1, шаги. C: дизайн 2×2.
+L: рекуррентность по сырому JSON дорога. S/R: подтверждается, если «только хранилище» не значимо хуже
+«хранилище + LSTM», а «только LSTM» значимо хуже «только хранилище».
 
-**RQ4 — Does hierarchical action representation improve learning?**
-H: Approach 1+3 learns faster and generalises better than the flat factorised Approach 2.
-IV: action representation. DV: AUC, final reward, `ood-*` gaps. C: equal budgets and demos.
-L: Approach 3 receives more symbolic help, which is confounded with hierarchy; mitigated by RQ6.
-S/R: CI on the AUC difference.
+**RQ4 — Улучшает ли обучение иерархическое представление действий?**
+H: подход 1+3 обучается быстрее и обобщает лучше, чем плоский факторизованный подход 2.
+IV: представление действий. DV: AUC, итоговая награда, разрывы `ood-*`. C: равные бюджеты и демонстрации.
+L: подход 3 получает больше символьной помощи, что смешивается с иерархичностью; смягчается вопросом RQ6.
+S/R: интервал разности AUC.
 
-**RQ5 — Does curriculum learning improve generalisation?**
-H: a mixture curriculum (clean → single → multiple → interacting → heavy distractors, all levels kept at
-non-zero probability) improves `ood-combination` and `ood-distractor` results over uniform sampling, while
-a strictly sequential curriculum suffers from forgetting (Bengio et al. 2009 frame curricula as
-easy-to-hard ordering).
-IV: sampling schedule. DV: OOD rewards, clean-episode false-positive rate. L: curriculum order can shift
-the learned prior p(clean); report the clean-episode FP rate separately.
-S/R: OOD reward CI for mixture > uniform.
+**RQ5 — Улучшает ли обучение по учебной программе (curriculum) обобщение?**
+H: смешанная программа (чистые → одиночные → множественные → взаимодействующие → плотные ложные следы, все
+уровни сохраняют ненулевую вероятность) улучшает результаты `ood-combination` и `ood-distractor` по
+сравнению с равномерной выборкой, а строго последовательная программа страдает от забывания (Bengio et al.
+2009 описывают учебные программы как упорядочивание от простого к сложному).
+IV: расписание выборки. DV: награды OOD, доля ложных срабатываний на чистых эпизодах. L: порядок программы
+может сдвинуть выученную априорную вероятность p(clean); долю FP на чистых эпизодах нужно приводить
+отдельно.
+S/R: интервал награды OOD для смешанной программы > равномерной.
 
-**RQ6 — Neuro-symbolic vs purely learned validation.**
-H: removing symbolic primitives (amounts and dates computed by the network, ids by pointer heads) sharply
-reduces exact TPs, especially for `fx_rate` and `payment_allocation`.
-IV: primitive set (full / no FX conversion / no date conversion / none). DV: per-type TP rate, near-miss
-profile (amount vs ids). L: the full-primitive agent risks trivialisation; reported as a gap to the
-reference auditor. S/R: per-type TP-rate CIs.
+**RQ6 — Нейросимвольная проверка против чисто обучаемой.**
+H: удаление символьных примитивов (суммы и даты считает сеть, идентификаторы — головы-указатели) резко
+снижает число точных TP, особенно для `fx_rate` и `payment_allocation`.
+IV: набор примитивов (полный / без пересчёта курса / без пересчёта дат / никакого). DV: доля TP по типам,
+профиль промахов (сумма или идентификаторы). L: агент с полным набором примитивов рискует тривиализацией;
+приводится как разрыв до reference auditor. S/R: интервалы долей TP по типам.
 
-**RQ7 — Generalisation to unseen anomaly combinations.**
-H: agents trained without `fx_rate`+`period_attribution` co-occurrence and without S2 keep ≥ 90 % of their
-in-distribution F1 on `ood-combination`.
-IV: train/test combination split. DV: F1 gap, per-type FN. L: types themselves are always seen; only
-combinations are held out. S/R: the lower CI bound of the F1 ratio is ≥ 0.9.
+**RQ7 — Обобщение на невиданные сочетания аномалий.**
+H: агенты, обученные без совместного появления `fx_rate`+`period_attribution` и без S2, сохраняют не меньше
+90 % своего F1 внутри распределения на `ood-combination`.
+IV: разбиение сочетаний между обучением и проверкой. DV: разрыв F1, FN по типам. L: сами типы всегда
+встречаются; откладываются только сочетания. S/R: нижняя граница интервала отношения F1 не меньше 0.9.
 
-**RQ8 — Accuracy under reduced inspection.**
-H: under self-imposed budgets (≤ 12, ≤ 8 steps), a learned acquisition policy keeps higher F1 than (i) a
-truncated fixed-order scan and (ii) a random-order scan with the same budget.
-IV: acquisition policy × budget. DV: F1, official reward, coverage. L: the official reward gives
-acquisition little headroom; this is a research regime. S/R: paired F1 CI at each budget.
+**RQ8 — Точность при сокращённой проверке.**
+H: при самоограниченных бюджетах (не больше 12 и 8 шагов) обучаемая политика сбора информации сохраняет
+более высокий F1, чем (i) обрезанный обход в фиксированном порядке и (ii) обход в случайном порядке с тем же
+бюджетом.
+IV: политика сбора информации × бюджет. DV: F1, официальная награда, покрытие. L: официальная награда
+оставляет сбору информации мало запаса; это исследовательский режим. S/R: парный интервал F1 на каждом
+бюджете.
 
-**RQ9 — Does PPO from scratch collapse to silence?**
-H (H-collapse): from random initialisation PPO converges to immediate empty submission (reward ≈ 2·p_clean − 1).
-IV: training steps. DV: fraction of episodes with an empty first-step submission; reward vs silent.
-L: depends on exploration settings; report several entropy coefficients. S/R: supported if ≥ 4/5 seeds
-end within 0.05 of the silent reward with ≥ 90 % immediate empty submissions.
+**RQ9 — Схлопывается ли PPO с нуля к молчанию?**
+H (H-collapse): со случайной инициализации PPO сходится к немедленной пустой отправке (награда ≈
+2·p_clean − 1).
+IV: шаги обучения. DV: доля эпизодов с пустой отправкой на первом шаге; награда относительно молчания.
+L: зависит от настроек исследования; приводить несколько коэффициентов энтропии. S/R: подтверждается, если
+не меньше 4 из 5 seed заканчивают в пределах 0.05 от награды молчания, а немедленных пустых отправок не
+меньше 90 %.
 
-**RQ10 — Can the policy rules be learned from the official reward?**
-H: an agent that must choose the valuation convention (local / UTC / as-written; issue / due) learns the
-policy-correct one from terminal reward alone, though more slowly than with supervised labels.
-IV: training signal (official reward vs supervised labels). DV: convention accuracy, per-type TP rate,
-sample count. L: the reward is shared by all findings in an episode. S/R: convention accuracy ≥ 95 % on
-`test-iid` for the reward-only agent.
+**RQ10 — Можно ли выучить правила учётной политики по официальной награде?**
+H: агент, который должен выбрать соглашение об оценке (местная / UTC / «как записано»; дата выставления /
+оплаты), выучивает правильное по учётной политике соглашение только по итоговой награде, хотя и медленнее,
+чем с метками учителя.
+IV: обучающий сигнал (официальная награда или метки учителя). DV: точность выбора соглашения, доля TP по
+типам, число примеров. L: награда общая для всех выводов эпизода. S/R: точность выбора соглашения не меньше
+95 % на `test-iid` для агента, обученного только по награде.
 
-**RQ11 — Robustness to presentation and red herrings.**
-H: agents with set encoders are invariant to record order and ids (metamorphic agreement ≥ 99 %) and lose
-≤ 10 % F1 on `ood-distractor`. IV: encoder type (set vs sequence). DV: metamorphic agreement, F1 gap.
-S/R: CI thresholds as stated.
+**RQ11 — Устойчивость к представлению и ложным следам.**
+H: агенты с кодировщиками множеств инвариантны к порядку записей и идентификаторам (метаморфное согласие не
+меньше 99 %) и теряют не больше 10 % F1 на `ood-distractor`. IV: тип кодировщика (множество или
+последовательность). DV: метаморфное согласие, разрыв F1. S/R: пороги интервалов, как указано.
 
-**RQ12 — Calibration.**
-H: per-candidate confidences are miscalibrated after RL fine-tuning; temperature scaling on `research/val`
-(Guo et al. 2017) reduces ECE without changing official reward. DV: ECE, reliability diagram, official
-reward. L: confidences live outside the official schema. S/R: ECE CI before vs after scaling.
+**RQ12 — Калибровка.**
+H: уверенности по кандидатам после дообучения RL плохо откалиброваны; температурное масштабирование на
+`research/val` (Guo et al. 2017) снижает ECE, не меняя официальную награду. DV: ECE, диаграмма надёжности,
+официальная награда. L: уверенности находятся вне официальной схемы. S/R: интервал ECE до и после
+масштабирования.
 
-## 6. Ablations
+## 6. Абляции
 
-| ablation | removes | tests |
+| абляция | что убирает | что проверяет |
 |---|---|---|
-| no explicit memory | `RevealedStore` (observation-only policy) | RQ3 |
-| primitive ablations | FX conversion, timezone conversion, grouping | RQ6 |
-| single-convention features | multi-convention alternatives | trivialisation risk, RQ10 |
-| demonstration diversity | randomised demonstrators → single fixed demonstrator | RQ1 |
-| auxiliary supervised loss | label-based candidate loss during RL | RQ1, RQ10 |
-| research-only shaping | potential-based shaping over agent-visible coverage (Ng, Harada & Russell 1999) | sparse-reward handling; **never** reported as official reward |
-| sequence vs set encoder | permutation invariance | RQ11 |
+| без явной памяти | `RevealedStore` (политика только по наблюдению) | RQ3 |
+| абляции примитивов | пересчёт курса, пересчёт часового пояса, группировка | RQ6 |
+| признаки одного соглашения | альтернативы с несколькими соглашениями | риск тривиализации, RQ10 |
+| разнообразие демонстраций | случайные демонстраторы → один фиксированный демонстратор | RQ1 |
+| вспомогательная функция потерь с учителем | функция потерь по кандидатам на основе меток во время RL | RQ1, RQ10 |
+| формирование награды только для исследований | потенциальное формирование (potential-based shaping) по покрытию, видимому агенту (Ng, Harada & Russell 1999) | работа с редкой наградой; **никогда** не выдаётся за официальную награду |
+| кодировщик последовательности или множества | инвариантность к перестановкам | RQ11 |

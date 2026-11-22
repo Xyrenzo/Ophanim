@@ -1,131 +1,136 @@
-# P6.4 / P6.8 — Agent architecture (proposal)
+# P6.4 / P6.8 — архитектура агента (предложение)
 
-This is a design for P7–P10. Nothing here is implemented yet. The official environment, reward, findings
-schema, matcher, evaluator and baselines stay unchanged; every new component sits **on the agent side**
-of the existing JSON interface or in research-only tooling.
+Это проект для этапов P7–P10; здесь пока ничего не реализовано. Официальное окружение, награда, схема
+выводов, matcher, оценщик и базовые политики остаются без изменений; каждый новый компонент находится **на
+стороне агента** существующего интерфейса JSON или в инструментах только для исследований.
 
-**Binding constraints first.** `p6_architecture_constraints.md` (derived from the official check
-definitions) overrides this document where they differ. In particular:
-* agents act through the `judge_adapter` envelope `{"name", "args"}`;
-* ids are copied exactly, never normalised;
-* amounts are exact (τ = 0);
-* the closed-mode environment holds no truth;
-* learning is possible only in train mode.
+**Сначала обязательные ограничения.** `p6_architecture_constraints.md` (выведен из официальных определений
+проверок) важнее этого документа там, где они расходятся. В частности:
 
-## 1. Information boundary
+* агенты действуют через оболочку `judge_adapter` `{"name", "args"}`;
+* идентификаторы копируются точно и никогда не нормализуются;
+* суммы точные (τ = 0);
+* окружение закрытого режима не держит эталон;
+* обучение возможно только в режиме train.
 
-| category | examples | may reach the acting agent? | may reach training code? |
+## 1. Информационная граница
+
+| категория | примеры | может дойти до действующего агента? | может дойти до кода обучения? |
 |---|---|---|---|
-| Public observations | tool outputs, task text, manifest, policy | yes | yes |
-| Agent memory | revealed-record store, candidates, features, drafts | yes (it is the agent) | yes |
-| Training labels | truth of **open** train/dev/research episodes | **never at act time** | yes, via `LabelProvider` only, for supervised losses |
-| Evaluator-only truth | truth of secret-keyed / official episodes | never | never |
-| Provenance | seeds, id maps, injections, clean snapshots | never | never (except offline analysis scripts) |
-| Official evaluation outputs | judge logs, reports, oracle trajectories | never | never |
+| Публичные наблюдения | выводы инструментов, текст задачи, манифест, учётная политика | да | да |
+| Память агента | хранилище раскрытых записей, кандидаты, признаки, черновики | да (это и есть агент) | да |
+| Обучающие метки | эталон **открытых** эпизодов train/dev/исследовательских | **никогда во время действия** | да, только через `LabelProvider`, для функций потерь с учителем |
+| Эталон только для оценщика | эталон эпизодов с секретным ключом и официальных эпизодов | никогда | никогда |
+| Provenance | seed, таблицы идентификаторов, внесённые ошибки, чистые снимки | никогда | никогда (кроме скриптов офлайн-анализа) |
+| Результаты официальной оценки | журналы судьи, отчёты, траектории oracle | никогда | никогда |
 
-Rules (to be enforced by tests in P7): agent packages may not import `ophanim.generator`,
-`ophanim.evaluator` or `ophanim.audit.reconcile`; learning code may read labels only through
-`LabelProvider`, which refuses secret-keyed episodes; official evaluation always runs agents through the
-existing process boundary (`evaluator/process_runner.py`). The in-process `OphanimEnv` must never be
-handed to agent code because it exposes `evaluator_*` accessors and the judge (`env/environment.py`
-L134–L160); training uses a `PublicEnv` facade (§6).
+Правила (их закрепят тесты на P7): пакеты агента не могут импортировать `ophanim.generator`,
+`ophanim.evaluator` и `ophanim.audit.reconcile`; код обучения читает метки только через `LabelProvider`,
+который отказывает для эпизодов с секретным ключом; официальная оценка всегда запускает агентов через
+существующую границу процессов (`evaluator/process_runner.py`). Внутрипроцессный `OphanimEnv` никогда не
+передаётся коду агента, потому что раскрывает методы `evaluator_*` и судью (`env/environment.py`
+L134–L160); обучение использует фасад `PublicEnv` (§6).
 
-## 2. Layers
+## 2. Слои
 
 ```
-L0  official interface (unchanged): OphanimEnv / agent_runtime JSON-lines protocol
-L1  PublicEnv facade (reset/step only)  ── training-time access, open splits only
-L2  agent memory: RevealedStore (typed, keyed record store; the sufficient statistic, P1)
-L3  action adapter: macro acquisition actions + candidate-selection submission
-L4  symbolic primitives (time, money, FX, grouping, structural links)   ── no procedures
-L5  candidate generator + feature extractor (built from L4 only)
-L6  finding builder (schema-valid findings from decisions, per the public task text)
-L7  policy (learned): acquisition head, candidate heads, valuation-convention head, stop head
+L0  официальный интерфейс (без изменений): OphanimEnv / протокол агента на JSON lines
+L1  фасад PublicEnv (только reset/step)  -- доступ во время обучения, только открытые выборки
+L2  память агента: RevealedStore (типизированное хранилище записей по ключу; достаточная статистика, P1)
+L3  адаптер действий: макродействия сбора информации + ответ через выбор кандидатов
+L4  символьные примитивы (время, деньги, курсы, группировка, структурные связи)   -- без процедур
+L5  генератор кандидатов + извлечение признаков (только на основе L4)
+L6  сборщик выводов (допустимые по схеме выводы из решений, по публичному тексту задачи)
+L7  политика (обучаемая): голова сбора информации, головы кандидатов, голова соглашения об оценке, голова остановки
 ```
 
-## 3. Action representation — three approaches
+## 3. Представление действий — три подхода
 
-**Approach 1 — hierarchical.** A high-level choice among {scan table *t*, fetch FX key, inspect document,
-stop-and-submit}, with low-level parameters filled per option. "Scan table *t*" is an option in the sense of
-Sutton, Precup & Singh (1999): it advances the cursor of *t* by one page.
+**Подход 1 — иерархический.** Выбор верхнего уровня среди {обойти таблицу *t*, запросить ключ курса,
+изучить документ, остановиться и отправить}, а параметры нижнего уровня заполняются для каждой опции.
+«Обойти таблицу *t*» — опция в смысле Sutton, Precup & Singh (1999): она сдвигает курсор *t* на одну
+страницу.
 
-**Approach 2 — factorised / autoregressive.** `π(tool, args | o) = π(tool | o) · Π_i π(arg_i | tool, arg_<i, o)`,
-with pointer heads (Vinyals, Fortunato & Jaitly 2015) over the revealed ids for id arguments, and an
-autoregressive decoder that emits findings one field at a time.
+**Подход 2 — факторизованный / авторегрессионный.**
+`π(tool, args | o) = π(tool | o) · Π_i π(arg_i | tool, arg_<i, o)`, с головами-указателями (Vinyals,
+Fortunato & Jaitly 2015) по раскрытым идентификаторам для аргументов-идентификаторов и авторегрессионным
+декодером, который выдаёт выводы по одному полю.
 
-**Approach 3 — learned decisions, deterministic arguments.** The policy chooses *what* to do (which table,
-which candidate, which type, which valuation convention); deterministic code fills bookkeeping arguments
-(cursor, limit = 50, FX-key string, evidence assembly, JSON serialisation).
+**Подход 3 — обучаемые решения, детерминированные аргументы.** Политика выбирает, *что* делать (какую
+таблицу, какого кандидата, какой тип, какое соглашение об оценке); детерминированный код заполняет
+служебные аргументы (курсор, limit = 50, строка ключа курса, сборка доказательств, сериализация JSON).
 
-| criterion | 1 hierarchical | 2 factorised / autoregressive | 3 learned decisions + deterministic args |
+| критерий | 1 иерархический | 2 факторизованный / авторегрессионный | 3 обучаемые решения + детерминированные аргументы |
 |---|---|---|---|
-| PPO compatibility | good (categorical + masks) | good but long autoregressive chains, high variance | good (categorical + Bernoulli heads with masks) |
-| DQN compatibility | good for the macro level | poor (huge joint argument space) | good for DRRN-style candidate scoring |
-| Imitation learning | good | good but needs many demos per field | good |
-| Sample efficiency | high at macro level | low | high |
-| Complexity | low | high | medium |
-| Leakage risk | low | low | **medium**: deterministic helpers could encode the answer |
-| Generalisation | good across sizes (masks) | pointer heads generalise to new ids | good, *if* candidates/features stay generic |
-| Task-trivialisation risk | low | lowest | **must be controlled** (primitives, not procedures) |
+| совместимость с PPO | хорошая (категориальные головы + маски) | хорошая, но длинные авторегрессионные цепочки, высокая дисперсия | хорошая (категориальные и бернуллиевские головы с масками) |
+| совместимость с DQN | хорошая на уровне макродействий | плохая (огромное совместное пространство аргументов) | хорошая для оценки кандидатов в стиле DRRN |
+| обучение подражанием | хорошее | хорошее, но нужно много демонстраций на каждое поле | хорошее |
+| эффективность по данным | высокая на уровне макродействий | низкая | высокая |
+| сложность | низкая | высокая | средняя |
+| риск утечки | низкий | низкий | **средний**: детерминированные помощники могут закодировать ответ |
+| обобщение | хорошее между размерами (маски) | головы-указатели обобщаются на новые идентификаторы | хорошее, *если* кандидаты и признаки остаются общими |
+| риск тривиализации задачи | низкий | самый низкий | **нужно контролировать** (примитивы, а не процедуры) |
 
-**Recommendation (hybrid).** Approach 1 for acquisition, with deterministic bookkeeping arguments only
-(cursor continuation, limit 50). Approach 3 for submission, through generic candidates and a learned
-valuation-convention choice. Approach 2 is retained as the "minimal symbolic help" research variant
-(RQ6). To keep Approach 3 honest, every deterministic helper that could encode a decision instead offers
-the alternatives as **separate options**. Example: "fetch the FX rate for a document" is offered for the
-local accounting date, the UTC date, the date as written, and the due date, and the policy must learn
-which one is correct.
+**Рекомендация (гибрид).** Подход 1 для сбора информации, только с детерминированными служебными
+аргументами (продолжение курсора, limit 50). Подход 3 для ответа — через общие кандидаты и обучаемый выбор
+соглашения об оценке. Подход 2 сохраняется как исследовательский вариант «минимальной символьной помощи»
+(RQ6). Чтобы подход 3 оставался честным, каждый детерминированный помощник, который мог бы закодировать
+решение, вместо этого предлагает альтернативы **отдельными опциями**. Пример: «получить курс для
+документа» предлагается для местной учётной даты, даты UTC, даты «как записано» и даты оплаты, и политика
+должна научиться выбирать правильную.
 
-## 4. Observation representation and memory
+## 4. Представление наблюдений и память
 
-Environment state (owned by the environment, never copied into the agent): the public dataset, the
-step counter, the hidden truth. Agent memory (owned by the agent, rebuilt from observations only):
+Состояние окружения (принадлежит окружению и никогда не копируется в агента): публичный набор данных,
+счётчик шагов, скрытый эталон. Память агента (принадлежит агенту и восстанавливается только из
+наблюдений):
 
-| component | content | source |
+| компонент | содержимое | источник |
 |---|---|---|
-| `RevealedStore` | every record returned so far, keyed by id, per table; cursor per table; first-seen step | step observations |
-| acquisition state | fraction read per table, pages read, steps used, remaining-step fraction, elapsed fraction | store + observation `remaining_steps` |
-| candidates | generic structural units (below) | L5 over the store |
-| candidate features | primitive outputs under several conventions | L4 over the store |
-| draft findings | decisions taken so far (optional, for multi-pass submission) | policy |
-| confidences | per-candidate probabilities, logged agent-side only | policy |
+| `RevealedStore` | каждая полученная запись по ключу, по таблицам; курсор по каждой таблице; шаг первого появления | наблюдения шагов |
+| состояние сбора информации | доля прочитанного по таблицам, прочитанные страницы, потраченные шаги, доля оставшихся шагов, доля прошедшего времени | хранилище + `remaining_steps` из наблюдения |
+| кандидаты | общие структурные единицы (ниже) | L5 над хранилищем |
+| признаки кандидатов | выходы примитивов при нескольких соглашениях | L4 над хранилищем |
+| черновые выводы | уже принятые решения (необязательно, для ответа в несколько проходов) | политика |
+| уверенность | вероятности по кандидатам, записываются только на стороне агента | политика |
 
-There is no observation history from the environment, so memory is not optional. Because the revealed
-set is a sufficient statistic (problem formulation P1), the store *is* the belief. Recurrent networks
-are an ablation, not a requirement.
+Окружение не даёт истории наблюдений, поэтому память обязательна. Раз раскрытое множество — достаточная
+статистика (постановка задачи, P1), хранилище *и есть* убеждение. Рекуррентные сети — абляция, а не
+требование.
 
-**Generic candidates (structural only).** (a) pairs of invoices with the same `entity_id`;
-(b) (payment, referenced invoice) pairs from `invoice_refs`; (c) each posted invoice document; (d) each
-posted payment document. Candidate generation must not filter by any discrepancy criterion.
+**Общие кандидаты (только структурные).** (a) пары счетов с одинаковым `entity_id`; (b) пары (платёж,
+указанный счёт) из `invoice_refs`; (c) каждый проведённый документ счёта; (d) каждый проведённый документ
+платежа. Генерация кандидатов не должна фильтровать их ни по какому критерию расхождения.
 
-**Features (computed by primitives, multi-convention).** Examples: vendor-ref equality, content equality,
-presence of a reversal; booked base amount vs conversion at {local, UTC, as-written, due} date;
-in-period under {local, UTC, as-written} date; AP applied for (payment, invoice) vs the line converted
-under each convention; Suspense rows on the payment. The policy must learn which features define a
-discrepancy and which conventions the policy text implies. Features are **inputs**, never labels.
+**Признаки (вычисляются примитивами, при нескольких соглашениях).** Примеры: совпадение `vendor_ref`,
+совпадение содержимого, наличие сторно; начисленная сумма в базовой валюте против пересчёта на дату
+{местную, UTC, «как записано», оплаты}; попадание в период по дате {местной, UTC, «как записано»};
+применённая AP для (платёж, счёт) против строки, пересчитанной по каждому соглашению; строки Suspense у
+платежа. Политика должна научиться, какие признаки определяют расхождение и какие соглашения следуют из
+текста учётной политики. Признаки — это **входы**, а не метки.
 
-**Set encoders.** Candidates and records are unordered and variable in number. Use permutation-invariant
-encoders (Deep Sets, Zaheer et al. 2017) or attention pooling, plus masks for absent or unknown items. This
-also gives invariance to record order and ids by construction, which is checked with the existing
-metamorphic variants.
+**Кодировщики множеств.** Кандидаты и записи неупорядочены, их число переменно. Нужны кодировщики,
+инвариантные к перестановкам (Deep Sets, Zaheer et al. 2017), или пулинг на внимании, плюс маски для
+отсутствующих или неизвестных элементов. Это по построению даёт инвариантность к порядку записей и
+идентификаторам, что проверяется существующими метаморфными вариантами.
 
-## 5. Finding builder and amounts
+## 5. Сборщик выводов и суммы
 
-For a chosen (type, candidate, convention), the builder computes the claimed amount with the chosen
-convention (for example |booked − convert(total, rate at the chosen date)|). It assembles evidence by the
-rule the **public task text** states for that type, and validates the finding against the official
-`FindingsSubmission` schema *before* submitting. Applying public rules is not leakage. Choosing which rule
-applies is the agent's decision. The amount is never regressed by a neural network: exactness (±1 minor
-unit) comes from symbolic arithmetic.
+Для выбранных (тип, кандидат, соглашение) сборщик вычисляет заявленную сумму по выбранному соглашению
+(например, |начислено − convert(total, курс на выбранную дату)|). Доказательства он собирает по правилу,
+которое для этого типа задаёт **публичный текст задачи**, и проверяет вывод по официальной схеме
+`FindingsSubmission` *до* отправки. Применение публичных правил — не утечка. Выбор того, какое правило
+применяется, — решение агента. Сумма никогда не предсказывается нейросетевой регрессией: точность (τ = 0)
+обеспечивает символьная арифметика.
 
-## 6. Proposed interfaces (Python protocols; P7)
+## 6. Предлагаемые интерфейсы (протоколы Python; P7)
 
 ```python
-class PublicEnv(Protocol):                       # facade: no evaluator accessors, no _state
+class PublicEnv(Protocol):                       # фасад: без методов оценщика и без _state
     def reset(self, seed: int, config: dict) -> tuple[dict, dict]: ...
     def step(self, action: dict) -> tuple[dict, float, bool, bool, dict]: ...
 
-class RevealedStore:                             # agent memory
+class RevealedStore:                             # память агента
     def ingest(self, observation: dict) -> None: ...
     def records(self, table: str) -> list[dict]: ...
     def get(self, record_id: str) -> dict | None: ...
@@ -139,43 +144,48 @@ class FeatureExtractor(Protocol):
 
 class ActionAdapter(Protocol):
     def encode(self, store: RevealedStore) -> tuple["PolicyInput", "Masks"]: ...
-    def decode(self, decision: "PolicyOutput", store: RevealedStore) -> dict: ...   # official JSON action
+    def decode(self, decision: "PolicyOutput", store: RevealedStore) -> dict: ...   # официальное действие JSON
 
 class FindingBuilder(Protocol):
     def build(self, c: "Candidate", type_: str, convention: str, store: RevealedStore) -> dict: ...
 
-class LabelProvider(Protocol):                   # training only, open splits only
+class LabelProvider(Protocol):                   # только для обучения, только открытые выборки
     def labels(self, episode_ref: "EpisodeRef", candidates: list["Candidate"]) -> list["Label"]: ...
 ```
 
-Agents keep implementing the existing `Policy` protocol (`policies/base.py`: `reset`, `act`), so every
-learned agent runs unchanged in `run_episode`, `run_episode_isolated` and the official evaluation.
+Агенты продолжают реализовывать существующий протокол `Policy` (`policies/base.py`: `reset`, `act`),
+поэтому каждый обучаемый агент без изменений работает в `run_episode`, `run_episode_isolated` и в
+официальной оценке.
 
-## 7. Security review checklist for every adapter (P7 acceptance)
+## 7. Контрольный список проверки безопасности для каждого адаптера (приёмка P7)
 
-1. Imports: no `ophanim.generator`, `ophanim.evaluator`, `ophanim.audit.reconcile` in agent code (AST test).
-2. Inputs: every feature is a function of `RevealedStore` + reset observation (property test: features are
-   identical when the hidden truth is altered but the public data is not).
-3. No caching across episodes of anything keyed by episode content (reset isolation test).
-4. Labels only via `LabelProvider`; it raises for episodes generated with a secret.
-5. Logs: agent-side logs contain public data and agent decisions only (leak scan, as for trajectories).
-6. Official runs: the agent is launched through `agent_runtime`/`process_runner`; no in-process shortcut.
+1. Импорты: в коде агента нет `ophanim.generator`, `ophanim.evaluator`, `ophanim.audit.reconcile`
+   (AST-тест).
+2. Входы: каждый признак — функция от `RevealedStore` и наблюдения reset (тест свойств: признаки не
+   меняются, если изменить скрытый эталон, не меняя публичные данные).
+3. Никакого кеширования между эпизодами по ключам, зависящим от содержимого эпизода (тест изоляции reset).
+4. Метки только через `LabelProvider`; для эпизодов, сгенерированных с секретом, он вызывает ошибку.
+5. Журналы: журналы на стороне агента содержат только публичные данные и решения агента (проверка утечек,
+   как для траекторий).
+6. Официальные прогоны: агент запускается через `agent_runtime`/`process_runner`; внутрипроцессных обходных
+   путей нет.
 
-## 8. Mapping to the repository
+## 8. Соответствие репозиторию
 
-| proposed | relationship to existing code | create in |
+| предлагаемое | связь с существующим кодом | когда создать |
 |---|---|---|
-| `src/ophanim/agents/` (memory, adapters, primitives, candidates, builder) | uses `policies/base.py` protocol; pure Python, no new dependency | P7 |
-| `src/ophanim/research/` (suites with seed namespaces, research metrics, statistics) | reads public trajectories and judge logs; reuses `derive_seed`; never imported by the official evaluator | P7 / P11 |
-| `src/ophanim/learning/` (datasets, BC, DAgger, PPO, checkpoints) | depends on optional `[learning]` extra (PyTorch) | P8 / P9 |
-| `experiments/` (research configs, runners, reports) | separate from `configs/` (official suites) | P8 |
-| existing `env/`, `evaluator/`, `schemas.py`, `policies/`, `configs/` | **unchanged** | — |
+| `src/ophanim/agents/` (память, адаптеры, примитивы, кандидаты, сборщик) | использует протокол `policies/base.py`; чистый Python, без новых зависимостей | P7 |
+| `src/ophanim/research/` (наборы с пространствами seed, исследовательские метрики, статистика) | читает публичные траектории и журналы судьи; переиспользует `derive_seed`; официальный оценщик его никогда не импортирует | P7 / P11 |
+| `src/ophanim/learning/` (наборы данных, BC, DAgger, PPO, контрольные точки) | зависит от необязательной группы `[learning]` (PyTorch) | P8 / P9 |
+| `experiments/` (исследовательские конфигурации, раннеры, отчёты) | отдельно от `configs/` (официальные наборы) | P8 |
+| существующие `env/`, `evaluator/`, `schemas.py`, `policies/`, `configs/` | **без изменений** | — |
 
-Directories for transformers, offline RL and LLM agents are not created until the corresponding research
-question is scheduled (P11/P12).
+Каталоги для трансформеров, offline RL и LLM-агентов не создаются, пока соответствующий исследовательский
+вопрос не поставлен в план (P11/P12).
 
-**Testing requirements per component:** unit tests for primitives (exact arithmetic, offsets, rounding,
-agreement with the published policy on the train split); property tests for candidate generation
-(complete coverage of the structural units, no filtering); leakage tests (§7); metamorphic invariance
-(identical decisions up to id mapping); end-to-end episodes through `run_episode_isolated`; the full
-existing suite must still pass unchanged.
+**Требования к тестам для каждого компонента:** модульные тесты для примитивов (точная арифметика,
+смещения, округление, согласие с опубликованной учётной политикой на обучающей выборке); тесты свойств
+для генерации кандидатов (полное покрытие структурных единиц, без фильтрации); тесты утечек (§7);
+метаморфная инвариантность (одинаковые решения с точностью до отображения идентификаторов); сквозные
+эпизоды через `run_episode_isolated`; весь существующий набор тестов должен по-прежнему проходить без
+изменений.

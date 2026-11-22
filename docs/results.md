@@ -1,90 +1,235 @@
-# Measured results
+# Измеренные результаты
 
-All numbers below were produced by running the code in this repository on 2026-11-21
-(`ENV_VERSION 0.1.0`). Re-run them with `python -m ophanim verify` (or the Docker command in the README).
+Здесь собраны цифры, полученные запуском кода этого репозитория. Измерения двух видов приведены раздельно:
 
-## Tests
+* **оценка (evaluation)** — прогон базовых политик на закрытом наборе из 20 эпизодов (разделы 1–3);
+* **регрессионные тесты** — набор `pytest` (раздел 4).
 
-**476 passed, 0 failed** on each of:
+Ни то, ни другое не является результатом официальной проверки жюри. Это внутренние измерения команды.
+Жюри проверяет решение своими тестами, на своих эпизодах и со своим секретом.
 
-| platform | Python | runtime |
-|---|---|---|
-| Windows 11, 12 CPUs | 3.11.15 | ~75 s |
-| Windows 11, 12 CPUs | 3.14.3 | ~75 s |
-| Linux container (`python:3.11.15-slim`, `--network none --cpus 2 --memory 4g`) | 3.11.15 | ~45 s |
+Актуальная версия окружения — `ENV_VERSION 0.3.0`. Результаты `ENV 0.1.0` сохранены в разделе 7 как
+исторические; с текущими их сравнивать нельзя, потому что с тех пор изменились эпизоды и matcher.
 
-| area | tests | what they cover |
-|---|---:|---|
-| unit | 63 | RNG golden values, money/rounding, calculator safety, matcher & metrics, code-independence AST scans |
-| integration | 264 | generator correctness across 108 episodes, all error types and scenarios, env contract, tools, limits, solvability, trajectory leak scans |
-| adversarial | 62 | every reward property required by the case (12) + extra attacks |
-| metamorphic | 62 | 60 (episode, variant) pairs + 2 sanity checks |
-| reproducibility | 16 | versioned suites, split separation, exact trajectory replay for every policy |
-| security | 9 | hostile agent processes, secret isolation, seed brute force |
+## 1. Закрытая оценка, ENV 0.3.0
 
-## Data and ground truth
+### Условия запуска
 
-* Closed evaluation suite: **20/20** episodes pass independent verification (clean before mutation,
-  exactly the declared issues after, every allowed evidence set sufficient).
-* Published train/dev: **20/20** verified; **20/20** regenerate byte-identically from `configs/` — including
-  inside the Linux container from data generated on Windows.
-* Development sweep: 320 episodes mixing every type, both scenarios, up to 12 issues and all sizes;
-  1,840 injected issues; 0 undeclared discrepancies; 0 anomalies; 0 generation errors.
-* Generation speed: 21 / 31 / 43 ms per small / medium / large episode.
+| параметр | значение |
+|---|---|
+| версия окружения | `0.3.0` |
+| набор эпизодов | `configs/eval/official_suite.json`: 20 эпизодов (5 чистых, 5 со взаимодействующими ошибками, 10 смешанных) |
+| seed base | публичное значение по умолчанию `DEFAULT_SEED_BASE` (`src/ophanim/evaluator/evaluation.py`); в отчёте — префикс SHA-256 `0fb6941e81197c8d` |
+| секрет | **не использовался** (`secret_used = false`): генерация не подписана ключом HMAC |
+| изоляция агентов | каждый агент работает в отдельном процессе (`isolated_agent_processes = true`) |
+| платформа отчёта | Python 3.14.3, Windows AMD64, 12 CPU, 24.91 с |
+| дата | 2026-11-22 |
 
-## Baselines on the same 20 closed episodes
+Раз секрет не использовался, эти 20 эпизодов может восстановить любой, у кого есть код. Значит, это
+воспроизводимая демонстрация, а не скрытый набор: официальная закрытая оценка запускается со скрытым
+seed base и секретом (см. `docs/evaluation_protocol.md`).
 
-Secret-keyed generation, derived hidden seeds, agents in separate processes. Precision and recall are
-micro-averaged; F1 is the mean per-episode F1 that the reward uses.
+### Как воспроизвести
 
-| policy | mean return | precision | recall | mean F1 | mean steps | TP | FP | FN |
+Переменные `OPHANIM_EVAL_SECRET` и `OPHANIM_SEED_BASE` должны быть **не заданы**:
+
+```bash
+unset OPHANIM_EVAL_SECRET OPHANIM_SEED_BASE      # PowerShell: Remove-Item Env:OPHANIM_EVAL_SECRET, Env:OPHANIM_SEED_BASE -ErrorAction SilentlyContinue
+export PYTHONPATH=src                            # PowerShell: $env:PYTHONPATH="src"
+python -m ophanim evaluate --out artifacts/eval-env-0.3.0
+```
+
+Команда создаёт `report.json`, `report.md`, траектории каждой политики (`trajectories/`) и журнал
+оценщика `evaluator_log.jsonl`. Каталог `artifacts/` исключён из Git (`.gitignore`), потому что в нём
+лежат файлы, предназначенные только оценщику: траектория oracle, действия которой и есть правильные ответы,
+и журнал судьи. Отчёт не хранится в репозитории, его получают этой командой.
+
+Проверка воспроизводимости от 2026-11-22: отчёты, полученные на Python 3.11.15 и 3.14.3, совпадают во всех
+разделах (`episodes`, `data_checks`, `policies`, `failure_analysis`, `metamorphic`, `reproducibility`,
+`episode_records`). Различается только время выполнения.
+
+### Проверки данных
+
+| проверка | результат |
+|---|---:|
+| данные и эталон (независимая верификация) | **20/20** |
+| метаморфные пары (порядок + идентификаторы + имена/запись времени) | **20/20** |
+| точная воспроизводимость (тот же seed и те же действия) | **20/20** |
+
+### Базовые политики на одних и тех же 20 эпизодах
+
+Precision и recall — микро-средние по всем выводам. F1 — среднее по эпизодам значение F1, которое входит в
+награду (на чистом эпизоде пустой ответ даёт F1 = 1). «Шаги» включают завершающий `submit`.
+
+| политика | средняя награда | precision | recall | средний F1 | среднее число шагов | TP | FP | FN |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
-| random explorer (seed 0) | −0.806 | 0.000 | 0.000 | 0.100 | 23.4 | 0 | 29 | 61 |
-| simple reconciliation | −0.599 | 0.141 | 0.607 | 0.213 | 20.5 | 37 | 225 | 24 |
-| mark everything | −1.000 | 0.000 | 0.000 | 0.000 | 5.3 | 0 | 600 | 61 |
-| oracle (evaluator-only) | +1.000 | 1.000 | 1.000 | 1.000 | 1.0 | 61 | 0 | 0 |
-| reference auditor (scripted, extra) | +0.961 | 1.000 | 1.000 | 1.000 | 20.5 | 61 | 0 | 0 |
+| `random_explorer` | -0.8065 | 0.000 | 0.000 | 0.100 | 22.45 | 0 | 31 | 61 |
+| `simple_reconciliation` | -0.6199 | 0.124 | 0.574 | 0.203 | 20.35 | 35 | 247 | 26 |
+| `mark_everything` | -1.0000 | 0.000 | 0.000 | 0.000 | 5.25 | 0 | 600 | 61 |
+| `reference_auditor` (дополнительная строка) | +0.9613 | 1.000 | 1.000 | 1.000 | 20.35 | 61 | 0 | 0 |
+| `oracle` (только на стороне оценщика) | +1.0000 | 1.000 | 1.000 | 1.000 | 1.00 | 61 | 0 | 0 |
 
-Mean return by category (clean / interacting / mixed): random −0.23 / −1.00 / −1.00; simple reconciliation
-−1.00 / −0.67 / −0.36; mark-everything −1.00 everywhere; oracle 1.00; reference auditor 0.96.
+Средняя награда по категориям эпизодов:
 
-The oracle only shows that the evaluator can award the maximum. The reference auditor shows that every
-episode is solvable from accessible records within ~20 of the 100 steps.
+| политика | чистые | взаимодействующие | смешанные |
+|---|---:|---:|---:|
+| `random_explorer` | -0.226 | -1.000 | -1.000 |
+| `simple_reconciliation` | -1.000 | -0.678 | -0.401 |
+| `mark_everything` | -1.000 | -1.000 | -1.000 |
+| `reference_auditor` | +0.962 | +0.961 | +0.961 |
+| `oracle` | +1.000 | +1.000 | +1.000 |
 
-## Failure analysis (measured)
+Как читать таблицу:
 
-**Simple reconciliation** — where the naive procedure breaks:
+* **oracle** читает скрытый эталон на стороне оценщика и отправляет его обычным `submit` с нулём шагов
+  проверки. Он показывает только то, что оценщик способен выставить максимум. О сложности задачи его
+  результат ничего не говорит.
+* **reference auditor** — заранее написанная программа (scripted policy), а не обученная
+  RL-модель. Она построена на том же независимом аудиторе, что и верификатор, и пользуется только
+  публичными данными через инструменты агента. Результат показывает, что каждый эпизод решается по
+  доступным записям примерно за 20 из 100 шагов. Обучения не было, и никакого улучшения от обучения здесь
+  не заявляется.
+* Три обязательные базовые политики (`random_explorer`, `simple_reconciliation`, `mark_everything`)
+  запускаются как отдельные процессы агента через `agent_runtime.py`.
 
-| claimed type | TP | FP | missed | cause of the false positives |
+## 2. Разбор сбоев (ENV 0.3.0)
+
+Цифры взяты из раздела `failure_analysis` отчёта `report.json`.
+
+**Простая сверка (`simple_reconciliation`)** — где ломается наивная процедура:
+
+| тип в выводе | TP | FP | пропущено (FN) | откуда берутся ложные срабатывания (по правилам политики) |
 |---|---:|---:|---:|---|
-| fx_rate | 16 | 146 | 4 | takes the date as written (supplier offset / UTC) instead of the company accounting date → wrong rate on every boundary-shifted document |
-| duplicate_invoice | 11 | 41 | 0 | "same supplier + same total" also matches repeat orders, recurring invoices and the reversed duplicate |
-| period_attribution | 1 | 28 | 10 | compares UTC date strings: flags legitimate boundary documents, misses documents that are outside the period only in company time |
-| payment_allocation | 9 | 10 | 10 | claims the Suspense amount and only the first remittance line: wrong for foreign and multi-line payments; also misses S1/S2 amounts |
+| `fx_rate` | 15 | 164 | 5 | берёт дату в том виде, в каком она записана (смещение поставщика или UTC), а не учётную дату компании, поэтому выбирает неверный курс для каждого документа, сдвинутого через границу суток |
+| `duplicate_invoice` | 11 | 42 | 0 | правило «тот же поставщик + та же сумма» срабатывает и на повторные заказы, регулярные счета и сторнированный дубль |
+| `period_attribution` | 1 | 30 | 10 | сравнивает даты в UTC: отмечает законные документы у границы периода и пропускает документы, которые выходят за период только по времени компании |
+| `payment_allocation` | 8 | 11 | 11 | заявляет сумму из Suspense и только первую строку расшифровки платежа; это неверно для валютных и многострочных платежей и не учитывает суммы сценариев S1/S2 |
 
-So the red herrings and the UTC-vs-local mechanics are exactly what separates a shallow reconciliation
-from a correct one. **Random explorer**: its few findings never match (wrong ids/amounts/evidence); it scores
-well only on clean books when it happens to submit nothing. **Mark-everything**: 600 false positives, −1.
+Итого 35 TP, 247 FP, 26 FN. Для каждого ложного вывода оценщик записывает, по каким полям он не совпал с
+ближайшей проблемой эталона (у одного вывода причин может быть несколько): `affected_ids` — 173,
+`amount` — 189, `evidence_insufficient` — 185, `type` — 85; `no_issue` — 58 (эпизод чистый, сопоставлять
+не с чем). Именно ложные следы (red herrings) и разница между UTC и местным временем отделяют
+поверхностную сверку от правильной.
 
-**Environment failures found and fixed during development** (each now covered by a test):
+**Случайный исследователь (`random_explorer`)**: 31 вывод, ни одного совпадения (неверные идентификаторы,
+суммы и доказательства). Положительную награду он получает только на чистых эпизодах, когда случайно не
+отправляет ни одного вывода.
 
-1. *Hung agent could stall the evaluator* — on Windows an agent that never reads stdin blocked the
-   evaluator's ~10 KB write. Fix: writes on a dedicated thread; hung agents are cut off at the time budget
-   (`test_hanging_agent_is_cut_off_by_the_time_budget`).
-2. *Oracle answers on disk during a closed run* — the oracle trajectory was written while later agent
-   processes still ran. Fix: oracle runs last; all evaluator-only artefacts are written after every agent
-   finished.
-3. *Episode record flags* — an invalid submission was recorded as not terminated in isolated runs. Fix:
-   use the flags returned by the environment.
-4. *Random explorer replayed one action sequence in every episode*. Fix: stream keyed by policy seed and
-   episode id.
-5. A guessed-id test did not actually change single-id findings (test bug, not an environment bug); fixed.
+**Пометить всё (`mark_everything`)**: 600 ложных срабатываний (по 140–160 на каждый тип), награда -1 на
+всех эпизодах.
 
-## Reproducibility and generalisation
+### Сбои окружения, найденные и исправленные во время разработки
 
-* Same seed + config + version + actions → byte-identical trajectories: **20/20** (closed suite) and for
-  every policy in the test suite.
-* RNG golden values identical on 3.11 and 3.14; a SHA-256 over 10 full episodes is identical on both.
-* Metamorphic pairs (new order + every id + names/timestamp text): **20/20** in the closed suite, 60/60 in
-  tests — oracle answer (id-mapped) and reward preserved, reference auditor reward and steps identical.
-* Evaluation parameter combinations never occur in train/dev (test-enforced); seeds are derived at run time.
+Каждый случай теперь покрыт тестом.
+
+1. *Зависший агент мог остановить оценщик.* В Windows агент, который не читает stdin, блокировал запись
+   оценщика (около 10 КБ). Исправление: запись идёт в отдельном потоке, а зависший агент прерывается по
+   лимиту времени (`test_hanging_agent_is_cut_off_by_the_time_budget`).
+2. *Ответы oracle на диске во время закрытого прогона.* Траектория oracle записывалась, пока ещё работали
+   процессы следующих агентов. Исправление: oracle запускается последним, а все файлы оценщика пишутся
+   только после завершения всех агентов.
+3. *Флаги записи эпизода.* При изолированном запуске невалидный `submit` записывался как незавершённый
+   эпизод. Исправление: используются флаги, которые вернуло окружение.
+4. *Случайный исследователь повторял одну и ту же последовательность действий во всех эпизодах.*
+   Исправление: поток случайных чисел привязан к seed политики и к `episode_id`.
+5. Тест на угаданные идентификаторы фактически не менял выводы с одним идентификатором. Это была ошибка
+   теста, а не окружения; тест исправлен.
+6. *Совпадение внутренней метки с публичным ключом (ENV 0.3.0).* Тест на утечки обнаружил, что внутренняя
+   метка ложного следа `refund` совпадает с публичным ключом правила проводки в `policy.json`. Метку
+   переименовали в `correct_refund`, сам тест ослаблять не стали.
+
+## 3. Контрольный прогон `verify`: встроенный локальный секрет
+
+`python -m ophanim verify` тоже запускает закрытую оценку на тех же 20 конфигурациях, но с секретом. Если
+переменная `OPHANIM_EVAL_SECRET` не задана, команда берёт встроенное значение `ophanim-verify-local-secret`
+(`src/ophanim/cli.py`). Это не секрет в смысле безопасности: значение опубликовано в исходном коде. Оно
+нужно, чтобы `verify` проходил тот же путь генерации с HMAC-ключом, что и официальный закрытый прогон.
+Ключ меняет сами эпизоды, поэтому цифры отличаются от раздела 1.
+
+Измерено 2026-11-22, Windows, Python 3.11.15, `secret_used = true`:
+
+| политика | средняя награда | precision | recall | средний F1 | среднее число шагов | TP | FP | FN |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| `random_explorer` | -0.7090 | 0.000 | 0.000 | 0.150 | 24.45 | 0 | 27 | 61 |
+| `simple_reconciliation` | -0.6500 | 0.123 | 0.557 | 0.187 | 20.60 | 34 | 243 | 27 |
+| `mark_everything` | -1.0000 | 0.000 | 0.000 | 0.000 | 5.30 | 0 | 600 | 61 |
+| `reference_auditor` | +0.9608 | 1.000 | 1.000 | 1.000 | 20.60 | 61 | 0 | 0 |
+| `oracle` | +1.0000 | 1.000 | 1.000 | 1.000 | 1.00 | 61 | 0 | 0 |
+
+Проверки данных, метаморфных пар и воспроизводимости: 20/20, 20/20, 20/20.
+
+## 4. Регрессионные тесты
+
+**687 passed, 0 failed** (измерено 2026-11-22):
+
+| платформа | Python | время `pytest` |
+|---|---|---|
+| Windows 11, 12 CPU | 3.11.15 | около 42 с |
+| Windows 11, 12 CPU | 3.14.3 | около 62 с |
+| Linux-контейнер `python:3.11.15-slim`, `--network none --cpus 2 --memory 4g` | 3.11.15 | около 38 с |
+
+| раздел | тестов | что проверяется |
+|---|---:|---|
+| `unit` | 132 | эталонные значения RNG, деньги и округление, безопасность калькулятора, matcher и метрики (в том числе сверка tie-break с полным перебором на 300 случайных графах), AST-проверки независимости кода |
+| `integration` | 403 | корректность генератора, все типы ошибок и сценарии, контракт окружения, инструменты и лимиты, решаемость, проверки утечек в траекториях, адаптер жюри, примеры matcher M01–M12, официальные сценарии D02, D03, D05, D09–D11 |
+| `adversarial` | 65 | каждое свойство награды, которого требует кейс, и дополнительные атаки |
+| `metamorphic` | 62 | 60 пар (эпизод, вариант) и 2 контрольные проверки |
+| `reproducibility` | 16 | версионированные наборы, разделение выборок, точное повторение траектории каждой политики |
+| `security` | 9 | враждебные процессы агентов, изоляция секрета, перебор seed |
+
+Зелёные внутренние тесты не гарантируют прохождения официальных тестов жюри. Чтобы снизить этот риск,
+скрипт `docs/research/evidence/p6_official_checks.py` (только чтение, ничего не записывает) прогоняет
+опубликованные примеры из определений проверок: тесты matcher 1–20, примеры M01–M12 и выборочные проверки
+контракта. Результат на 2026-11-22: 46 PASS, 0 FAIL.
+
+## 5. Опубликованные данные
+
+* `data/train` и `data/dev`: **20/20** эпизодов проходят независимую верификацию; **20/20**
+  побайтно совпадают при повторной генерации из `configs/`, в том числе внутри Linux-контейнера.
+* `data/trajectories.jsonl`: 727 строк, 40 прогонов (4 публичные политики × 10 обучающих эпизодов),
+  все строки содержат ровно поля `episode_id, step, action, observation, reward, terminated, truncated`;
+  0 утечек эталона в наблюдения.
+* Размеры опубликованных эпизодов приведены в `docs/data_model.md`.
+* Дополнительная проверка генератора ENV 0.3.0: 300 эпизодов (30 seed × 10 конфигураций, включая оба
+  режима `allocation_mode`, смеси из 12 проблем и уровни ложных следов low/high) — 0 ошибок независимой
+  верификации. Явный режим `missing` дал отсутствующее распределение 90 раз из 90, режим `partial` —
+  частичное 210 раз из 210 (отчёт `docs/research/p6c_phase3_generator_report.md`).
+
+## 6. Воспроизводимость и обобщение
+
+* Тот же seed, конфигурация, версия и действия дают идентичные траектории: **20/20** на закрытом наборе
+  и для каждой политики в тестах.
+* Отчёт `evaluate` без секрета совпадает на Python 3.11.15 и 3.14.3 (раздел 1). Эталонные значения RNG
+  совпадают на обеих версиях.
+* Метаморфные пары (новый порядок записей, новые идентификаторы, имена и запись времени): **20/20** на
+  закрытом наборе и 60/60 в тестах. Ответ oracle после отображения идентификаторов и награда сохраняются;
+  у reference auditor совпадают награда и число шагов.
+* Комбинации параметров закрытого набора не встречаются в train/dev (это проверяет тест); seed
+  закрытого набора вычисляются во время запуска.
+
+## 7. Исторические результаты: ENV 0.1.0 (2026-11-21)
+
+Этот раздел сохранён для истории разработки. Он описывает предыдущую версию окружения: с тех пор matcher
+перешёл на официальные соглашения (ENV 0.2.0), а генератор получил возвраты, явные режимы распределения
+платежей и гарантированные официальные сценарии (ENV 0.3.0). Эпизоды стали другими, поэтому цифры ниже не
+сравнимы с разделами 1–6.
+
+**Тесты:** 476 passed, 0 failed на Windows 11 (Python 3.11.15 и 3.14.3, около 75 с) и в Linux-контейнере
+(около 45 с).
+
+**Базовые политики** (по исходной записи — генерация с секретным ключом, 20 закрытых эпизодов):
+
+| политика | средняя награда | precision | recall | средний F1 | среднее число шагов | TP | FP | FN |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| случайный исследователь (seed 0) | -0.806 | 0.000 | 0.000 | 0.100 | 23.4 | 0 | 29 | 61 |
+| простая сверка | -0.599 | 0.141 | 0.607 | 0.213 | 20.5 | 37 | 225 | 24 |
+| пометить всё | -1.000 | 0.000 | 0.000 | 0.000 | 5.3 | 0 | 600 | 61 |
+| oracle (только оценщик) | +1.000 | 1.000 | 1.000 | 1.000 | 1.0 | 61 | 0 | 0 |
+| reference auditor (дополнительно) | +0.961 | 1.000 | 1.000 | 1.000 | 20.5 | 61 | 0 | 0 |
+
+**Разбор сбоев простой сверки (ENV 0.1.0):** `fx_rate` — TP 16, FP 146, пропущено 4; `duplicate_invoice`
+— 11 / 41 / 0; `period_attribution` — 1 / 28 / 10; `payment_allocation` — 9 / 10 / 10.
+
+**Проверка генератора (ENV 0.1.0):** 320 эпизодов, 1 840 внесённых проблем, 0 незаявленных расхождений,
+0 аномалий, 0 ошибок генерации. Скорость генерации: 21 / 31 / 43 мс на эпизод small / medium / large
+(для ENV 0.3.0 скорость повторно не измерялась).

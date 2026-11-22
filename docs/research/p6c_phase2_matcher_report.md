@@ -1,124 +1,129 @@
-# P6-C Phase 2 — Exact matcher and lookup compliance: report
+# P6-C, этап 2 — соответствие matcher и поиска точным соглашениям: отчёт
 
-Branch `feat/p6-c-compliance` (Phase 1 committed as `6dadbed`); nothing committed in this phase. Scope:
-the matcher and lookup conventions of the official check definitions (`fintech-checks.txt`, section
-"Точные соглашения matcher"), plus tolerance and tie-break. The episode generator logic, refunds and
-partial allocations are **out of scope** and still open (§8).
+Ветка `feat/p6-c-compliance` (этап 1 закоммичен как `6dadbed`); на момент отчёта изменения этапа не
+закоммичены (позже — коммит `60b9f8d`). Объём: соглашения matcher и поиска из официальных определений
+проверок (`fintech-checks.txt`, раздел «Точные соглашения matcher»), а также допуск и tie-break. Логика
+генератора эпизодов, возвраты и частичные распределения **вне объёма** этапа и остаются открытыми (§8).
 
-## 1. Baseline (re-run before editing)
+## 1. Исходное состояние (перепроверено до правок)
 
-* `git status` clean, branch `feat/p6-c-compliance`, `git log`: `6dadbed p6-c p1`, `f16b130`, `1a7ac33`.
-* Tests: **525 passed** on Python 3.11.15, **525 passed** on Python 3.14.3.
+* `git status` чистый, ветка `feat/p6-c-compliance`, `git log`: `6dadbed p6-c p1`, `f16b130`, `1a7ac33`.
+* Тесты: **525 passed** на Python 3.11.15, **525 passed** на Python 3.14.3.
 
-## 2. Official requirements addressed
+## 2. Закрытые официальные требования
 
-| requirement (official) | old behaviour | new behaviour |
+| требование (официальное) | старое поведение | новое поведение |
 |---|---|---|
-| ids compared exactly (matcher) | `strip().upper()` on affected/evidence ids and on the evidence universe | exact strings; sets only for order/repeats |
-| ids exact (tool lookups; C11/C12) | case- and whitespace-insensitive index (`_norm`) | exact dict lookups; a case/space variant of a real id → `unknown_id` / `unknown_document`, step consumed |
-| `episode_id` | normalised comparison | exact comparison (still a structure error when different, O2) |
-| type exact, unknown string → FP | `Literal` type → unknown/cased type = structure error (−1) | any string; non-matching type → FP |
-| currency exact, no ISO requirement | `^[A-Z]{3}$` → `kzt` / ` KZT` = structure error (−1) | any string, exact comparison → FP (M06) |
-| amount = JSON integer | strict int **and** `0 ≤ amount ≤ 10^15` → negative = −1 | strict int only (bool, string, float, null rejected); negative/huge ints valid → FP |
-| affected ids: set of exact ids, no extra limits | 1–20 ids, ids ≤ 64 chars → else −1 | any list of strings (non-strings = type error) |
-| evidence: complete allowed set; unknown/inaccessible → FP | universe = row_id, doc_id, FX key | universe = every id a tool returns: row_id, doc_id, **invoice_id, payment_id**, FX key; `entity_id` (no tool returns it) stays inaccessible |
-| limits before normalisation; 30 / 10 / 1000 code points | already correct | unchanged, now tested with 1–4-byte characters |
-| τ = 0 by default; explicit, non-negative, never inferred | τ = 1 for every generated episode; no validation | `TOLERANCE_MINOR = 0`; `TruthFile.tolerance_minor` defaults to 0 and must be a non-negative int; the matcher rejects invalid τ |
-| maximum matching + official tie-break | maximum matching, augmenting-path order (M11 → F0→B, F1→A) | maximum matching, then issue-by-issue lexicographic tie-break (M11 → A→F0, B→F1) |
+| идентификаторы сравниваются точно (matcher) | `strip().upper()` для затронутых идентификаторов, доказательств и универсума доказательств | точные строки; множества — только ради порядка и повторов |
+| точные идентификаторы (поиск в инструментах; C11/C12) | индекс без учёта регистра и пробелов (`_norm`) | точный поиск по словарю; вариант настоящего идентификатора в другом регистре или с пробелом → `unknown_id` / `unknown_document`, шаг потрачен |
+| `episode_id` | сравнение после нормализации | точное сравнение (при несовпадении по-прежнему ошибка структуры, O2) |
+| тип точный, неизвестная строка → FP | тип `Literal` → неизвестный тип или тип в другом регистре = ошибка структуры (−1) | любая строка; несовпадающий тип → FP |
+| валюта точная, без требования ISO | `^[A-Z]{3}$` → `kzt` / ` KZT` = ошибка структуры (−1) | любая строка, точное сравнение → FP (M06) |
+| сумма = целое JSON | строгий int **и** `0 ≤ amount ≤ 10^15` → отрицательная = −1 | только строгий int (bool, строка, float, null отклоняются); отрицательные и огромные int допустимы → FP |
+| затронутые идентификаторы: множество точных идентификаторов без дополнительных лимитов | 1–20 идентификаторов, не длиннее 64 символов, иначе −1 | любой список строк (не строки = ошибка типа) |
+| доказательства: полный допустимый набор; неизвестные или недоступные → FP | универсум = row_id, doc_id, ключ курса | универсум = любой идентификатор, который возвращает инструмент: row_id, doc_id, **invoice_id, payment_id**, ключ курса; `entity_id` (его не возвращает ни один инструмент) остаётся недоступным |
+| лимиты до нормализации; 30 / 10 / 1000 кодовых точек | уже было верно | без изменений, теперь проверяется и с символами длиной 1–4 байта |
+| τ = 0 по умолчанию; явный, неотрицательный, никогда не подбирается | τ = 1 в каждом сгенерированном эпизоде; без проверки | `TOLERANCE_MINOR = 0`; `TruthFile.tolerance_minor` по умолчанию 0 и должен быть неотрицательным int; matcher отклоняет недопустимый τ |
+| максимальное паросочетание и официальный tie-break | максимальное паросочетание в порядке увеличивающих путей (M11 → F0→B, F1→A) | максимальное паросочетание, затем лексикографический tie-break проблема за проблемой (M11 → A→F0, B→F1) |
 
-Unchanged by design: the reward formula `clip(2·F1 − 1 − 0.002·k, −1, 1)` and its fractions-based
-evaluation; inspection-step accounting; O1 (unknown extra fields → structure error) and O2
-(`episode_id` mismatch → structure error), as proposed in the compliance audit.
+Не менялись по замыслу: формула награды `clip(2·F1 − 1 − 0.002·k, −1, 1)` и её вычисление на дробях; учёт
+шагов проверки; O1 (неизвестные лишние поля → ошибка структуры) и O2 (несовпадение `episode_id` → ошибка
+структуры), как предложено в аудите соответствия.
 
-## 3. Files changed
+## 3. Изменённые файлы
 
-| file | change |
+| файл | изменение |
 |---|---|
-| `src/ophanim/schemas.py` | `Finding`: `type`/`currency` plain strings; `affected_ids`/`evidence_ids` lists of strings; amount strict int without bounds; limits 30/10/1000 kept; `TruthFile.tolerance_minor = Field(0, ge=0)`; removed `MAX_AFFECTED_IDS` |
-| `src/ophanim/evaluator/matcher.py` | exact eligibility; `check_tolerance`; maximum matching + official tie-break; `normalize_id` removed |
-| `src/ophanim/evaluator/judge.py` | exact `episode_id` in the shared `validate_submission` |
-| `src/ophanim/env/tools.py` | exact lookups (`_norm` removed) |
-| `src/ophanim/generator/episode.py` | `PublicEpisode.evidence_universe` adds `invoice_id`, `payment_id` (scoring helper; generation output unchanged) |
-| `src/ophanim/generator/presentation.py` | `TOLERANCE_MINOR = 0` (written into `policy.json`/`truth.json`) |
-| `src/ophanim/generator/injectors.py` | comment only |
-| `src/ophanim/env/task.py` | task text: exact ids/types/currency; structure vs value errors |
-| `src/ophanim/version.py` | `ENV_VERSION` 0.1.0 → **0.2.0** (same actions can now earn different rewards) |
-| `data/**` | regenerated with `ophanim build-data` (see §6) |
-| `docs/reward_design.md`, `docs/design_note.md` | published matcher rules updated |
-| `tests/unit/test_matcher_exact.py` (new, 69) | ids, currency/type, amount, evidence, limits, structure, tolerance, matching, brute-force cross-check |
-| `tests/integration/test_exact_semantics.py` (new, 22) | C11/C12 through the adapter, M01–M12 on episode files, structure vs semantics through `score_episode`, evidence universe, tolerance on files |
-| `tests/adversarial/test_reward_attacks.py`, `tests/integration/test_env_contract.py`, `tests/unit/test_matcher_reward.py` | 10 assertions that encoded the old semantics updated (see §5) |
-| `docs/research/evidence/p6c_phase2_official_checks.out.txt` (new) | the unmodified P6 harness re-run on Phase 2 code |
+| `src/ophanim/schemas.py` | `Finding`: `type`/`currency` — обычные строки; `affected_ids`/`evidence_ids` — списки строк; сумма — строгий int без границ; лимиты 30/10/1000 сохранены; `TruthFile.tolerance_minor = Field(0, ge=0)`; удалён `MAX_AFFECTED_IDS` |
+| `src/ophanim/evaluator/matcher.py` | точная проверка пригодности; `check_tolerance`; максимальное паросочетание и официальный tie-break; удалён `normalize_id` |
+| `src/ophanim/evaluator/judge.py` | точный `episode_id` в общей `validate_submission` |
+| `src/ophanim/env/tools.py` | точный поиск (удалён `_norm`) |
+| `src/ophanim/generator/episode.py` | `PublicEpisode.evidence_universe` добавляет `invoice_id`, `payment_id` (вспомогательная функция оценки; результат генерации не меняется) |
+| `src/ophanim/generator/presentation.py` | `TOLERANCE_MINOR = 0` (записывается в `policy.json`/`truth.json`) |
+| `src/ophanim/generator/injectors.py` | только комментарий |
+| `src/ophanim/env/task.py` | текст задачи: точные идентификаторы, типы и валюта; ошибки структуры и ошибки значений |
+| `src/ophanim/version.py` | `ENV_VERSION` 0.1.0 → **0.2.0** (одни и те же действия теперь могут получать другую награду) |
+| `data/**` | перегенерировано командой `ophanim build-data` (см. §6) |
+| `docs/reward_design.md`, `docs/design_note.md` | обновлены опубликованные правила matcher |
+| `tests/unit/test_matcher_exact.py` (новый, 69) | идентификаторы, валюта и тип, сумма, доказательства, лимиты, структура, допуск, сопоставление, сверка с полным перебором |
+| `tests/integration/test_exact_semantics.py` (новый, 22) | C11/C12 через адаптер, M01–M12 на файлах эпизода, структура и смысл через `score_episode`, универсум доказательств, допуск в файлах |
+| `tests/adversarial/test_reward_attacks.py`, `tests/integration/test_env_contract.py`, `tests/unit/test_matcher_reward.py` | обновлены 10 проверок, закреплявших старую семантику (см. §5) |
+| `docs/research/evidence/p6c_phase2_official_checks.out.txt` (новый) | вывод неизменённого скрипта P6 на коде этапа 2 |
 
-## 4. Matching algorithm and tie-break
+## 4. Алгоритм сопоставления и tie-break
 
-1. Build edges: finding *i* — issue *j* iff every eligibility condition holds (exact).
-2. K = size of a maximum matching (augmenting paths over all findings and issues).
-3. Sort issues by `issue_id` (Python string order = Unicode code points). For each issue in that order,
-   take the lowest finding index *i* such that the issues already fixed + (issue, *i*) + a maximum
-   matching of the remaining issues on the remaining findings still reaches K. If none exists, the issue
-   stays unmatched.
-4. This produces the lexicographically smallest sorted sequence of (issue_id, finding index) pairs
-   among all maximum matchings. TP = K always; FP = findings − K; FN = issues − K.
+1. Построить рёбра: вывод *i* — проблема *j* тогда и только тогда, когда выполнены все условия пригодности
+   (точно).
+2. K = размер максимального паросочетания (увеличивающие пути по всем выводам и проблемам).
+3. Отсортировать проблемы по `issue_id` (порядок строк Python = кодовые точки Unicode). Для каждой проблемы
+   в этом порядке взять наименьший индекс вывода *i*, при котором уже закреплённые пары + (проблема, *i*) +
+   максимальное паросочетание оставшихся проблем на оставшихся выводах всё ещё дают K. Если такого нет,
+   проблема остаётся несопоставленной.
+4. Так получается лексикографически наименьшая отсортированная последовательность пар (issue_id, индекс
+   вывода) среди всех максимальных паросочетаний. Всегда TP = K; FP = выводы − K; FN = проблемы − K.
 
-Correctness evidence: `test_matching_equals_exhaustive_search_on_random_graphs` compares K and the exact
-pair sequence with brute-force enumeration on 300 random graphs (≤ 5 findings × ≤ 4 issues): all equal.
-M10 (greedy would lose a TP) and M11 (tie-break) pass on synthetic issues and on episode files.
+Доказательство корректности: `test_matching_equals_exhaustive_search_on_random_graphs` сравнивает K и
+точную последовательность пар с полным перебором на 300 случайных графах (до 5 выводов × до 4 проблем):
+всё совпадает. M10 (жадный алгоритм потерял бы TP) и M11 (tie-break) проходят на синтетических проблемах и
+на файлах эпизода.
 
-## 5. Structural versus semantic decisions
+## 5. Решения о структуре и смысле
 
-* **Structural (−1, all metrics null):** missing field; wrong JSON type (bool/string/float/null amount,
-  numeric id, non-string type/currency/explanation, non-list ids); unknown field (O1); wrong
-  `episode_id` (O2); 31 findings; 11 evidence ids (raw, even if repeated); 1001 code points.
-* **Semantic (normal FP/FN):** unknown or differently-cased type; currency differing in case or space;
-  wrong, negative or huge amount; empty, long, unknown or case-variant ids; missing, incomplete or
-  inaccessible evidence.
-* Updated old tests (intent kept): the ±1 tolerance test became `..._is_exactly_zero_by_default`; four
-  former "structure error" cases (negative amount, lowercase currency, unknown type, empty affected ids)
-  moved to `test_semantic_mismatch_is_a_false_positive_not_a_structure_error` (with three more variants);
-  the env contract test now asserts that case/space variants are unknown ids; the matcher unit test now
-  asserts exactness.
+* **Структурные (−1, все метрики null):** отсутствующее поле; неверный тип JSON (сумма bool, строкой,
+  float или null, числовой идентификатор, тип/валюта/объяснение не строкой, идентификаторы не списком);
+  неизвестное поле (O1); неверный `episode_id` (O2); 31 вывод; 11 идентификаторов доказательств (в
+  исходном списке, даже с повторами); 1001 кодовая точка.
+* **Смысловые (обычные FP/FN):** неизвестный тип или тип в другом регистре; валюта, отличающаяся регистром
+  или пробелом; неверная, отрицательная или огромная сумма; пустые, длинные, неизвестные идентификаторы или
+  их варианты в другом регистре; отсутствующие, неполные или недоступные доказательства.
+* Обновлённые старые тесты (смысл сохранён): тест допуска ±1 стал `..._is_exactly_zero_by_default`; четыре
+  прежних случая «ошибки структуры» (отрицательная сумма, валюта в нижнем регистре, неизвестный тип, пустые
+  затронутые идентификаторы) перенесены в
+  `test_semantic_mismatch_is_a_false_positive_not_a_structure_error` (и добавлены ещё три варианта);
+  контрактный тест окружения теперь утверждает, что варианты в другом регистре или с пробелом — неизвестные
+  идентификаторы; модульный тест matcher теперь утверждает точность.
 
-## 6. Data regeneration (required, explained)
+## 6. Перегенерация данных (необходима, с объяснением)
 
-`tolerance_minor` is written into every `policy.json` and `truth.json`, and `env_version` into every
-manifest and provenance. Keeping τ = 1 in published truth would contradict the matcher default, and
-`ophanim verify` requires the published data to regenerate byte-identically. The data was therefore
-regenerated with the established command `ophanim build-data`. Seeds and configs are unchanged, so ids
-and content are unchanged. `git diff` shows exactly:
+`tolerance_minor` записывается в каждый `policy.json` и `truth.json`, а `env_version` — в каждый манифест
+и provenance. Оставить τ = 1 в опубликованном эталоне значило бы противоречить значению matcher по
+умолчанию, а `ophanim verify` требует побайтной регенерации опубликованных данных. Поэтому данные
+перегенерированы штатной командой `ophanim build-data`. Seed и конфигурации не менялись, поэтому
+идентификаторы и содержимое тоже не изменились. `git diff` показывает ровно:
 
-* 40 `tolerance_minor` lines (1 → 0) in the 20 `policy.json` and 20 `truth.json` files;
-* 40 `env_version` lines in the 20 manifests and 20 provenance files;
-* the 40 reset observations in `trajectories.jsonl` (version and task text), still 698 lines.
+* 40 строк `tolerance_minor` (1 → 0) в 20 файлах `policy.json` и 20 файлах `truth.json`;
+* 40 строк `env_version` в 20 манифестах и 20 файлах provenance;
+* 40 наблюдений reset в `trajectories.jsonl` (версия и текст задачи), по-прежнему 698 строк.
 
-The two `index.json` files were rewritten with CRLF by `build-data` on Windows. Their content was
-unchanged, so they were restored. Minor pre-existing tooling issue, see §8.
+Два файла `index.json` команда `build-data` в Windows перезаписала с CRLF. Их содержимое не изменилось,
+поэтому они восстановлены. Это мелкая проблема инструментов, существовавшая раньше; см. §8.
 
-## 7. Results (executed)
+## 7. Результаты (выполнено)
 
-| check | result |
+| проверка | результат |
 |---|---|
-| full suite, Python 3.11.15 | **619 passed** (525 baseline − 4 moved + 7 semantic cases + 69 unit + 22 integration) |
-| full suite, Python 3.14.3 | **619 passed** |
-| published Block-3 tests 1–20 | 20/20 (in-memory and through `score_episode` on episode files) |
-| M01–M12 | all pass, including M06 (FP), M11 pairs (A→F0, B→F1), M10 (F1→A, F0→B) |
-| C11 / C12 | case, leading/trailing whitespace, newline and numeric variants → bounded errors, step consumed |
-| P6 harness (unmodified) | before 34 PASS / 10 FAIL → after **44 PASS / 0 FAIL** |
-| existing adapter tests | 49/49 still pass |
-| `ophanim verify` | PASS: 20/20 episodes verified, 20/20 byte-identical regeneration, 0 trajectory leaks; closed evaluation 20/20 data, 20/20 metamorphic, 20/20 reproducibility; baseline returns unchanged (−0.8065, −0.5987, −1.0, 0.961, 1.0) |
-| Docker offline, Linux, Python 3.11.15, `--network none --cpus 2 --memory 4g` | full `ophanim verify` PASS (**619 passed** inside the container; data 20/20 verified and regenerated identically; 0 leaks; 20/20/20 closed evaluation); `judge_adapter.py --smoke` ok |
+| полный набор, Python 3.11.15 | **619 passed** (525 исходных − 4 перенесённых + 7 смысловых случаев + 69 модульных + 22 интеграционных) |
+| полный набор, Python 3.14.3 | **619 passed** |
+| опубликованные тесты блока 3 1–20 | 20/20 (в памяти и через `score_episode` на файлах эпизода) |
+| M01–M12 | все проходят, включая M06 (FP), пары M11 (A→F0, B→F1), M10 (F1→A, F0→B) |
+| C11 / C12 | варианты с другим регистром, пробелами в начале и конце, переводом строки и числовые → ограниченные ошибки, шаг потрачен |
+| скрипт P6 (без изменений) | до: 34 PASS / 10 FAIL → после: **44 PASS / 0 FAIL** |
+| существующие тесты адаптера | 49/49 по-прежнему проходят |
+| `ophanim verify` | PASS: 20/20 эпизодов проверено, 20/20 побайтная регенерация, 0 утечек в траекториях; закрытая оценка — 20/20 данные, 20/20 метаморфные пары, 20/20 воспроизводимость; средние награды базовых политик не изменились (−0.8065, −0.5987, −1.0, 0.961, 1.0) |
+| Docker без сети, Linux, Python 3.11.15, `--network none --cpus 2 --memory 4g` | полный `ophanim verify` PASS (**619 passed** внутри контейнера; данные 20/20 проверены и перегенерированы идентично; 0 утечек; закрытая оценка 20/20/20); `judge_adapter.py --smoke` ok |
 
-## 8. Remaining gaps and notes
+## 8. Оставшиеся пробелы и замечания
 
-* **Generator (Phase 3):** refund red herring (D03); requestable partial vs missing allocation (D09–D11);
-  documented guarantees for split payments and FX-boundary documents (D02, D05); provenance format
-  documentation (DC1, T1).
-* **Interpretations kept:** O1 (unknown extra fields → −1) and O2 (`episode_id` mismatch → −1). Neither
-  is used by any published test. Both are documented in the compliance audit.
-* **Evidence universe interpretation:** "accessible" = returned by a tool. `entity_id` values appear
-  inside records but no tool retrieves an entity, so citing one makes a finding unmatched.
-* **Tooling:** `build-data` writes `index.json` with platform line endings (CRLF on Windows). It is
-  harmless because `.gitattributes` normalises to LF, but it creates working-tree noise on Windows. A
-  one-line fix (`newline="\n"`) is proposed for a later phase.
-* This phase does not claim full compliance of Blocks 1–4. Block 2 still depends on the generator gaps
-  above.
+* **Генератор (этап 3):** ложный след «возврат» (D03); запрашиваемое частичное или отсутствующее
+  распределение (D09–D11); документированные гарантии разделённых платежей и валютных документов у границы
+  (D02, D05); документация формата provenance (DC1, T1).
+* **Сохранённые толкования:** O1 (неизвестные лишние поля → −1) и O2 (несовпадение `episode_id` → −1). Ни
+  одно не используется опубликованными тестами. Оба описаны в аудите соответствия.
+* **Толкование универсума доказательств:** «доступный» = возвращаемый инструментом. Значения `entity_id`
+  встречаются внутри записей, но ни один инструмент не возвращает организацию, поэтому ссылка на неё делает
+  вывод несопоставимым.
+* **Инструменты:** `build-data` записывает `index.json` с окончаниями строк платформы (CRLF в Windows). Это
+  безвредно, потому что `.gitattributes` приводит файлы к LF, но в Windows создаёт шум в рабочем дереве.
+  Предложено исправление в одну строку (`newline="\n"`) на следующем этапе; оно сделано на этапе 3.
+* Этот этап не заявляет полного соответствия блокам 1–4. Блок 2 всё ещё зависит от перечисленных выше
+  пробелов генератора.

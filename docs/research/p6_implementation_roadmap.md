@@ -1,156 +1,177 @@
-# P6 — Implementation roadmap P7–P13
+# P6 — план реализации P7–P13
 
-Principles for every phase: the official environment API, reward, findings schema, matcher, closed
-evaluation, baselines and dataset reproducibility stay unchanged; the full existing test suite (476 tests)
-must still pass; new dependencies arrive only when a phase needs them, as optional extras; every learned
-agent is evaluated through the existing process boundary.
+Принципы для каждого этапа: официальный API окружения, награда, схема выводов, matcher, закрытая оценка,
+базовые политики и воспроизводимость данных не меняются; весь существующий набор тестов (на этапе P6 — 476
+тестов, сейчас — 687) должен по-прежнему проходить; новые зависимости появляются только тогда, когда они
+нужны этапу, и только как необязательные; каждый обучаемый агент оценивается через существующую границу
+процессов.
 
-## P6-C — Official compliance fixes (blocking; precede P7; awaiting approval)
+## P6-C — исправления соответствия официальным проверкам (блокирующие; идут до P7)
 
-The official check definitions (2026-11-20) are binding and were not available when P0–P5 were built.
-`p6_official_compliance_audit.md` and `p6_traceability_matrix.md` show that the jury currently cannot run
-Blocks 1, 3 and 4 (no `judge_adapter.py`, no `episode_dir` loading, no `score_episode`) and that several
-matcher/tool conventions differ from the definitions. These fixes belong to the official benchmark, not
-to the research phases, and must land first:
+> На момент написания исправления ожидали одобрения. Позднее они выполнены на этапах P6-C 1–3 (см. отчёты
+> `p6c_phase1`–`p6c_phase3` и раздел «Обновления статуса по этапам» матрицы трассировки).
 
-1. **P0** `judge_adapter.py` (generate_episode / make_env / reset with `episode_dir` / step envelope /
-   score_episode), file-order episode loader, closed-mode env without truth, README section.
-2. **P1** exact-id matcher and tool lookups; any-string type and currency compared exactly; remove extra
-   structural limits; evidence universe = all tool-accessible ids; τ = 0 default; refund red herring;
-   requestable partial vs missing allocation; documented red-herring guarantees.
-3. **P2** lexicographic tie-break; provenance and id-field documentation.
-4. **Verification:** adapter-level replay of C01–C20, Block-3 tests 1–20 via `score_episode`, M01–M12,
-   file-level paired checks; full suite; `ophanim verify`; Docker offline run.
+Официальные определения проверок (2026-11-20) обязательны, и когда строились этапы P0–P5, их ещё не было.
+`p6_official_compliance_audit.md` и `p6_traceability_matrix.md` показывают, что жюри сейчас не может
+запустить блоки 1, 3 и 4 (нет `judge_adapter.py`, нет загрузки `episode_dir`, нет `score_episode`) и что
+несколько соглашений matcher и инструментов расходятся с определениями. Эти исправления относятся к
+официальному бенчмарку, а не к исследовательским этапам, и должны быть сделаны первыми:
 
-**Acceptance:** every row of the traceability matrix VERIFIED via the adapter; all existing tests pass (with
-the adversarial tests updated where they encoded the old −1 behaviour); `data/` regenerated;
-`ENV_VERSION` bumped. P7 below assumes P6-C is done and treats the adapter envelope as the agent
-interface (`p6_architecture_constraints.md`).
+1. **P0** `judge_adapter.py` (generate_episode / make_env / reset с `episode_dir` / оболочка step /
+   score_episode), загрузчик эпизода в порядке файла, окружение закрытого режима без эталона, раздел в
+   README.
+2. **P1** точные идентификаторы в matcher и при поиске в инструментах; тип и валюта — любые строки, которые
+   сравниваются точно; убрать лишние структурные лимиты; универсум доказательств = все идентификаторы,
+   доступные через инструменты; τ = 0 по умолчанию; ложный след «возврат»; запрашиваемое частичное или
+   отсутствующее распределение; документированные гарантии ложных следов.
+3. **P2** лексикографический tie-break; документация provenance и полей с идентификаторами.
+4. **Проверка:** повтор C01–C20 на уровне адаптера, тесты блока 3 1–20 через `score_episode`, M01–M12,
+   парные проверки на уровне файлов; полный набор тестов; `ophanim verify`; прогон в Docker без сети.
 
-## Dependency graph
+**Приёмка:** каждая строка матрицы трассировки VERIFIED через адаптер; все существующие тесты проходят
+(состязательные тесты обновлены там, где закрепляли старое поведение −1); `data/` перегенерированы;
+`ENV_VERSION` повышена. Этап P7 ниже предполагает, что P6-C выполнен, и считает оболочку адаптера
+интерфейсом агента (`p6_architecture_constraints.md`).
+
+## Граф зависимостей
 
 ```
-P7 interface & infrastructure ──► P8 datasets & imitation ──► P9 RL core ──► P10 financial intelligence
-        │                                                          │                    │
-        └──────────────► P11 generalisation & benchmark research ◄─┴────────────────────┘
-                                         │
-                                         ▼
-                               P12 autonomous auditor ──► P13 research-grade platform
+P7 интерфейс и инфраструктура --> P8 данные и подражание --> P9 ядро RL --> P10 финансовый интеллект
+        |                                                       |                  |
+        +-------------> P11 исследования обобщения и бенчмарка <+------------------+
+                                         |
+                                         v
+                               P12 автономный аудитор --> P13 исследовательская платформа
 ```
 
-## P7 — Agent interface and learning infrastructure (no learning, no new mandatory dependency)
+## P7 — интерфейс агента и инфраструктура обучения (без обучения и без новых обязательных зависимостей)
 
-**Deliverables:** `PublicEnv` facade; `RevealedStore`; symbolic primitives (time, money, FX, grouping,
-structural links); generic candidate generator and multi-convention feature extractor; finding builder
-with pre-submit schema validation; hierarchical action adapter (macro acquisition + candidate submission);
-research suites with seed namespaces (`research/*` sets); research-metrics module (records and documents
-revealed, tool histogram, evidence quality, near-miss profile) computed from public trajectories and judge
-logs; `LabelProvider` for open splits; the silent reference policy; leakage and import tests (architecture
-§7). Optional: a thin Gymnasium wrapper behind an extra.
+**Результаты:** фасад `PublicEnv`; `RevealedStore`; символьные примитивы (время, деньги, курсы,
+группировка, структурные связи); общий генератор кандидатов и извлечение признаков при нескольких
+соглашениях; сборщик выводов с проверкой схемы перед отправкой; иерархический адаптер действий
+(макродействия сбора информации + ответ через кандидатов); исследовательские наборы с пространствами seed
+(наборы `research/*`); модуль исследовательских метрик (раскрытые записи и документы, гистограмма
+инструментов, качество доказательств, профиль промахов), который считается по публичным траекториям и
+журналам судьи; `LabelProvider` для открытых выборок; эталонная политика молчания; тесты утечек и импортов
+(архитектура, §7). Необязательно: тонкая обёртка Gymnasium за отдельной группой зависимостей.
 
-**Acceptance criteria:**
-* A *scripted* agent built only from P7 components (fixed rules over candidates and features) reproduces
-  the reference auditor's results on `research/test-iid` (F1 = 1 on ≥ 99 % of episodes). This shows the
-  adapter loses no information; it is not a learning claim.
-* Leakage tests pass: features are unchanged when only the hidden truth changes; agent packages import
-  no generator/evaluator/reconcile code; `LabelProvider` refuses secret-keyed episodes.
-* Namespace disjointness test passes; research metrics match hand-computed values on fixtures.
-* No changes in `env/`, `evaluator/`, `schemas.py`, `policies/`, `configs/`; `python -m ophanim verify`
-  still prints PASS.
+**Критерии приёмки:**
 
-**Risks:** primitives that silently encode the answer (mitigated by multi-convention features and the
-RQ6 ablations); performance of feature extraction (budget: < 1 s per episode).
+* *Заранее написанный* агент, собранный только из компонентов P7 (фиксированные правила над кандидатами и
+  признаками), воспроизводит результаты reference auditor на `research/test-iid` (F1 = 1 не меньше чем на
+  99 % эпизодов). Это показывает, что адаптер не теряет информации; это не заявление об обучении.
+* Тесты утечек проходят: признаки не меняются, когда меняется только скрытый эталон; пакеты агента не
+  импортируют код генератора, оценщика и reconcile; `LabelProvider` отказывает для эпизодов с секретным
+  ключом.
+* Тест непересечения пространств имён проходит; исследовательские метрики совпадают с вычисленными вручную
+  значениями на фикстурах.
+* Нет изменений в `env/`, `evaluator/`, `schemas.py`, `policies/`, `configs/`; `python -m ophanim verify`
+  по-прежнему печатает PASS.
 
-## P8 — Datasets and imitation learning (introduces the optional `[learning]` extra: PyTorch)
+**Риски:** примитивы, которые незаметно кодируют ответ (смягчается признаками с несколькими соглашениями и
+абляциями RQ6); скорость извлечения признаков (бюджет: меньше 1 с на эпизод).
 
-**Deliverables:** demonstration generator with diverse, observation-consistent demonstrators (randomised
-table order, targeted FX lookups, early-stop variants), each scored by the judge on training splits;
-dataset format (public trajectory + agent annotations + labels from `LabelProvider`); BC for the candidate
-and convention heads; BC + DAgger for the acquisition head; first learning curves with ≥ 5 seeds.
+## P8 — наборы данных и обучение подражанием (появляется необязательная группа `[learning]`: PyTorch)
 
-**Acceptance criteria:**
-* The BC agent beats the silent reference (−0.5 on the closed-suite mix; `2·p_clean − 1` on research
-  sets) and simple reconciliation on `research/val`, with non-overlapping 95 % CIs.
-* Training is reproducible: same seed → same checkpoint metrics on CPU (tolerance documented).
-* The official image still has a single runtime dependency; the learning extra installs separately.
+**Результаты:** генератор демонстраций с разнообразными, согласованными с наблюдениями демонстраторами
+(случайный порядок таблиц, точечные запросы курсов, варианты ранней остановки), каждый оценён судьёй на
+обучающих выборках; формат набора данных (публичная траектория + аннотации агента + метки из
+`LabelProvider`); BC для голов кандидатов и соглашений; BC + DAgger для головы сбора информации; первые
+кривые обучения с не меньше чем 5 seed.
 
-**Risks:** low demonstration diversity (track action-sequence entropy); BC that only learns the counter
-(explained by the audit; mitigated by diverse demonstrators).
+**Критерии приёмки:**
 
-## P9 — Reinforcement-learning core
+* Агент BC превосходит молчание (−0.5 на смеси закрытого набора; `2·p_clean − 1` на исследовательских
+  наборах) и простую сверку на `research/val`, с непересекающимися 95-процентными интервалами.
+* Обучение воспроизводимо: тот же seed → те же метрики контрольной точки на CPU (допуск документирован).
+* У официального образа по-прежнему одна зависимость времени выполнения; группа для обучения ставится
+  отдельно.
 
-**Deliverables:** in-repo PPO derived from the CleanRL single-file design (attribution, MIT) with masked
-factorised heads and GAE; experiments: PPO from scratch (RQ9), BC → PPO (RQ1); a value-based comparator
-(DQN/QR-DQN macro head + DRRN-style candidate scorer, RQ2); optional SB3/sb3-contrib MaskablePPO cross-check
-on a padded MultiBinary adapter.
+**Риски:** низкое разнообразие демонстраций (отслеживать энтропию последовательностей действий); BC,
+который выучивает только счётчик (объяснено в аудите; смягчается разнообразными демонстраторами).
 
-**Acceptance criteria:**
-* Learning curves, IQM and CIs for every condition, ≥ 5 seeds each, all on identical episodes.
-* RQ1, RQ2 and RQ9 answered with the pre-registered criteria (support or reject; a rejection is a valid
-  outcome).
-* Every RL-trained agent runs unchanged through `run_episode_isolated` with `mode="eval"`.
+## P9 — ядро обучения с подкреплением
 
-**Risks:** H-collapse (expected without BC); instability (Engstrom et al. 2020: implementation details
-dominate) — mitigated by unit tests of the PPO components against known small tasks.
+**Результаты:** собственный PPO в репозитории по образцу однофайловой реализации CleanRL (с указанием
+авторства, MIT) с маскированными факторизованными головами и GAE; эксперименты: PPO с нуля (RQ9), BC → PPO
+(RQ1); агент на основе ценности для сравнения (голова макродействий DQN/QR-DQN + оценщик кандидатов в стиле
+DRRN, RQ2); необязательная перекрёстная проверка через MaskablePPO из SB3/sb3-contrib на дополненном
+адаптере MultiBinary.
 
-## P10 — Financial intelligence
+**Критерии приёмки:**
 
-**Deliverables:** convention-learning experiments (RQ10); primitive ablations (RQ6); evidence-quality and
-near-miss diagnostics; calibration channel and temperature scaling (RQ12); error taxonomy per error type
-and per red-herring kind.
+* Кривые обучения, IQM и интервалы для каждого условия, не меньше 5 seed на каждое, все на одинаковых
+  эпизодах.
+* На RQ1, RQ2 и RQ9 даны ответы по заранее зарегистрированным критериям (подтверждение или опровержение;
+  опровержение — тоже допустимый результат).
+* Каждый агент, обученный RL, без изменений работает через `run_episode_isolated` с `mode="eval"`.
 
-**Acceptance criteria:** per-type and per-red-herring results with CIs; the reward-only agent's convention
-accuracy reported against the supervised one; no change to the official schema.
+**Риски:** H-collapse (ожидается без BC); нестабильность (Engstrom et al. 2020: детали реализации решают
+всё) — смягчается модульными тестами компонентов PPO на известных небольших задачах.
 
-**Risks:** trivialisation through primitives — every result must report the matching ablation.
+## P10 — финансовый интеллект
 
-## P11 — Generalisation and benchmark research
+**Результаты:** эксперименты по выучиванию соглашений (RQ10); абляции примитивов (RQ6); диагностика качества
+доказательств и промахов; канал калибровки и температурное масштабирование (RQ12); таксономия ошибок по
+типам ошибок и видам ложных следов.
 
-**Deliverables:** OOD suites (profile, combination, size, distractor, presentation), research-only scarcity
-regimes (RQ8), curriculum study (RQ5), memory study (RQ3), representation study (RQ4), invariance study
-(RQ11), optional Decision Transformer study if a diverse corpus exists.
+**Критерии приёмки:** результаты по типам и видам ложных следов с интервалами; точность выбора соглашения
+у агента, обученного только по награде, сравнивается с агентом на метках учителя; официальная схема не
+меняется.
 
-**Acceptance criteria:** every OOD result reported as a paired gap with CI; metamorphic agreement measured
-for every learned agent; one consolidated research report.
+**Риски:** тривиализация через примитивы — каждый результат должен сопровождаться соответствующей абляцией.
 
-**Risks:** overfitting the curriculum order (mixture schedules, held-out evaluation); test-set reuse
-(each final model is evaluated once).
+## P11 — исследования обобщения и бенчмарка
 
-## P12 — Autonomous auditor
+**Результаты:** наборы OOD (профиль, сочетание, размер, ложные следы, представление), исследовательские
+режимы дефицита (RQ8), исследование учебной программы (RQ5), исследование памяти (RQ3), исследование
+представления (RQ4), исследование инвариантности (RQ11), необязательное исследование Decision Transformer,
+если появится разнообразный корпус.
 
-**Deliverables:** the best agent packaged as an `agent_runtime` policy; evaluation on the official closed
-suite (as an additional row; baselines unchanged); optional LLM tool-agent research track through the same
-JSON protocol, run outside the official setting when it needs network or exceeds 60 s.
+**Критерии приёмки:** каждый результат OOD приводится как парный разрыв с интервалом; метаморфное согласие
+измерено для каждого обучаемого агента; один сводный исследовательский отчёт.
 
-**Acceptance criteria:** the closed evaluation still passes 20/20/20 (data, metamorphic, reproducibility);
-the agent's row reports reward, P/R/F1, steps and runtime with the same report code; LLM results are
-labelled non-official, with model id and decoding settings recorded.
+**Риски:** переобучение под порядок учебной программы (смешанные расписания, отложенная оценка); повторное
+использование тестового набора (каждая итоговая модель оценивается один раз).
 
-**Risks:** results on 20 episodes are noisy (−0.599 vs −0.662 across two suites for the same baseline);
-headline claims use the research test sets.
+## P12 — автономный аудитор
 
-## P13 — Research-grade platform
+**Результаты:** лучший агент упакован как политика `agent_runtime`; оценка на официальном закрытом наборе
+(как дополнительная строка; базовые политики без изменений); необязательная исследовательская ветка
+LLM-агентов с инструментами через тот же протокол JSON, которая запускается вне официальной постановки, если
+ей нужна сеть или она не укладывается в 60 с.
 
-**Deliverables:** experiment registry (config + code hash + data namespace + seeds → result), leaderboard
-format separating official reward from research metrics, documentation for external agents, CI running
-the official suite and the leakage tests, packaging of the learning extra.
+**Критерии приёмки:** закрытая оценка по-прежнему проходит 20/20/20 (данные, метаморфные пары,
+воспроизводимость); строка агента содержит награду, P/R/F1, шаги и время выполнения, посчитанные тем же
+кодом отчёта; результаты LLM помечены как неофициальные, с записанными идентификатором модели и
+параметрами декодирования.
 
-**Acceptance criteria:** a third party can reproduce one P9 result and the official evaluation from a clean
-checkout with documented commands; the leaderboard never mixes research-shaped rewards with the official
-reward.
+**Риски:** результаты на 20 эпизодах шумные (−0.599 и −0.662 на двух наборах для одной и той же базовой
+политики); главные заявления делаются на исследовательских тестовых наборах.
 
-## Suggested order and first step after approval
+## P13 — исследовательская платформа
 
-1. P7 `RevealedStore` + primitives + candidate generator + finding builder, validated by the P7 scripted
-   agent (largest risk reduction: proves the adapter is lossless and leak-free).
-2. P7 research metrics and namespaces (needed by every later comparison).
-3. P8 BC on the submission heads (cheapest learning signal, highest headroom), then acquisition.
-4. P9 PPO with the RQ9 control first (fast, informative), then BC → PPO.
+**Результаты:** реестр экспериментов (конфигурация + хеш кода + пространство данных + seed → результат),
+формат таблицы лидеров, отделяющий официальную награду от исследовательских метрик, документация для
+внешних агентов, CI, который запускает официальный набор и тесты утечек, упаковка группы зависимостей для
+обучения.
 
-## Open questions
+**Критерии приёмки:** третья сторона может воспроизвести один результат P9 и официальную оценку из чистого
+checkout по документированным командам; таблица лидеров никогда не смешивает исследовательские
+сформированные награды с официальной.
 
-* Which research budget regimes make acquisition non-trivial without changing the official setting
-  (step caps, larger research-only sizes)? To be decided with RQ8 pilots.
-* Whether a fully pointer-based agent (Approach 2) can reach non-trivial F1 at all under exact-match
-  scoring — RQ6 will tell.
-* Whether local LLMs can operate within 60 s per episode — needs measurement in P12.
+## Предлагаемый порядок и первый шаг после одобрения
+
+1. P7: `RevealedStore` + примитивы + генератор кандидатов + сборщик выводов, проверенные заранее написанным
+   агентом P7 (наибольшее снижение риска: доказывает, что адаптер не теряет информации и не даёт утечек).
+2. P7: исследовательские метрики и пространства имён (нужны для каждого последующего сравнения).
+3. P8: BC на головах ответа (самый дешёвый обучающий сигнал, наибольший запас), затем сбор информации.
+4. P9: PPO, сначала с контролем RQ9 (быстро и информативно), затем BC → PPO.
+
+## Открытые вопросы
+
+* Какие исследовательские режимы бюджета делают сбор информации нетривиальным, не меняя официальную
+  постановку (ограничения шагов, более крупные размеры только для исследований)? Решается пилотами RQ8.
+* Может ли полностью основанный на указателях агент (подход 2) вообще достичь нетривиального F1 при оценке
+  с точным совпадением — ответит RQ6.
+* Могут ли локальные LLM укладываться в 60 с на эпизод — нужно измерить на P12.

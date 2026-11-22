@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="460" viewBox="0 0 1200 460" font-family="'Segoe UI', Inter, 'Helvetica Neue', Arial, 'DejaVu Sans', sans-serif">
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#0B1020"/><stop offset="1" stop-color="#161B3D"/>
+  </linearGradient>
+  <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+    <path d="M32 0H0V32" fill="none" stroke="#FFFFFF" stroke-opacity=".035"/>
+  </pattern>
+  <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#7C6CF6"/><stop offset="1" stop-color="#14B8A6"/>
+  </linearGradient>
+</defs>
+<rect width="1200" height="460" rx="18" fill="url(#bg)"/><rect width="1200" height="460" rx="18" fill="url(#grid)"/>
+<rect x="30" y="30" width="760" height="400" rx="14" fill="#FFFFFF" fill-opacity=".03" stroke="#7C6CF6" stroke-opacity=".6"/>
+<text x="54" y="64" font-size="15" font-weight="700" fill="#FFFFFF" letter-spacing="2">ПРОЦЕСС ОЦЕНЩИКА<tspan dx="12" fill="#14B8A6" font-weight="600" letter-spacing="0">·  доверенный</tspan></text>
+<text x="766" y="64" font-size="12.5" fill="#14B8A6" text-anchor="end">эталон · provenance · seed не покидают процесс</text>
+<rect x="50" y="84" width="720" height="72" rx="10" fill="#0B1020" stroke="#FFFFFF" stroke-opacity=".1"/><rect x="50" y="84" width="4" height="72" rx="2" fill="#7C6CF6"/><text x="72" y="126" font-family="'JetBrains Mono', 'SFMono-Regular', Consolas, 'DejaVu Sans Mono', monospace" font-size="16" font-weight="700" fill="#C7D2FE">generator/</text><text x="196" y="115" font-size="14" fill="#E2E8F0">скрытая история → проводки → самопроверка → снимок чистых книг</text><text x="196" y="137" font-size="14" fill="#94A3B8">→ внесение ошибок → представление → публичный + закрытый эпизод</text>
+<rect x="50" y="168" width="720" height="72" rx="10" fill="#0B1020" stroke="#FFFFFF" stroke-opacity=".1"/><rect x="50" y="168" width="4" height="72" rx="2" fill="#14B8A6"/><text x="72" y="210" font-family="'JetBrains Mono', 'SFMono-Regular', Consolas, 'DejaVu Sans Mono', monospace" font-size="16" font-weight="700" fill="#C7D2FE">env/</text><text x="196" y="199" font-size="14" fill="#E2E8F0">OphanimEnv (reset / step) · Toolbox — только публичные таблицы</text><text x="196" y="221" font-size="14" fill="#94A3B8">Judge (эталон) → matcher → reward</text>
+<rect x="50" y="252" width="720" height="72" rx="10" fill="#0B1020" stroke="#FFFFFF" stroke-opacity=".1"/><rect x="50" y="252" width="4" height="72" rx="2" fill="#7C6CF6"/><text x="72" y="294" font-family="'JetBrains Mono', 'SFMono-Regular', Consolas, 'DejaVu Sans Mono', monospace" font-size="16" font-weight="700" fill="#C7D2FE">evaluator/</text><text x="196" y="283" font-size="14" fill="#E2E8F0">верификатор · раннеры · метаморфные проверки · отчёт</text><text x="196" y="305" font-size="14" fill="#94A3B8">oracle — только на стороне оценщика</text>
+<rect x="50" y="336" width="720" height="72" rx="10" fill="#0B1020" stroke="#FFFFFF" stroke-opacity=".1"/><rect x="50" y="336" width="4" height="72" rx="2" fill="#7C6CF6"/><text x="72" y="378" font-family="'JetBrains Mono', 'SFMono-Regular', Consolas, 'DejaVu Sans Mono', monospace" font-size="16" font-weight="700" fill="#C7D2FE">audit/</text><text x="196" y="367" font-size="14" fill="#E2E8F0">независимый аудитор публичных записей</text><text x="196" y="389" font-size="14" fill="#94A3B8">только stdlib, не импортирует генератор (AST-тест)</text>
+<rect x="900" y="30" width="270" height="400" rx="14" fill="#FFFFFF" fill-opacity=".03" stroke="#FB7185" stroke-opacity=".55" stroke-dasharray="6 5"/>
+<text x="924" y="64" font-size="15" font-weight="700" fill="#FFFFFF" letter-spacing="2">ПРОЦЕСС АГЕНТА</text>
+<text x="924" y="86" font-size="14" font-weight="600" fill="#FB7185">недоверенный</text>
+<rect x="920" y="152" width="230" height="140" rx="10" fill="#0B1020" stroke="#FFFFFF" stroke-opacity=".1"/>
+<text x="940" y="186" font-family="'JetBrains Mono', 'SFMono-Regular', Consolas, 'DejaVu Sans Mono', monospace" font-size="15" font-weight="700" fill="#FECDD3">agent_runtime.py</text>
+<text x="940" y="216" font-size="14" fill="#E2E8F0">policies/ или любая</text>
+<text x="940" y="238" font-size="14" fill="#E2E8F0">программа на протоколе</text>
+<text x="940" y="260" font-size="14" fill="#E2E8F0">JSON lines</text>
+<text x="924" y="372" font-size="13" fill="#94A3B8">видит только публичные</text>
+<text x="924" y="392" font-size="13" fill="#94A3B8">таблицы и ответы инструментов</text>
+<g stroke="#14B8A6" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M778 212H912"/><path d="M902 205l10 7-10 7"/><path d="M788 205l-10 7 10 7"/>
+</g>
+<text x="845" y="200" font-size="13" font-weight="600" fill="#14B8A6" text-anchor="middle">JSON lines</text>
+<text x="845" y="236" font-size="12.5" fill="#94A3B8" text-anchor="middle">stdin / stdout</text>
+</svg>

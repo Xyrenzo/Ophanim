@@ -1,210 +1,220 @@
-# Traceability matrix — official Genesis FinTech check definitions (published 2026-11-20)
+# Матрица трассировки — официальные определения проверок Genesis FinTech (опубликованы 2026-11-20)
 
-Source of requirements: `fintech-checks.txt` ("Genesis FinTech: определения проверок"). Audited against the
-working tree on 2026-11-21. **No status is based on documentation alone.**
+Источник требований: `fintech-checks.txt` («Genesis FinTech: определения проверок»). Проверка рабочего
+дерева выполнена 2026-11-21. **Ни один статус не поставлен только на основании документации.**
 
-**Status values:**
-* **VERIFIED** — implemented and confirmed by execution: an existing test, or the P6 harness
-  `docs/research/evidence/p6_official_checks.py` with output in `p6_official_checks.out.txt`.
-* **PARTIAL** — the logic exists but is incomplete, or is not reachable through the official interface.
-* **MISSING** — not implemented.
-* **NON-COMPLIANT** — implemented, but contradicts the definition.
+**Значения статуса:**
 
-Two status columns are given because the jury runs everything through `judge_adapter.py`:
+* **VERIFIED** — реализовано и подтверждено запуском: существующим тестом или скриптом P6
+  `docs/research/evidence/p6_official_checks.py` с выводом в `p6_official_checks.out.txt`.
+* **PARTIAL** — логика есть, но неполная или недоступна через официальный интерфейс.
+* **MISSING** — не реализовано.
+* **NON-COMPLIANT** — реализовано, но противоречит определению.
 
-* **Core** — whether the behaviour exists in our code.
-* **Adapter** — whether the jury can reach it through the official interface. The adapter does not exist,
-  so every requirement that needs it is MISSING today.
+Колонок статуса две, потому что жюри запускает всё через `judge_adapter.py`:
 
-**Priority:**
-* **P0** — blocking: the jury cannot run the check at all.
-* **P1** — a specific published test fails.
-* **P2** — alignment or robustness.
-* **P3** — documentation.
+* **Core** — есть ли такое поведение в нашем коде.
+* **Adapter** — может ли жюри добраться до него через официальный интерфейс. Адаптера пока нет, поэтому
+  каждое требование, которому он нужен, сегодня в статусе MISSING.
 
-## A. Adapter interface (§ "Единый способ подключения")
+**Приоритет:**
 
-| ID | official requirement | implementation | status | evidence | required change | prio |
+* **P0** — блокирующий: жюри вообще не может запустить проверку.
+* **P1** — не проходит конкретный опубликованный тест.
+* **P2** — согласование или надёжность.
+* **P3** — документация.
+
+## A. Интерфейс адаптера (§ «Единый способ подключения»)
+
+| ID | официальное требование | реализация | статус | доказательство | необходимое изменение | приор. |
 |---|---|---|---|---|---|---|
-| A1 | `judge_adapter.py` in the container | — | MISSING | file absent | create `judge_adapter.py` (thin wrapper over existing modules) | P0 |
-| A2 | `generate_episode(seed, config, output_dir)` writes manifest, ledger, invoices, payments, fx, policy + truth, provenance | `generator/episode.py` L170 (`generate_episode`), `GeneratedEpisode.write` L95 (layout `public/`, `evaluator/`) | PARTIAL | writer exists, signature differs | wrapper with the official signature; document the directory layout | P0 |
-| A3 | `make_env()` returns an object with `reset`/`step` | `OphanimEnv` (`env/environment.py` L66) | PARTIAL | class exists | factory returning an adapter env | P0 |
-| A4 | `reset(seed, config)` with `{"mode":"closed","episode_dir":…,"team_config":…}` **loads that episode as-is** (no regeneration, no id change); repeated reset restarts it | `reset` L80 generates only | MISSING | harness: config with `mode/episode_dir/team_config` → `ValidationError` | episode loader from `episode_dir` (reuse `audit/dataset.py` `PublicDataset.from_directory`, which already reads our files); serve tables **in file order** | P0 |
-| A5 | `mode="train"` without `episode_dir` → team generator with `seed` + `team_config` | `reset(seed, config)` | PARTIAL | works with native config | map `team_config` → `EpisodeConfig`; `mode` → env mode | P0 |
-| A6 | `step({"name": …, "args": {…}})`; names `list_records`, `get_record`, `get_document`, `calculator`, `submit`; submit args `{"findings": …}` | native flat `{"action": …, …}` (`schemas.py` L123–L152) | MISSING | harness: envelope → not accepted | translate envelope → native action; unknown names must still reach `step` (so they consume a step) | P0 |
-| A7 | first observation `{task, manifest, policy, remaining_steps: 100}`; then `{result, error, remaining_steps}` | native adds `tools`, `time_budget_seconds`; step obs adds `ok` | PARTIAL | harness: first-observation keys | adapter emits the documented shapes | P0 |
-| A8 | `list_records` → `{records, next_cursor}`; `get_record`/`get_document` → the object itself; `calculator` → decimal string | native wraps: `{table, records, next_cursor, total}`, `{table, record}`, `{doc_type, document}`, `{result}` | PARTIAL | harness C05/C07/C09 lines | adapter unwraps results | P0 |
-| A9 | submit returns only `{"accepted": true}` or a bounded structure error; no correctness | native `{"status": "submitted"}` / `invalid_submission` | PARTIAL | `env/environment.py` L179–L191 | adapter maps result | P0 |
-| A10 | `score_episode(episode_dir, findings, inspection_steps)` → `{tp, fp, fn, precision, recall, f1, return}`; invalid → `return=-1`, others `null`, error logged | `Judge` (`evaluator/judge.py`) works on in-memory objects only | MISSING (logic VERIFIED) | harness Block 3: 20/20 with in-memory truth | load `evaluator/truth.json` + public files from `episode_dir`; call the existing judge; map output | P0 |
-| A11 | closed mode: policy reward 0 incl. termination; true reward kept separately | eval mode (`_visible_reward` L199) | VERIFIED (core) | `test_eval_mode_withholds_reward_and_diagnostics` | map `mode:"closed"` → `mode="eval"` | P0 |
-| A12 | policy in a separate restricted process; no evaluator import; no access to `episode_dir`; hiding fields in a Python object is not isolation | jury runs the policy process; our env lives in the jury process | PARTIAL | `tests/security/*`, AST tests | in closed mode the adapter env should **not load truth at all** (scoring only via `score_episode`) | P1 |
-| A13 | canonical table names `ledger`, `invoices`, `payments`, `fx` | `env/tools.py` L19 | VERIFIED | code | — | — |
-| A14 | README documents adapter code, result schema, mapping of the four error types, working directory and launch command | README has none of this | MISSING | README | add an "Official judge adapter" section | P0 |
+| A1 | `judge_adapter.py` в контейнере | — | MISSING | файла нет | создать `judge_adapter.py` (тонкая обёртка над существующими модулями) | P0 |
+| A2 | `generate_episode(seed, config, output_dir)` записывает manifest, ledger, invoices, payments, fx, policy, а также truth и provenance | `generator/episode.py` L170 (`generate_episode`), `GeneratedEpisode.write` L95 (структура `public/`, `evaluator/`) | PARTIAL | запись есть, сигнатура другая | обёртка с официальной сигнатурой; описать структуру каталогов | P0 |
+| A3 | `make_env()` возвращает объект с `reset`/`step` | `OphanimEnv` (`env/environment.py` L66) | PARTIAL | класс есть | фабрика, возвращающая окружение адаптера | P0 |
+| A4 | `reset(seed, config)` с `{"mode":"closed","episode_dir":…,"team_config":…}` **загружает этот эпизод как есть** (без повторной генерации и смены идентификаторов); повторный reset начинает его заново | `reset` L80 только генерирует | MISSING | скрипт: конфигурация с `mode/episode_dir/team_config` → `ValidationError` | загрузчик эпизода из `episode_dir` (переиспользовать `audit/dataset.py` `PublicDataset.from_directory`, который уже читает наши файлы); отдавать таблицы **в порядке файла** | P0 |
+| A5 | `mode="train"` без `episode_dir` → генератор команды с `seed` и `team_config` | `reset(seed, config)` | PARTIAL | работает с нативной конфигурацией | отобразить `team_config` → `EpisodeConfig`, `mode` → режим окружения | P0 |
+| A6 | `step({"name": …, "args": {…}})`; имена `list_records`, `get_record`, `get_document`, `calculator`, `submit`; аргументы submit — `{"findings": …}` | нативный плоский формат `{"action": …, …}` (`schemas.py` L123–L152) | MISSING | скрипт: оболочка не принимается | переводить оболочку в нативное действие; неизвестные имена всё равно должны доходить до `step` (чтобы тратить шаг) | P0 |
+| A7 | первое наблюдение `{task, manifest, policy, remaining_steps: 100}`, затем `{result, error, remaining_steps}` | нативное добавляет `tools`, `time_budget_seconds`; наблюдение шага добавляет `ok` | PARTIAL | скрипт: ключи первого наблюдения | адаптер выдаёт документированные формы | P0 |
+| A8 | `list_records` → `{records, next_cursor}`; `get_record`/`get_document` → сам объект; `calculator` → десятичная строка | нативные обёртки: `{table, records, next_cursor, total}`, `{table, record}`, `{doc_type, document}`, `{result}` | PARTIAL | строки скрипта C05/C07/C09 | адаптер разворачивает результаты | P0 |
+| A9 | submit возвращает только `{"accepted": true}` или ограниченную ошибку структуры, без оценки правильности | нативное `{"status": "submitted"}` / `invalid_submission` | PARTIAL | `env/environment.py` L179–L191 | адаптер отображает результат | P0 |
+| A10 | `score_episode(episode_dir, findings, inspection_steps)` → `{tp, fp, fn, precision, recall, f1, return}`; невалидный ответ → `return=-1`, остальные `null`, ошибка в журнале | `Judge` (`evaluator/judge.py`) работает только с объектами в памяти | MISSING (логика VERIFIED) | скрипт, блок 3: 20/20 с эталоном в памяти | загрузить `evaluator/truth.json` и публичные файлы из `episode_dir`; вызвать существующего судью; отобразить результат | P0 |
+| A11 | закрытый режим: награда политики 0, включая завершение; настоящая награда хранится отдельно | режим eval (`_visible_reward` L199) | VERIFIED (core) | `test_eval_mode_withholds_reward_and_diagnostics` | отобразить `mode:"closed"` → `mode="eval"` | P0 |
+| A12 | политика в отдельном ограниченном процессе; без импорта оценщика; без доступа к `episode_dir`; скрытие полей в объекте Python — не изоляция | процесс политики запускает жюри; наше окружение живёт в процессе жюри | PARTIAL | `tests/security/*`, AST-тесты | в закрытом режиме окружение адаптера **вообще не должно загружать эталон** (оценка только через `score_episode`) | P1 |
+| A13 | канонические имена таблиц `ledger`, `invoices`, `payments`, `fx` | `env/tools.py` L19 | VERIFIED | код | — | — |
+| A14 | README описывает код адаптера, схему результатов, соответствие четырёх типов ошибок, рабочий каталог и команду запуска | в README этого нет | MISSING | README | добавить раздел «Official judge adapter» | P0 |
 
-## B. Block 1 — contract tests C01–C20 (25 points)
+## B. Блок 1 — контрактные тесты C01–C20 (25 баллов)
 
-| ID | requirement | core | adapter | evidence | required change | prio |
+| ID | требование | core | adapter | доказательство | необходимое изменение | приор. |
 |---|---|---|---|---|---|---|
-| C01 | reset on C → (observation, info), JSON | VERIFIED | MISSING | `test_reset_returns_observation_and_info` | A3/A4 | P0 |
-| C02 | first obs: task, manifest, short policy, budget; no seed/truth | VERIFIED | MISSING | harness keys; `test_observations_never_include_seed_or_config` | A7 | P0 |
-| C03 | manifest fields; numbers match the data | VERIFIED | MISSING | verifier format checks; `test_public_formats` | A4 (counts stay correct after jury permutation) | P0 |
-| C04 | list_records step → 5-tuple, bool flags, JSON | VERIFIED | MISSING | `test_step_returns_five_tuple_of_json_values` | A6 | P0 |
-| C05 | L (≥ 101 rows), limit 50, cursor walk: no gaps/repeats | VERIFIED | MISSING | `test_pagination_covers_every_row_once_with_max_50` (ledger ≥ 149 rows always) | A8 | P0 |
-| C06 | same cursor twice → same records, same order | VERIFIED | MISSING | `test_cursors_are_stable_and_validated` | A8 | P0 |
-| C07 | get_record R1 → that record | VERIFIED | MISSING | harness (shape `{table, record}`) | A8 unwrap | P0 |
-| C08 | get_document D1 → that document | VERIFIED | MISSING | `test_get_record_and_get_document` | A8 unwrap | P0 |
-| C09 | calculator `0.1+0.2` → decimal 0.3 | VERIFIED | MISSING | harness `'0.3'`; `test_arithmetic` | A8 | P0 |
-| C10 | calculator outside grammar → controlled error, nothing executed | VERIFIED | MISSING | `test_rejects_anything_but_arithmetic`; AST scan (no eval/exec) | — | P0 |
-| C11 | get_record U (absent string) → bounded error, step used | **NON-COMPLIANT** | MISSING | harness: a case-variant of an existing id returns a record | **exact id lookup** in `env/tools.py` (`_norm` L51 upper-cases and strips) | P1 |
-| C12 | get_document U → bounded error, nothing disclosed | **NON-COMPLIANT** | MISSING | same mechanism | exact `doc_id` lookup | P1 |
-| C13 | unknown action name → bounded error, step used | VERIFIED | MISSING | `test_invalid_actions_are_bounded_and_consume_a_step` | A6 must pass unknown names through | P0 |
-| C14 | each request (valid or not) costs one step | VERIFIED | MISSING | same test (`remaining_steps == 99`) | — | P0 |
-| C15 | submit → terminated; later actions change nothing | VERIFIED | MISSING | `test_repeated_submission_cannot_change_the_reward` | A9 | P0 |
-| C16 | 99 inspection actions + submit as action 100 → accepted, terminated | VERIFIED | MISSING | `test_submit_on_the_last_step_terminates_not_truncates` | — | P0 |
-| C17 | 100 inspection actions → truncated, empty findings | VERIFIED | MISSING | `test_step_limit_truncates_with_empty_answer` | — | P0 |
-| C18 | 60 s from reset incl. policy time → truncated, empty findings | VERIFIED (injected clock) | MISSING | `test_time_limit_truncates`, `test_timeouts_truncate_with_empty_answer` | adapter uses the real monotonic clock; loading counts as fixture preparation | P0 |
-| C19 | closed: reward 0 at every step incl. end; no diagnostics in info/final answer | VERIFIED | MISSING | eval-mode tests; `test_agent_process_receives_no_hidden_data_and_no_secret` | A11 | P0 |
-| C20 | no truth/provenance/seed/answers anywhere the policy sees; no shell/SQL/FS/network | VERIFIED | MISSING | leak scans, process-isolation tests, calculator grammar | A12 (no truth in the closed-mode env object) | P1 |
+| C01 | reset на C → (observation, info), JSON | VERIFIED | MISSING | `test_reset_returns_observation_and_info` | A3/A4 | P0 |
+| C02 | первое наблюдение: задача, манифест, краткая политика, бюджет; без seed и эталона | VERIFIED | MISSING | ключи в скрипте; `test_observations_never_include_seed_or_config` | A7 | P0 |
+| C03 | поля манифеста; числа совпадают с данными | VERIFIED | MISSING | проверки форматов в верификаторе; `test_public_formats` | A4 (счётчики остаются верными после перестановки жюри) | P0 |
+| C04 | шаг list_records → 5 значений, флаги bool, JSON | VERIFIED | MISSING | `test_step_returns_five_tuple_of_json_values` | A6 | P0 |
+| C05 | L (не меньше 101 строки), limit 50, обход курсором: без пропусков и повторов | VERIFIED | MISSING | `test_pagination_covers_every_row_once_with_max_50` (в главной книге всегда не меньше 149 строк) | A8 | P0 |
+| C06 | тот же курсор дважды → те же записи в том же порядке | VERIFIED | MISSING | `test_cursors_are_stable_and_validated` | A8 | P0 |
+| C07 | get_record R1 → эта запись | VERIFIED | MISSING | скрипт (форма `{table, record}`) | A8: развернуть | P0 |
+| C08 | get_document D1 → этот документ | VERIFIED | MISSING | `test_get_record_and_get_document` | A8: развернуть | P0 |
+| C09 | calculator `0.1+0.2` → десятичное 0.3 | VERIFIED | MISSING | скрипт `'0.3'`; `test_arithmetic` | A8 | P0 |
+| C10 | calculator вне грамматики → контролируемая ошибка, ничего не исполняется | VERIFIED | MISSING | `test_rejects_anything_but_arithmetic`; AST-проверка (нет eval/exec) | — | P0 |
+| C11 | get_record U (отсутствующая строка) → ограниченная ошибка, шаг потрачен | **NON-COMPLIANT** | MISSING | скрипт: вариант существующего идентификатора в другом регистре возвращает запись | **точный поиск по идентификатору** в `env/tools.py` (`_norm` L51 переводит в верхний регистр и обрезает пробелы) | P1 |
+| C12 | get_document U → ограниченная ошибка, ничего не раскрыто | **NON-COMPLIANT** | MISSING | тот же механизм | точный поиск `doc_id` | P1 |
+| C13 | неизвестное имя действия → ограниченная ошибка, шаг потрачен | VERIFIED | MISSING | `test_invalid_actions_are_bounded_and_consume_a_step` | A6 должен пропускать неизвестные имена | P0 |
+| C14 | каждый запрос (валидный или нет) стоит один шаг | VERIFIED | MISSING | тот же тест (`remaining_steps == 99`) | — | P0 |
+| C15 | submit → terminated; последующие действия ничего не меняют | VERIFIED | MISSING | `test_repeated_submission_cannot_change_the_reward` | A9 | P0 |
+| C16 | 99 действий проверки и submit как действие 100 → принято, terminated | VERIFIED | MISSING | `test_submit_on_the_last_step_terminates_not_truncates` | — | P0 |
+| C17 | 100 действий проверки → truncated, пустые выводы | VERIFIED | MISSING | `test_step_limit_truncates_with_empty_answer` | — | P0 |
+| C18 | 60 с от reset с учётом времени политики → truncated, пустые выводы | VERIFIED (подменённые часы) | MISSING | `test_time_limit_truncates`, `test_timeouts_truncate_with_empty_answer` | адаптер использует настоящие монотонные часы; загрузка считается подготовкой фикстуры | P0 |
+| C19 | закрытый режим: награда 0 на каждом шаге, включая конец; нет диагностики в info и итоговом ответе | VERIFIED | MISSING | тесты режима eval; `test_agent_process_receives_no_hidden_data_and_no_secret` | A11 | P0 |
+| C20 | ни эталона, ни provenance, ни seed, ни ответов там, где их видит политика; нет shell/SQL/ФС/сети | VERIFIED | MISSING | проверки утечек, тесты изоляции процессов, грамматика калькулятора | A12 (нет эталона в объекте окружения закрытого режима) | P1 |
 
-## C. Block 2 — closed episodes D01–D20 (25 points)
+## C. Блок 2 — закрытые эпизоды D01–D20 (25 баллов)
 
-| ID | scenario | core | adapter | evidence | required change | prio |
+| ID | сценарий | core | adapter | доказательство | необходимое изменение | приор. |
 |---|---|---|---|---|---|---|
-| D01 | clean, ordinary | VERIFIED | MISSING (A2) | clean configs verify, truth empty | A2 | P0 |
-| D02 | clean, correctly split payment | PARTIAL | MISSING | split payment present in 60/60 default episodes (measured), but not guaranteed by a documented setting | document and test the guarantee at `distractors ≥ normal` | P1 |
-| D03 | clean, **correct refund** | **MISSING** | MISSING | no refund concept anywhere in `src/` (grep: 0 files) | implement a legitimate refund red herring + auditor support (proposal: supplier returns an unidentified payment: `Dr Bank / Cr Suspense`, documented `direction` field) | P1 |
-| D04 | clean, legitimate repeated amounts | VERIFIED | MISSING | repeat order 60/60, recurring 51/60 (measured) | — | P0 (A2) |
-| D05 | clean, correct FX/period boundary | PARTIAL | MISSING | boundary-UTC document 60/60 (measured); FX-boundary document not guaranteed | document/guarantee a foreign-currency boundary document | P2 |
-| D06–D08 | duplicate invoice (varied); repeated amounts not duplicates | VERIFIED | MISSING | generator + verifier tests; red herrings | — | P0 (A2) |
-| D09–D11 | allocation; ≥ 1 **missing** and ≥ 1 **partial** | **PARTIAL** | MISSING | one requested allocation error → *missing* in 40/40 seeds (measured); partial only inside scenario S1 | documented setting to request partial vs missing allocation (multi-line carrier, as for S1) | P1 |
-| D12–D13 | wrong FX date/rate per policy | VERIFIED | MISSING | `test_fx_errors_recompute_from_the_cited_rate` | — | P0 (A2) |
-| D14–D15 | period error; timezone per manifest/policy | VERIFIED | MISSING | `test_period_attribution_is_a_utc_versus_local_date_error` | — | P0 (A2) |
-| D16–D18 | first interaction scenario, varied parameters | VERIFIED (S1) | MISSING | `test_s1_partial_foreign_payment_at_boundary` (15 seeds) | — | P0 (A2) |
-| D19–D20 | second interaction scenario | VERIFIED (S2) | MISSING | `test_s2_wrong_rate_invoice_with_unapplied_payment_line` | — | P0 (A2) |
-| DC1 | clean before injection; provenance documented and sufficient | VERIFIED / PARTIAL docs | — | verifier pre-mutation check (`provenance.pre_mutation.tables`) | document the provenance format field by field | P2 |
-| DC2 | injection = declared discrepancy, checkable independently of our matcher | VERIFIED | — | independent auditor (`audit/`, stdlib only), 20/20 closed + 108 test episodes | — | — |
-| DC3 | truth type/ids/amount/currency match the change | VERIFIED | — | verifier amount/id comparison | — | — |
-| DC4 | a complete evidence set is reachable through the tools | VERIFIED | — | evidence-sufficiency check; reference auditor solves through tools | — | — |
-| DC5 | §03 formats (offsets, minor units, decimal FX strings, explicit nulls) | VERIFIED | — | `audit/formats.py`; `test_public_formats` | — | — |
-| DC6 | no contradictory/unsolvable data | VERIFIED | — | zero anomalies in reconciliation | — | — |
+| D01 | чистый, обычный | VERIFIED | MISSING (A2) | чистые конфигурации проходят верификацию, эталон пуст | A2 | P0 |
+| D02 | чистый, корректно разделённый платёж | PARTIAL | MISSING | разделённый платёж есть в 60/60 эпизодах по умолчанию (измерено), но не гарантирован документированной настройкой | описать и проверить тестом гарантию при `distractors ≥ normal` | P1 |
+| D03 | чистый, **корректный возврат** | **MISSING** | MISSING | понятия возврата в `src/` нет (grep: 0 файлов) | реализовать законный ложный след «возврат» и его поддержку в аудиторе (предложение: поставщик возвращает платёж без расшифровки: `Дт Bank / Кт Suspense`, документированное поле `direction`) | P1 |
+| D04 | чистый, законно повторяющиеся суммы | VERIFIED | MISSING | повторный заказ 60/60, регулярные счета 51/60 (измерено) | — | P0 (A2) |
+| D05 | чистый, корректная граница курса и периода | PARTIAL | MISSING | документ с датой UTC за границей 60/60 (измерено); валютный документ у границы не гарантирован | описать и гарантировать валютный документ у границы | P2 |
+| D06–D08 | дубль счёта (разные варианты); повторяющиеся суммы — не дубли | VERIFIED | MISSING | тесты генератора и верификатора; ложные следы | — | P0 (A2) |
+| D09–D11 | распределение; не меньше 1 **отсутствующего** и 1 **частичного** | **PARTIAL** | MISSING | одна запрошенная ошибка распределения → *отсутствующее* в 40/40 seed (измерено); частичное только внутри сценария S1 | документированная настройка для запроса частичного или отсутствующего распределения (многострочный носитель, как в S1) | P1 |
+| D12–D13 | неверная дата или курс по политике | VERIFIED | MISSING | `test_fx_errors_recompute_from_the_cited_rate` | — | P0 (A2) |
+| D14–D15 | ошибка периода; часовой пояс по манифесту и политике | VERIFIED | MISSING | `test_period_attribution_is_a_utc_versus_local_date_error` | — | P0 (A2) |
+| D16–D18 | первый сценарий взаимодействия, разные параметры | VERIFIED (S1) | MISSING | `test_s1_partial_foreign_payment_at_boundary` (15 seed) | — | P0 (A2) |
+| D19–D20 | второй сценарий взаимодействия | VERIFIED (S2) | MISSING | `test_s2_wrong_rate_invoice_with_unapplied_payment_line` | — | P0 (A2) |
+| DC1 | чисто до внесения ошибок; provenance описан и достаточен | VERIFIED / PARTIAL (документация) | — | проверка верификатором состояния до изменений (`provenance.pre_mutation.tables`) | описать формат provenance поле за полем | P2 |
+| DC2 | внесение = заявленное расхождение, проверяемое независимо от нашего matcher | VERIFIED | — | независимый аудитор (`audit/`, только stdlib), 20/20 закрытых и 108 тестовых эпизодов | — | — |
+| DC3 | тип, идентификаторы, сумма и валюта эталона соответствуют изменению | VERIFIED | — | сравнение сумм и идентификаторов в верификаторе | — | — |
+| DC4 | полный набор доказательств достижим через инструменты | VERIFIED | — | проверка достаточности доказательств; reference auditor решает через инструменты | — | — |
+| DC5 | форматы §03 (смещения, минимальные единицы, десятичные строки курсов, явные null) | VERIFIED | — | `audit/formats.py`; `test_public_formats` | — | — |
+| DC6 | нет противоречивых или нерешаемых данных | VERIFIED | — | ноль аномалий при сверке | — | — |
 
-## D. Block 3 — matcher and reward tests 1–20 (25 points) and examples M01–M12
+## D. Блок 3 — тесты matcher и награды 1–20 (25 баллов) и примеры M01–M12
 
-Logic was executed against the existing judge with in-memory fixtures built from real episode ids (τ = 0
-where the definitions fix it). Through the official interface every row is **MISSING** until A10 exists.
+Логика проверена на существующем судье с фикстурами в памяти, построенными из настоящих идентификаторов
+эпизода (τ = 0 там, где его фиксируют определения). Через официальный интерфейс каждая строка остаётся
+**MISSING**, пока нет A10.
 
-| ID | expectation | core result | required change | prio |
+| ID | ожидание | результат core | необходимое изменение | приор. |
 |---|---|---|---|---|
-| 1–17 | TP/FP/FN and reward values (incl. 47/150, −871/1050, −0.02, 1/0.90/0.80) | **VERIFIED 17/17** | A10 | P0 |
-| 18–20 | 31 findings / 11 evidence ids / 1001-char explanation → structure error, −1 | **VERIFIED 3/3** | A10 | P0 |
-| M01–M05 | multiset ids, extra ids, extra/unknown evidence, raw-limit before dedup | VERIFIED 5/5 | — | — |
-| M06 | currency differing by case or space → **FP** (not a structure error) | **NON-COMPLIANT** | drop the `^[A-Z]{3}$` pattern; compare exactly | P1 |
-| M07–M09 | τ boundary; string/bool amount → structure error | VERIFIED | — | — |
-| M10 | maximum matching (F1→A, F0→B) | VERIFIED | — | — |
-| M11 | tie-break A→F0, B→F1 | **NON-COMPLIANT (pairs only)**: got F0→B, F1→A; TP/FP/FN/reward identical | lexicographic tie-break over (issue_id, finding index) | P2 |
-| M12 | duplicates stay separate (TP=1, FP=1) | VERIFIED | — | — |
+| 1–17 | значения TP/FP/FN и награды (в том числе 47/150, −871/1050, −0.02, 1/0.90/0.80) | **VERIFIED 17/17** | A10 | P0 |
+| 18–20 | 31 вывод / 11 идентификаторов доказательств / объяснение из 1001 символа → ошибка структуры, −1 | **VERIFIED 3/3** | A10 | P0 |
+| M01–M05 | идентификаторы как мультимножество, лишние идентификаторы, лишние и неизвестные доказательства, лимит на исходном списке до удаления повторов | VERIFIED 5/5 | — | — |
+| M06 | валюта, отличающаяся регистром или пробелом → **FP** (не ошибка структуры) | **NON-COMPLIANT** | убрать шаблон `^[A-Z]{3}$`; сравнивать точно | P1 |
+| M07–M09 | граница τ; сумма строкой или bool → ошибка структуры | VERIFIED | — | — |
+| M10 | максимальное паросочетание (F1→A, F0→B) | VERIFIED | — | — |
+| M11 | tie-break A→F0, B→F1 | **NON-COMPLIANT (только пары)**: получено F0→B, F1→A; TP/FP/FN и награда совпадают | лексикографический tie-break по (issue_id, индекс вывода) | P2 |
+| M12 | дубли остаются отдельными (TP=1, FP=1) | VERIFIED | — | — |
 
-### Matcher conventions (§ "Точные соглашения matcher")
+### Соглашения matcher (§ «Точные соглашения matcher»)
 
-| ID | rule | status | evidence | required change | prio |
+| ID | правило | статус | доказательство | необходимое изменение | приор. |
 |---|---|---|---|---|---|
-| N1 | ids compared **exactly** (case and whitespace significant) | **NON-COMPLIANT** | harness: lowercase and space-padded ids still matched | remove `normalize_id` upper/strip (`evaluator/matcher.py` L30) | P1 |
-| N2 | `affected_ids` = exact set; no extra limits | **NON-COMPLIANT** | empty list and 21 ids → −1 (should be FP) | remove `min_length=1`/`max_length=20` (`schemas.py` L110) | P1 |
-| N3 | evidence set after raw limit; complete inclusion; unknown/inaccessible id → FP | PARTIAL | universe excludes `invoice_id`/`payment_id`, although `get_record` can retrieve them | add retrievable ids to the evidence universe (`generator/episode.py` L64) | P1 |
-| N4 | type exact; unknown string → not matched (FP) | **NON-COMPLIANT** | `"fraud"` → −1 (`Literal` type) | accept any string; unknown → FP | P1 |
-| N5 | currency exact; no ISO requirement | **NON-COMPLIANT** | M06 | see M06 | P1 |
-| N6 | amount: JSON integer, not bool/string/float | VERIFIED (types) / **NON-COMPLIANT** (bounds) | negative integer → −1 (`ge=0`, `le=10**15`) | remove numeric bounds; any int structurally valid | P1 |
-| N7 | limits checked before normalisation; 30 / 10 / 1000 code points | VERIFIED | tests 18–20, M05, 1000 non-ASCII chars accepted | — | — |
-| N8 | wrong values → FP; only type errors/missing fields/limits → structure error | PARTIAL | ids > 64 chars → −1 (`IdStr max_length=64`) | remove id length bound | P1 |
-| N9 | default τ = 0; any τ fixed in advance per type, documented | **NON-COMPLIANT (default)** | `TOLERANCE_MINOR = 1` (`generator/presentation.py`) | set τ = 0 (our amounts are exact by the published rounding rule); regenerate data; bump `ENV_VERSION` | P1 |
-| N10 | maximum-cardinality matching | VERIFIED | M10 | — | — |
-| N11 | deterministic lexicographic tie-break | NON-COMPLIANT (pairs only) | M11 | see M11 | P2 |
-| N12 | numeric results within 1e-9 | VERIFIED | exact fractions → float | — | — |
+| N1 | идентификаторы сравниваются **точно** (регистр и пробелы важны) | **NON-COMPLIANT** | скрипт: идентификаторы в нижнем регистре и с пробелами всё равно совпадали | убрать перевод в верхний регистр и обрезку в `normalize_id` (`evaluator/matcher.py` L30) | P1 |
+| N2 | `affected_ids` — точное множество; без дополнительных лимитов | **NON-COMPLIANT** | пустой список и 21 идентификатор → −1 (должно быть FP) | убрать `min_length=1`/`max_length=20` (`schemas.py` L110) | P1 |
+| N3 | множество доказательств после лимита на исходном списке; полное включение; неизвестный или недоступный идентификатор → FP | PARTIAL | в универсум не входят `invoice_id`/`payment_id`, хотя `get_record` их возвращает | добавить получаемые идентификаторы в универсум доказательств (`generator/episode.py` L64) | P1 |
+| N4 | тип точный; неизвестная строка → не совпадает (FP) | **NON-COMPLIANT** | `"fraud"` → −1 (тип `Literal`) | принимать любую строку; неизвестная → FP | P1 |
+| N5 | валюта точная; без требования ISO | **NON-COMPLIANT** | M06 | см. M06 | P1 |
+| N6 | сумма: целое JSON, не bool, не строка, не float | VERIFIED (типы) / **NON-COMPLIANT** (границы) | отрицательное целое → −1 (`ge=0`, `le=10**15`) | убрать числовые границы; любое int структурно допустимо | P1 |
+| N7 | лимиты проверяются до нормализации; 30 / 10 / 1000 кодовых точек | VERIFIED | тесты 18–20, M05, принимаются 1000 символов не из ASCII | — | — |
+| N8 | неверные значения → FP; ошибка структуры — только неверные типы, отсутствующие поля, лимиты | PARTIAL | идентификаторы длиннее 64 символов → −1 (`IdStr max_length=64`) | убрать ограничение длины идентификатора | P1 |
+| N9 | τ по умолчанию 0; любое τ фиксируется заранее для типа и документируется | **NON-COMPLIANT (по умолчанию)** | `TOLERANCE_MINOR = 1` (`generator/presentation.py`) | установить τ = 0 (наши суммы точны по опубликованному правилу округления); перегенерировать данные; повысить `ENV_VERSION` | P1 |
+| N10 | паросочетание максимальной мощности | VERIFIED | M10 | — | — |
+| N11 | детерминированный лексикографический tie-break | NON-COMPLIANT (только пары) | M11 | см. M11 | P2 |
+| N12 | числовые результаты с точностью 1e-9 | VERIFIED | точные дроби → float | — | — |
 
-## E. Block 4 — paired checks P01–P20 (15 points)
+## E. Блок 4 — парные проверки P01–P20 (15 баллов)
 
-The jury transforms **files** in a copy of the episode directory and loads both copies with `reset`. Our
-own metamorphic machinery (`evaluator/metamorphic.py`) is evidence that the logic is invariant, but it is
-not the mechanism the jury uses.
+Жюри преобразует **файлы** в копии каталога эпизода и загружает обе копии через `reset`. Наш собственный
+механизм метаморфных проверок (`evaluator/metamorphic.py`) доказывает инвариантность логики, но жюри
+пользуется не им.
 
-| ID | requirement | core | adapter | evidence | required change | prio |
+| ID | требование | core | adapter | доказательство | необходимое изменение | приор. |
 |---|---|---|---|---|---|---|
-| P01–P05 | permuted record order (D01–D05) | VERIFIED (own transforms) | MISSING | 60 metamorphic tests; closed-suite 20/20 | A4 loader must serve **file order** | P0 |
-| P06–P10 | bijective id replacement (D06–D10) | VERIFIED (own transforms) | MISSING | same | A4 + N1 (exact ids) + A10 | P0 |
-| P11–P20 | order + ids (D11–D20) | VERIFIED (own transforms) | MISSING | same | as above | P0 |
-| PC1 | exact replay of records, transitions, rewards; reset keeps no state | VERIFIED | MISSING | replay tests, reset isolation | loader must be deterministic | P0 |
-| PC2 | oracle with remapped ids correct after inverse mapping | VERIFIED (own) | MISSING | `check_pair` oracle reward 1.0 | A10 on transformed truth | P0 |
-| PC3 | TP/FP/FN/P/R/F1/reward identical at equal inspection steps | VERIFIED (own) | MISSING | `check_pair` | — | P0 |
-| PC4 | no new leak; evidence still reachable | VERIFIED (own) | MISSING | leak tests | — | P0 |
-| T1 | every id field and reference documented for consistent replacement (row_id, doc_id, invoice_id, payment_id, entity_id, affected_ids, evidence_ids **and our extras**) | PARTIAL | — | `invoice_refs[].invoice_id`, provenance `id_map` values and `pre_mutation.tables` are not listed as id-bearing | document the complete id-field list per file | P1 |
-| T2 | FX keys are natural keys, not surrogate ids | VERIFIED | — | `date:SRC:BASE` derived from content | state it in the README | P3 |
-| T3 | `line_items` order is not treated as harmless | VERIFIED | — | nothing depends on it | — | — |
+| P01–P05 | переставленный порядок записей (D01–D05) | VERIFIED (свои преобразования) | MISSING | 60 метаморфных тестов; закрытый набор 20/20 | загрузчик A4 должен отдавать **порядок файла** | P0 |
+| P06–P10 | взаимно однозначная замена идентификаторов (D06–D10) | VERIFIED (свои преобразования) | MISSING | то же | A4 + N1 (точные идентификаторы) + A10 | P0 |
+| P11–P20 | порядок и идентификаторы (D11–D20) | VERIFIED (свои преобразования) | MISSING | то же | как выше | P0 |
+| PC1 | точное повторение записей, переходов и наград; reset не сохраняет состояние | VERIFIED | MISSING | тесты повторения, изоляция reset | загрузчик должен быть детерминированным | P0 |
+| PC2 | oracle с переотображёнными идентификаторами верен после обратного отображения | VERIFIED (свои) | MISSING | `check_pair`: награда oracle 1.0 | A10 на преобразованном эталоне | P0 |
+| PC3 | TP/FP/FN/P/R/F1/награда совпадают при равных шагах проверки | VERIFIED (свои) | MISSING | `check_pair` | — | P0 |
+| PC4 | нет новой утечки; доказательства по-прежнему достижимы | VERIFIED (свои) | MISSING | тесты утечек | — | P0 |
+| T1 | каждое поле с идентификатором и каждая ссылка описаны для согласованной замены (row_id, doc_id, invoice_id, payment_id, entity_id, affected_ids, evidence_ids **и наши дополнительные поля**) | PARTIAL | — | `invoice_refs[].invoice_id`, значения `id_map` и `pre_mutation.tables` в provenance не указаны как поля с идентификаторами | описать полный список полей с идентификаторами по каждому файлу | P1 |
+| T2 | ключи курса — естественные ключи, а не суррогатные идентификаторы | VERIFIED | — | `date:SRC:BASE` выводится из содержимого | указать это в README | P3 |
+| T3 | порядок `line_items` не считается безвредным | VERIFIED | — | от него ничего не зависит | — | — |
 
-## F. Boundary conventions and engineering
+## F. Граничные соглашения и инженерия
 
-| ID | requirement | status | evidence | required change | prio |
+| ID | требование | статус | доказательство | необходимое изменение | приор. |
 |---|---|---|---|---|---|
-| B1 | submit counts toward 100 actions, not toward inspection_steps; all earlier steps (incl. errors) count | VERIFIED | `_submit` L181; C16/C17 tests | — | — |
-| B2 | 60 s from reset to completion, incl. policy | VERIFIED (core) | time-limit tests | adapter: real clock | P0 |
-| B3 | JSON compared by value; list order significant except sets | VERIFIED | determinism tests | — | — |
-| E1 | one documented command | VERIFIED (`ophanim verify`, Docker) / MISSING (adapter run command) | Docker run PASS | README: adapter working dir and command | P0 |
-| E2 | versions of code, dependencies and configs | VERIFIED | `requirements.lock`, `ENV_VERSION`, suite versions | — | — |
-| E3 | trajectories.jsonl with the §09 fields, no truth in observations | VERIFIED | `data/trajectories.jsonl`, 0 leaks | — | — |
-| E4 | measured failure, cause, re-check | VERIFIED | `docs/results.md` (4 measured failures fixed and re-tested) | — | — |
-| E5 | honest limitations tied to scenarios | VERIFIED | `docs/design_note.md`, `docs/results.md` | add the adapter/compliance limitations once fixed | P3 |
+| B1 | submit входит в 100 действий, но не в inspection_steps; все предыдущие шаги (включая ошибки) считаются | VERIFIED | `_submit` L181; тесты C16/C17 | — | — |
+| B2 | 60 с от reset до завершения, включая политику | VERIFIED (core) | тесты лимита времени | адаптер: настоящие часы | P0 |
+| B3 | JSON сравнивается по значениям; порядок списков важен, кроме множеств | VERIFIED | тесты детерминизма | — | — |
+| E1 | одна документированная команда | VERIFIED (`ophanim verify`, Docker) / MISSING (команда запуска адаптера) | Docker run PASS | README: рабочий каталог адаптера и команда | P0 |
+| E2 | версии кода, зависимостей и конфигураций | VERIFIED | `requirements.lock`, `ENV_VERSION`, версии наборов | — | — |
+| E3 | trajectories.jsonl с полями §09, без эталона в наблюдениях | VERIFIED | `data/trajectories.jsonl`, 0 утечек | — | — |
+| E4 | измеренный сбой, причина, повторная проверка | VERIFIED | `docs/results.md` (4 измеренных сбоя исправлены и проверены повторно) | — | — |
+| E5 | честные ограничения, привязанные к сценариям | VERIFIED | `docs/design_note.md`, `docs/results.md` | после исправлений добавить ограничения адаптера и соответствия | P3 |
 
-## Summary
+## Итог
 
-| block | points | jury-runnable today | after P0 (adapter) | after P0 + P1 |
+| блок | баллов | жюри может запустить сегодня | после P0 (адаптер) | после P0 + P1 |
 |---|---:|---|---|---|
-| 1 Contract C01–C20 | 25 | 0/20 (no adapter) | 18/20 expected (C11, C12 fail) | 20/20 expected |
-| 2 Data D01–D20 | 25 | 0/20 (no `generate_episode` entry point) | 17–18/20 expected (D03 refund missing; D09–D11 partial case not requestable) | 20/20 expected |
-| 3 Matcher/reward 1–20 | 25 | 0/20 (no `score_episode`) | 20/20 expected (logic verified 20/20) | 20/20 |
-| 4 Pairs P01–P20 | 15 | 0/20 (no `episode_dir` loading) | 20/20 expected if jury ids differ only as tokens; exact-id fix (N1) removes case-collision risk | 20/20 expected |
+| 1 Контракт C01–C20 | 25 | 0/20 (нет адаптера) | ожидается 18/20 (C11, C12 не проходят) | ожидается 20/20 |
+| 2 Данные D01–D20 | 25 | 0/20 (нет точки входа `generate_episode`) | ожидается 17–18/20 (нет возврата D03; частичный случай D09–D11 нельзя запросить) | ожидается 20/20 |
+| 3 Matcher и награда 1–20 | 25 | 0/20 (нет `score_episode`) | ожидается 20/20 (логика проверена 20/20) | 20/20 |
+| 4 Пары P01–P20 | 15 | 0/20 (нет загрузки `episode_dir`) | ожидается 20/20, если идентификаторы жюри отличаются только как токены; исправление точных идентификаторов (N1) убирает риск коллизий по регистру | ожидается 20/20 |
 
-"Expected" values are predictions from the verified core behaviour, not results of an official run.
+«Ожидаемые» значения — прогноз по проверенному поведению core, а не результаты официального прогона.
 
-## Phase status updates
+## Обновления статуса по этапам
 
-The tables above record the **P6 audit baseline (2026-11-21)** and are kept unchanged as history.
+Таблицы выше фиксируют **исходное состояние аудита P6 (2026-11-21)** и сохранены без изменений как
+история.
 
-### P6-C Phase 1 — jury adapter (commit `6dadbed`)
+### P6-C, этап 1 — адаптер жюри (коммит `6dadbed`)
 
-A1–A14 implemented (`judge_adapter.py`, `src/ophanim/adapter.py`): `generate_episode`, `make_env`,
-closed loading from `episode_dir` without truth, the `{"name","args"}` envelope, the official observation
-and result shapes, and `score_episode`. The "Adapter" column of rows C01–C20, D01–D20, tests 1–20 and
-P01–P20 is now reachable. Report: `p6c_phase1_adapter_report.md`.
+Реализованы A1–A14 (`judge_adapter.py`, `src/ophanim/adapter.py`): `generate_episode`, `make_env`,
+загрузка закрытого эпизода из `episode_dir` без эталона, оболочка `{"name","args"}`, официальные формы
+наблюдений и результатов и `score_episode`. Колонка «Adapter» строк C01–C20, D01–D20, тестов 1–20 и
+P01–P20 теперь достижима. Отчёт: `p6c_phase1_adapter_report.md`.
 
-### P6-C Phase 2 — exact matcher and lookups (working tree, ENV_VERSION 0.2.0)
+### P6-C, этап 2 — точный matcher и поиск (ENV_VERSION 0.2.0)
 
-| ID | new status | evidence |
+| ID | новый статус | доказательство |
 |---|---|---|
 | C11, C12 | VERIFIED | `tests/integration/test_exact_semantics.py::test_c11_c12_variants_of_real_ids_are_unknown` |
 | M06 | VERIFIED (FP) | `test_published_examples_m01_to_m09_and_m12` |
-| M11 / N11 | VERIFIED (A→F0, B→F1) | `test_published_examples_m10_m11_through_the_episode_files`; exhaustive cross-check on 300 random graphs |
-| N1 exact ids | VERIFIED | `tests/unit/test_matcher_exact.py` (id variants, numeric ids) |
-| N2 affected ids without extra limits | VERIFIED | `test_semantic_mismatches_are_structurally_valid` |
-| N3 evidence = tool-accessible ids | VERIFIED | `test_tool_accessible_ids_are_valid_extra_evidence_entity_ids_are_not` |
-| N4 type exact, unknown → FP | VERIFIED | `test_type_is_compared_exactly_without_aliases` |
-| N5 currency exact | VERIFIED | `test_currency_is_compared_exactly_and_never_a_structure_error` |
-| N6 amount = JSON int, no bounds | VERIFIED | `test_amount_must_be_a_json_integer`, `test_amount_semantics` |
-| N8 structure vs semantics | VERIFIED | `test_structure_errors_return_minus_one_and_nulls`, `test_semantic_mismatch_counts_as_fp_fn` |
-| N9 τ = 0 default, validated | VERIFIED | `test_default_tolerance_is_zero`, `test_invalid_tolerance_configuration_is_rejected`, `test_generated_episodes_use_exact_amounts_by_default` |
-| Block 3 test 8 / M07 with our own default | VERIFIED | same |
+| M11 / N11 | VERIFIED (A→F0, B→F1) | `test_published_examples_m10_m11_through_the_episode_files`; сверка с полным перебором на 300 случайных графах |
+| N1 точные идентификаторы | VERIFIED | `tests/unit/test_matcher_exact.py` (варианты идентификаторов, числовые идентификаторы) |
+| N2 affected_ids без дополнительных лимитов | VERIFIED | `test_semantic_mismatches_are_structurally_valid` |
+| N3 доказательства = идентификаторы, доступные через инструменты | VERIFIED | `test_tool_accessible_ids_are_valid_extra_evidence_entity_ids_are_not` |
+| N4 тип точный, неизвестный → FP | VERIFIED | `test_type_is_compared_exactly_without_aliases` |
+| N5 валюта точная | VERIFIED | `test_currency_is_compared_exactly_and_never_a_structure_error` |
+| N6 сумма = целое JSON без границ | VERIFIED | `test_amount_must_be_a_json_integer`, `test_amount_semantics` |
+| N8 структура и смысл | VERIFIED | `test_structure_errors_return_minus_one_and_nulls`, `test_semantic_mismatch_counts_as_fp_fn` |
+| N9 τ = 0 по умолчанию, с проверкой | VERIFIED | `test_default_tolerance_is_zero`, `test_invalid_tolerance_configuration_is_rejected`, `test_generated_episodes_use_exact_amounts_by_default` |
+| Тест 8 блока 3 / M07 с нашим значением по умолчанию | VERIFIED | то же |
 
-Unmodified P6 harness: 34 PASS / 10 FAIL → 44 PASS / 0 FAIL
-(`evidence/p6c_phase2_official_checks.out.txt`). Still open (Phase 3): D02, D03, D05, D09–D11, DC1, T1.
-Report: `p6c_phase2_matcher_report.md`.
+Скрипт P6 без изменений: 34 PASS / 10 FAIL → 44 PASS / 0 FAIL
+(`evidence/p6c_phase2_official_checks.out.txt`). Оставались открытыми (этап 3): D02, D03, D05, D09–D11,
+DC1, T1. Отчёт: `p6c_phase2_matcher_report.md`.
 
-### P6-C Phase 3 — generator compliance (working tree, ENV_VERSION 0.3.0)
+### P6-C, этап 3 — соответствие генератора (ENV_VERSION 0.3.0)
 
-| ID | new status | evidence |
+| ID | новый статус | доказательство |
 |---|---|---|
-| D02 split payment | VERIFIED (guaranteed at distractors normal/high) | `test_d02_clean_episode_has_a_legitimate_split_payment`, `test_d02_guarantee_path_plants_a_valid_split_when_none_occurred` |
-| D03 correct refund | VERIFIED (clean, truth empty; independently checked; tamper controls) | `test_d03_*` (13 tests) |
-| D05 FX/period boundary | VERIFIED (foreign boundary invoice; provable with the tools) | `test_d05_clean_foreign_boundary_document_is_correct_and_provable_with_tools` |
-| D09–D11 missing/partial allocation | VERIFIED (`allocation_mode`; no fallback) | `test_d09_*`, `test_d10_*`, `test_d09_d11_three_episodes_with_both_kinds_pass_end_to_end`, `test_explicit_mode_never_falls_back` |
-| DC1 / T1 provenance format | VERIFIED (documented from the real schema; keys pinned by a test) | `docs/provenance_format.md`, `test_provenance_has_exactly_the_documented_top_level_keys` |
+| D02 разделённый платёж | VERIFIED (гарантирован при distractors normal/high) | `test_d02_clean_episode_has_a_legitimate_split_payment`, `test_d02_guarantee_path_plants_a_valid_split_when_none_occurred` |
+| D03 корректный возврат | VERIFIED (чистый эпизод, эталон пуст; независимо проверен; контрольные тесты на подмену) | `test_d03_*` (13 тестов) |
+| D05 граница курса и периода | VERIFIED (валютный счёт у границы; доказуем инструментами) | `test_d05_clean_foreign_boundary_document_is_correct_and_provable_with_tools` |
+| D09–D11 отсутствующее и частичное распределение | VERIFIED (`allocation_mode`; без отката к случайному выбору) | `test_d09_*`, `test_d10_*`, `test_d09_d11_three_episodes_with_both_kinds_pass_end_to_end`, `test_explicit_mode_never_falls_back` |
+| DC1 / T1 формат provenance | VERIFIED (описан по реальной схеме; ключи закреплены тестом) | `docs/provenance_format.md`, `test_provenance_has_exactly_the_documented_top_level_keys` |
 
-Report: `p6c_phase3_generator_report.md`. These statuses come from our own tests and the independent
-auditor; no official jury run has taken place.
+Отчёт: `p6c_phase3_generator_report.md`. Эти статусы получены нашими собственными тестами и независимым
+аудитором; официального прогона жюри не было.
+
+### Проверка от 2026-11-22 (ENV 0.3.0, ветка `main`)
+
+Скрипт `evidence/p6_official_checks.py` на текущем коде: 46 PASS, 0 FAIL. Полный набор тестов: 687 passed
+на Python 3.11.15 и 3.14.3 и в Linux-контейнере. Это по-прежнему внутренние измерения, а не результат
+жюри.

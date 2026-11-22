@@ -1,108 +1,119 @@
-# Matching and reward (published rules)
+# Сопоставление выводов и награда (опубликованные правила)
 
-Code: `src/ophanim/evaluator/matcher.py` (normalisation, tolerance, evidence, ambiguity) and
-`src/ophanim/evaluator/reward.py` (metrics and the official reward). The same matcher is used by the
-environment, the evaluation runner and every test.
+Код: `src/ophanim/evaluator/matcher.py` (правила совпадения, допуск, доказательства, разрешение
+неоднозначности) и `src/ophanim/evaluator/reward.py` (метрики и официальная награда). Один и тот же matcher
+используют окружение, раннер оценки и все тесты.
 
-## Findings schema (strict)
+## Схема выводов (строгая)
 
 ```json
-{"episode_id": "EP-…", "findings": [{"type": "duplicate_invoice|payment_allocation|fx_rate|period_attribution",
-  "affected_ids": ["…"], "claimed_amount_minor": 12345, "currency": "USD",
-  "evidence_ids": ["DOC-…", "GL-…", "2026-03-14:EUR:USD"], "explanation": "short justification"}]}
+{"episode_id": "EP-...", "findings": [{"type": "duplicate_invoice|payment_allocation|fx_rate|period_attribution",
+  "affected_ids": ["..."], "claimed_amount_minor": 12345, "currency": "USD",
+  "evidence_ids": ["DOC-...", "GL-...", "2026-03-14:EUR:USD"], "explanation": "short justification"}]}
 ```
 
-Since `ENV_VERSION 0.2.0` these rules follow the official Genesis FinTech matcher conventions.
+Начиная с `ENV_VERSION 0.2.0` эти правила следуют официальным соглашениям matcher Genesis FinTech.
 
-**Structure errors** make the whole submission invalid: the episode terminates with reward **−1**, and
-`score_episode` returns `return = -1` with every other field `null`. They are only:
+**Структурные ошибки** делают весь ответ невалидным: эпизод завершается с наградой **-1**, а
+`score_episode` возвращает `return = -1`, все остальные поля — `null`. Структурными считаются только:
 
-* a missing required field;
-* a wrong JSON value type: the amount is a bool, string or float; an id is a number; a string field is
-  not a string;
-* an unknown field;
-* `episode_id` different from the manifest's;
-* more than 30 findings, more than 10 evidence ids in a finding, or an explanation longer than 1000
-  **Unicode code points**.
+* отсутствие обязательного поля;
+* неверный тип значения JSON: сумма — логическое значение, строка или дробное число; идентификатор —
+  число; строковое поле — не строка;
+* лишнее (неизвестное) поле;
+* `episode_id`, отличный от указанного в манифесте;
+* больше 30 выводов, больше 10 доказательств в одном выводе или объяснение длиннее 1000 **символов
+  Unicode** (кодовых точек).
 
-The limits are checked on the raw lists, before any set conversion; 10 copies of one id still count as
-10. The error goes to the evaluator log.
+Лимиты проверяются на исходных списках, до превращения в множества: 10 копий одного идентификатора всё
+равно считаются за 10. Ошибка записывается в журнал оценщика.
 
-**Everything else is structurally valid** and simply does not match, so it counts as an FP or FN:
-* an unknown or differently-cased type string;
-* a currency that differs in case or whitespace;
-* a negative or wrong amount;
-* an empty or wrong id list;
-* missing or unknown evidence.
+**Всё остальное структурно допустимо** и просто не совпадает, то есть считается FP или FN:
 
-## When is a finding a true positive?
+* неизвестный тип или тип в другом регистре;
+* валюта, отличающаяся регистром или пробелами;
+* отрицательная или неверная сумма;
+* пустой или неверный список идентификаторов;
+* отсутствующие или неизвестные доказательства.
 
-A finding is *eligible* for a truth issue when all of these hold, all compared **exactly**:
+## Когда вывод считается true positive
 
-1. `type` equals the issue's type (no aliases, no case or space folding);
-2. the set of `affected_ids` equals the issue's set. Ids are exact strings: case and whitespace matter;
-   nothing is stripped, upper-cased, converted from numbers or aliased. Order and repeats are ignored;
-3. `|claimed − expected| ≤ τ`, where τ = `tolerance_minor` from `truth.json`. τ is **0 by default**:
-   amounts are exact under the published rounding rule. A fixed non-negative integer may be published
-   per episode; it is never inferred;
-4. `currency` equals the issue's currency (exact string; no conversion);
-5. every evidence id is an existing id the tools can return (`row_id`, `doc_id`, `invoice_id`,
-   `payment_id`, FX key; `entity_id` is not retrievable and therefore not valid evidence). The set of
-   evidence ids must contain at least one complete allowed evidence set; extra existing ids are fine.
+Вывод *подходит* к проблеме эталона, если выполнены все условия, и все сравнения **точные**:
 
-The explanation is never read.
+1. `type` совпадает с типом проблемы (без псевдонимов, без приведения регистра и пробелов);
+2. множество `affected_ids` совпадает с множеством проблемы. Идентификаторы — точные строки: регистр и
+   пробелы важны; ничего не обрезается, не переводится в верхний регистр, не преобразуется из чисел и не
+   заменяется псевдонимами. Порядок и повторы не важны;
+3. `|claimed − expected| ≤ τ`, где τ — `tolerance_minor` из `truth.json`. По умолчанию **τ = 0**: суммы
+   точны при опубликованном правиле округления. Для эпизода может быть опубликовано фиксированное
+   неотрицательное целое τ; оно никогда не подбирается;
+4. `currency` совпадает с валютой проблемы (точная строка, без пересчёта);
+5. каждый идентификатор доказательства существует и может быть получен через инструменты (`row_id`,
+   `doc_id`, `invoice_id`, `payment_id`, ключ курса; `entity_id` через инструменты не получить, поэтому он
+   не принимается). Множество `evidence_ids` должно содержать хотя бы один полный допустимый набор
+   доказательств; лишние существующие идентификаторы допустимы.
 
-**One-to-one matching.** Every submitted finding is a separate vertex, and repeats are not merged.
-* TP is the size K of a **maximum-cardinality** bipartite matching.
-* Tie-break: among all maximum matchings, choose the one whose sorted sequence of
-  (issue_id, finding index) pairs is lexicographically smallest, with issue_ids ordered by Unicode
-  code point. The implementation fixes pairs issue by issue and checks at each step that K is still
-  reachable; it is cross-checked against exhaustive search on 300 random graphs.
-* The tie-break never changes TP/FP/FN or the reward.
-* Unmatched findings, including repeats of a matched finding, are FP; unmatched issues are FN.
+Объяснение никогда не читается.
 
-## Metrics and reward
+**Взаимно однозначное сопоставление.** Каждый отправленный вывод — отдельная вершина, повторы не
+объединяются.
+
+* TP — размер K паросочетания **максимальной мощности** в двудольном графе.
+* Разрешение неоднозначности (tie-break): среди всех максимальных паросочетаний выбирается то, у которого
+  отсортированная последовательность пар (issue_id, индекс вывода) лексикографически наименьшая; issue_id
+  упорядочиваются по кодовым точкам Unicode. Реализация закрепляет пары проблема за проблемой и на каждом
+  шаге проверяет, что K всё ещё достижимо; результат сверен с полным перебором на 300 случайных графах.
+* Tie-break никогда не меняет TP/FP/FN и награду.
+* Несопоставленные выводы, включая повторы уже сопоставленного вывода, — FP; несопоставленные проблемы —
+  FN.
+
+## Метрики и награда
 
 ```
-P  = TP / (TP + FP)        0 if the denominator is 0
-R  = TP / (TP + FN)        0 if the denominator is 0
-F1 = 2TP / (2TP + FP + FN) 1 if truth and findings are both empty; 0 if truth is empty but findings are not
-R_episode = clip(2·F1 − 1 − 0.002·inspection_steps, −1, 1)      (official, unchanged)
+P  = TP / (TP + FP)        0, если знаменатель равен 0
+R  = TP / (TP + FN)        0, если знаменатель равен 0
+F1 = 2TP / (2TP + FP + FN) 1, если и эталон, и выводы пусты; 0, если эталон пуст, а выводы нет
+R_episode = clip(2·F1 − 1 − 0.002·inspection_steps, −1, 1)      (официальная формула без изменений)
 ```
 
-* `inspection_steps` = every step consumed **before** the final submit: `list_records`, `get_record`,
-  `get_document`, `calculator` and invalid actions (they also consume a step). The submit step is not
-  counted. On truncation it equals the steps consumed. The trajectory logger and the evaluator use this
-  same definition.
-* Exploration steps return 0; the episode return equals the terminal reward.
-* Truncation (100 steps or 60 s) scores an **empty final answer**.
-* In closed evaluation (`mode="eval"`) the environment returns 0.0 for every step; the real reward and all
-  diagnostics stay with the evaluator until the run ends.
-* Arithmetic is exact (fractions), converted to float once.
+* `inspection_steps` — все шаги, потраченные **до** финального `submit`: `list_records`, `get_record`,
+  `get_document`, `calculator` и невалидные действия (они тоже тратят шаг). Шаг `submit` не считается. При
+  обрыве эпизода это число потраченных шагов. Логгер траекторий и оценщик используют одно и то же
+  определение.
+* Шаги исследования возвращают 0; доход за эпизод равен итоговой награде.
+* Обрыв эпизода (100 шагов или 60 с) оценивается как **пустой итоговый ответ**.
+* В закрытой оценке (`mode="eval"`) окружение на каждом шаге возвращает 0.0; настоящая награда и вся
+  диагностика остаются у оценщика до конца прогона.
+* Арифметика точная (дроби), в float значение переводится один раз.
 
-## Specification-gaming defences and the tests that prove them
+## Защита от обхода спецификации и тесты, которые её доказывают
 
-| attack / property | defence | test (`tests/adversarial/test_reward_attacks.py` unless noted) |
+| атака или свойство | защита | тест (`tests/adversarial/test_reward_attacks.py`, если не указано иное) |
 |---|---|---|
-| evidence-backed answer must beat silence on erroneous books | F1 | `test_correct_evidence_backed_answer_beats_silence_on_erroneous_books` |
-| silence must beat false accusations on clean books | F1 special cases | `test_silence_beats_false_accusations_on_clean_books` |
-| duplicate findings | one-to-one matching; repeats are FP | `test_duplicate_findings_give_no_benefit` |
-| mark every record / every type | FP destroys precision | `test_marking_everything_scores_badly` |
-| unsupported or fabricated evidence | complete allowed set required; unknown ids disqualify | `test_unsupported_evidence_cannot_create_a_true_positive`, `test_evidence_from_another_episode_is_rejected` |
-| guessed ids | exact id set required | `test_guessed_ids_receive_no_credit` |
-| currency / amount tricks | exact currency, τ = 0 by default, ints only | `test_incorrect_currency_receives_no_credit`, `test_amount_tolerance_is_exactly_zero_by_default`, `tests/unit/test_matcher_exact.py` |
-| malformed input | strict schema → −1 | `test_invalid_input_gives_minus_one_and_terminates` (16 variants) |
-| repeated submission | episode ends at first submit | `test_repeated_submission_cannot_change_the_reward` |
-| timeout | truncated + empty answer | `test_timeouts_truncate_with_empty_answer`, `tests/integration/test_env_contract.py` |
-| inspection cost only slightly separates equal answers | 0.002/step, max 0.198 | `test_inspection_cost_only_slightly_distinguishes_equal_answers` |
-| persuasive explanations | explanation ignored | `test_reward_does_not_depend_on_explanation_text`, `tests/unit/test_matcher_reward.py` |
-| reward tampering / reading the answer | no write path; evaluator in another process; secret-keyed seeds | `tests/security/test_process_isolation.py` |
+| ответ с доказательствами должен быть лучше молчания на книгах с ошибками | F1 | `test_correct_evidence_backed_answer_beats_silence_on_erroneous_books` |
+| молчание должно быть лучше ложных обвинений на чистых книгах | частные случаи F1 | `test_silence_beats_false_accusations_on_clean_books` |
+| дублирующиеся выводы | взаимно однозначное сопоставление; повторы — FP | `test_duplicate_findings_give_no_benefit` |
+| пометить каждую запись и каждый тип | FP уничтожают precision | `test_marking_everything_scores_badly` |
+| неподтверждённые или выдуманные доказательства | нужен полный допустимый набор; неизвестные идентификаторы исключают совпадение | `test_unsupported_evidence_cannot_create_a_true_positive`, `test_evidence_from_another_episode_is_rejected` |
+| угаданные идентификаторы | нужно точное множество идентификаторов | `test_guessed_ids_receive_no_credit` |
+| уловки с валютой и суммой | точная валюта, τ = 0 по умолчанию, только целые числа | `test_incorrect_currency_receives_no_credit`, `test_amount_tolerance_is_exactly_zero_by_default`, `tests/unit/test_matcher_exact.py` |
+| невалидный ввод | строгая схема, -1 | `test_invalid_input_gives_minus_one_and_terminates` (16 вариантов) |
+| повторная отправка | эпизод завершается на первом `submit` | `test_repeated_submission_cannot_change_the_reward` |
+| исчерпание времени | обрыв и пустой ответ | `test_timeouts_truncate_with_empty_answer`, `tests/integration/test_env_contract.py` |
+| стоимость шагов лишь немного различает одинаковые ответы | 0.002 за шаг, максимум 0.198 | `test_inspection_cost_only_slightly_distinguishes_equal_answers` |
+| убедительные объяснения | объяснение не читается | `test_reward_does_not_depend_on_explanation_text`, `tests/unit/test_matcher_reward.py` |
+| подмена награды или чтение ответа | нет пути записи; оценщик в другом процессе; seed подписаны секретом | `tests/security/test_process_isolation.py` |
 
-## Properties of the official formula worth knowing (honest notes)
+Опубликованные примеры matcher M01–M12 из определений проверок прогоняются через адаптер жюри в
+`tests/integration/test_exact_semantics.py`.
 
-* On erroneous books, silence and wild accusations both score −1: the formula does not separate "did
-  nothing" from "did harm" there. Only precision-preserving partial answers climb above −1.
-* With many issues (e.g. 12), saving ~90 steps can outweigh one missed issue; with ≤ 3 issues a complete
-  answer after 99 steps always beats an answer missing one issue at 0 steps (tested).
-* On clean books a time-out scores like a late empty submission (1 − 0.002·steps).
-* A high oracle reward proves only that the evaluator can award the maximum, not that the task is hard.
+## Свойства официальной формулы, о которых стоит знать
+
+* На книгах с ошибками и молчание, и массовые ложные обвинения дают -1: формула здесь не отличает «ничего
+  не сделал» от «навредил». Выше -1 поднимаются только частичные ответы, которые сохраняют precision.
+* При большом числе проблем (например, 12) экономия около 90 шагов может перевесить одну пропущенную
+  проблему; при 3 и менее проблемах полный ответ после 99 шагов всегда лучше ответа без одной проблемы
+  после 0 шагов (проверяется тестом).
+* На чистых книгах обрыв по времени оценивается как позднее пустое отправление (1 − 0.002·шаги).
+* Высокая награда oracle доказывает только то, что оценщик способен выставить максимум, а не то, что
+  задача сложная.

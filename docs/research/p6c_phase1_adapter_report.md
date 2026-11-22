@@ -1,59 +1,62 @@
-# P6-C Phase 1 — Official jury adapter: report
+# P6-C, этап 1 — официальный адаптер жюри: отчёт
 
-Branch `feat/p6-c-compliance`; nothing committed. Scope: the integration layer required by the official
-check definitions (`fintech-checks.txt`, 2026-11-20). This phase does **not** make every scoring block
-compliant. The remaining gaps are listed in §6.
+Ветка `feat/p6-c-compliance`; на момент отчёта ничего не закоммичено (позже этап вошёл в коммит
+`6dadbed`). Объём: слой интеграции, которого требуют официальные определения проверок
+(`fintech-checks.txt`, 2026-11-20). Этот этап **не** делает соответствующим каждый блок оценки; оставшиеся
+пробелы перечислены в §6.
 
-## 1. Existing architecture (verified before editing)
+## 1. Существующая архитектура (проверено до правок)
 
-* Baseline: **476 tests passed** (Python 3.11.15), clean tree, HEAD = `main`.
-* `OphanimEnv.reset` (`src/ophanim/env/environment.py`) could only **generate** an episode. It always
-  created a `Judge` holding the sealed truth, also in eval mode.
-* `Judge.submit` (`src/ophanim/evaluator/judge.py`) mixed structural validation with scoring.
-* `GeneratedEpisode.write` already writes `<dir>/public/*` and `<dir>/evaluator/*`.
-* `PublicDataset.from_directory` (`src/ophanim/audit/dataset.py`, stdlib only) already reads our files in
-  file order. It converts integer CSV fields and maps the `null` token to `None`.
-* No adapter, no `episode_dir` loading, no `{"name", "args"}` envelope, no file-based scoring entry point.
+* Исходное состояние: **476 тестов пройдено** (Python 3.11.15), чистое дерево, HEAD = `main`.
+* `OphanimEnv.reset` (`src/ophanim/env/environment.py`) умел только **генерировать** эпизод и всегда
+  создавал `Judge` с закрытым эталоном, в том числе в режиме eval.
+* `Judge.submit` (`src/ophanim/evaluator/judge.py`) смешивал проверку структуры с оценкой.
+* `GeneratedEpisode.write` уже записывает `<dir>/public/*` и `<dir>/evaluator/*`.
+* `PublicDataset.from_directory` (`src/ophanim/audit/dataset.py`, только stdlib) уже читает наши файлы в
+  порядке файла, преобразует целочисленные поля CSV и отображает токен `null` в `None`.
+* Нет адаптера, нет загрузки `episode_dir`, нет оболочки `{"name", "args"}`, нет точки входа для оценки по
+  файлам.
 
-## 2. Files
+## 2. Файлы
 
-| file | change |
+| файл | изменение |
 |---|---|
-| `judge_adapter.py` (new, repo root) | jury entry point; re-exports `generate_episode`, `make_env`, `score_episode`; `--smoke` self-check |
-| `src/ophanim/adapter.py` (new) | thin adapter: config split, generation wrapper, episode-directory loaders, envelope translation, observation shaping, `JudgeEnv`, `score_episode`, smoke test |
-| `src/ophanim/env/environment.py` | `reset_loaded(public, sealed=None)`; closed episodes hold **no judge/truth**; submit validates structure only when no judge; `accepted_findings`; reward 0.0 when no outcome |
-| `src/ophanim/evaluator/judge.py` | structural validation extracted to `validate_submission()`, shared by the judge and the closed environment (behaviour unchanged) |
-| `src/ophanim/schemas.py` | `TruthIssue.scenario` optional (default `"single"`), so minimal jury-written truth files load |
-| `Dockerfile` | copies `judge_adapter.py` into `/app` |
-| `README.md` | section "Official judge adapter" |
-| `tests/integration/test_judge_adapter.py` (new) | 49 adapter tests |
+| `judge_adapter.py` (новый, корень репозитория) | точка входа жюри; реэкспортирует `generate_episode`, `make_env`, `score_episode`; самопроверка `--smoke` |
+| `src/ophanim/adapter.py` (новый) | тонкий адаптер: разбор конфигурации, обёртка генерации, загрузчики каталога эпизода, перевод оболочки, формирование наблюдений, `JudgeEnv`, `score_episode`, smoke-тест |
+| `src/ophanim/env/environment.py` | `reset_loaded(public, sealed=None)`; закрытые эпизоды **не держат судью и эталон**; без судьи submit проверяет только структуру; `accepted_findings`; награда 0.0, если исхода нет |
+| `src/ophanim/evaluator/judge.py` | проверка структуры вынесена в `validate_submission()`, общую для судьи и закрытого окружения (поведение не изменилось) |
+| `src/ophanim/schemas.py` | `TruthIssue.scenario` необязателен (по умолчанию `"single"`), чтобы загружались минимальные файлы эталона, написанные жюри |
+| `Dockerfile` | копирует `judge_adapter.py` в `/app` |
+| `README.md` | раздел «Official judge adapter» |
+| `tests/integration/test_judge_adapter.py` (новый) | 49 тестов адаптера |
 
-`git diff --stat` on tracked files: 5 files, +135/−25. New files: `adapter.py` (294 lines),
-`judge_adapter.py` (33), tests (500).
+`git diff --stat` по отслеживаемым файлам: 5 файлов, +135/−25. Новые файлы: `adapter.py` (294 строки),
+`judge_adapter.py` (33), тесты (500).
 
-## 3. Adapter design
+## 3. Устройство адаптера
 
-* **No logic duplication.** Generation, loading, tools, limits, validation, matching and reward all reuse
-  the existing implementations; the adapter only translates and shapes.
-* **Closed isolation.** `{"mode": "closed", "episode_dir": d}` reads `d/public` only. The environment
-  object has `judge = None`; nothing evaluator-side is in memory. `submit` returns `{"accepted": true}`
-  or `invalid_submission`; every reward is `0.0`, including at termination; `info` holds nothing derived
-  from truth. Scoring happens only in `score_episode`, which reads `d/evaluator/truth.json`.
-* **Loading is exact.** Tables are served in file order with the ids as stored, so a jury permutation or
-  id replacement is visible to the policy exactly as written. A repeated reset re-reads the directory and
-  starts the episode again. Nothing is written to `episode_dir`.
-* **Envelope.** `{"name", "args"}` → native `{"action": name, **args}`. Malformed envelopes (non-object,
-  missing `name`, non-object `args`, extra top-level keys, an `action` key inside `args`) become an
-  invalid action that consumes a step.
-* **Observation shaping.** First: `{task, manifest, policy, remaining_steps}`. Then:
-  `{result, error, remaining_steps}`. Results: `list_records` → `{records, next_cursor}`; `get_record` /
-  `get_document` → the object; `calculator` → decimal string; `submit` → `{"accepted": true}`. The task
-  text is extended with the envelope format.
+* **Без дублирования логики.** Генерация, загрузка, инструменты, лимиты, проверка, сопоставление и награда
+  переиспользуют существующие реализации; адаптер только переводит и формирует ответы.
+* **Изоляция закрытого режима.** `{"mode": "closed", "episode_dir": d}` читает только `d/public`. У объекта
+  окружения `judge = None`; в памяти нет ничего со стороны оценщика. `submit` возвращает
+  `{"accepted": true}` или `invalid_submission`; каждая награда — `0.0`, включая завершение; в `info` нет
+  ничего, выведенного из эталона. Оценка происходит только в `score_episode`, который читает
+  `d/evaluator/truth.json`.
+* **Загрузка точная.** Таблицы отдаются в порядке файла с идентификаторами в том виде, в каком они
+  сохранены, поэтому перестановка или замена идентификаторов жюри видна политике ровно так, как записана.
+  Повторный reset перечитывает каталог и начинает эпизод заново. В `episode_dir` ничего не записывается.
+* **Оболочка.** `{"name", "args"}` → нативное `{"action": name, **args}`. Неправильные оболочки (не объект,
+  нет `name`, `args` не объект, лишние ключи верхнего уровня, ключ `action` внутри `args`) становятся
+  невалидным действием, которое тратит шаг.
+* **Формирование наблюдений.** Первое: `{task, manifest, policy, remaining_steps}`. Далее:
+  `{result, error, remaining_steps}`. Результаты: `list_records` → `{records, next_cursor}`;
+  `get_record` / `get_document` → сам объект; `calculator` → десятичная строка; `submit` →
+  `{"accepted": true}`. Текст задачи дополнен описанием формата оболочки.
 
-## 4. How the jury invokes each entry point
+## 4. Как жюри вызывает каждую точку входа
 
 ```python
-import judge_adapter as ja                       # working directory: repository root (/app in Docker)
+import judge_adapter as ja                       # рабочий каталог: корень репозитория (/app в Docker)
 ja.generate_episode(seed, team_config, out_dir)  # -> out_dir/public/*, out_dir/evaluator/*
 env = ja.make_env()
 obs, info = env.reset(seed, {"mode": "closed", "episode_dir": out_dir, "team_config": {}})
@@ -61,88 +64,92 @@ obs, reward, terminated, truncated, info = env.step({"name": "get_record", "args
 scores = ja.score_episode(out_dir, findings, inspection_steps)   # {tp, fp, fn, precision, recall, f1, return}
 ```
 
-`JudgeEnv` also exposes `inspection_steps`, `steps_used` and `submitted_findings`. These are public
-quantities and are optional conveniences.
+`JudgeEnv` дополнительно предоставляет `inspection_steps`, `steps_used` и `submitted_findings`. Это
+публичные величины и необязательные удобства.
 
-## 5. Tests and results (executed)
+## 5. Тесты и результаты (выполнено)
 
-| run | result |
+| прогон | результат |
 |---|---|
-| adapter tests (`tests/integration/test_judge_adapter.py`) | **49 passed** |
-| full suite, Python 3.11.15 | **525 passed** (476 existing + 49 new) |
-| full suite, Python 3.14.3 | **525 passed** |
-| `python judge_adapter.py --smoke` | ok (8/8 checks) |
-| `ophanim verify --skip-tests` | PASS: published data 20/20 verified and 20/20 regenerated byte-identically, 0 trajectory leaks; closed evaluation 20/20 data, 20/20 metamorphic, 20/20 reproducibility |
-| Docker `--network none`: `judge_adapter.py --smoke` | ok (8/8); import from another working directory ok |
+| тесты адаптера (`tests/integration/test_judge_adapter.py`) | **49 passed** |
+| полный набор, Python 3.11.15 | **525 passed** (476 существующих + 49 новых) |
+| полный набор, Python 3.14.3 | **525 passed** |
+| `python judge_adapter.py --smoke` | ok (8/8 проверок) |
+| `ophanim verify --skip-tests` | PASS: опубликованные данные — 20/20 проверено и 20/20 побайтно перегенерировано, 0 утечек в траекториях; закрытая оценка — 20/20 данные, 20/20 метаморфные пары, 20/20 воспроизводимость |
+| Docker `--network none`: `judge_adapter.py --smoke` | ok (8/8); импорт из другого рабочего каталога работает |
 
-Coverage against the phase checklist:
-* **Files and determinism:** required files, independent verification of a generated episode,
-  determinism and both config forms.
-* **Modes:** train generation; train with an episode directory (terminal reward); exact closed loading of
-  all four tables (same ids, order, values); no regeneration and no mutation (generator patched to raise,
-  file hashes unchanged); closed episode with the `evaluator/` folder deleted (needs no truth); reset
-  restores the initial state.
-* **Observations:** exact first- and later-observation fields.
-* **Actions:** all five actions incl. FX-key lookups; 12 malformed or unknown actions (bounded, step
-  consumed, environment still usable); unknown ids; pagination (≥ 3 pages, no gaps or repeats, stable
-  cursor); exact and safe calculator.
-* **Termination:** submit terminates and later actions change nothing; closed reward exactly 0.0
-  (including a perfect answer and an invalid one); the 99 + submit boundary; the 100-action truncation;
-  the time-limit truncation.
-* **Scoring:** all 20 published Block-3 tests through `score_episode` on an episode directory with a
-  minimal truth file (τ = 0). Tests 1–17 check exact values; tests 18–20 (31 findings, 11 evidence ids,
-  1001-character explanation) plus string/bool amounts and a non-object payload check the structure-error
-  result `return = -1` with `null` fields.
-* **Paired checks:** jury-style copies with permuted ledger rows, bijective id replacement across all
-  files, or both — served in file order and scored identically, including remapped original findings.
-* **Isolation:** a leak scan of every agent-visible output for issue ids, truth/provenance vocabulary,
-  the seed, the episode path and scoring fields.
+Покрытие по контрольному списку этапа:
 
-Commands:
+* **Файлы и детерминизм:** обязательные файлы, независимая верификация сгенерированного эпизода,
+  детерминизм и обе формы конфигурации.
+* **Режимы:** генерация в train; train с каталогом эпизода (итоговая награда); точная загрузка закрытого
+  эпизода по всем четырём таблицам (те же идентификаторы, порядок, значения); без повторной генерации и без
+  изменений (генератор подменён так, чтобы падать, хеши файлов не меняются); закрытый эпизод с удалённой
+  папкой `evaluator/` (эталон не нужен); reset восстанавливает начальное состояние.
+* **Наблюдения:** точные поля первого и последующих наблюдений.
+* **Действия:** все пять действий, включая поиск по ключу курса; 12 неправильных или неизвестных действий
+  (ограниченная ошибка, шаг потрачен, окружение продолжает работать); неизвестные идентификаторы;
+  постраничный вывод (не меньше 3 страниц, без пропусков и повторов, стабильный курсор); точный и
+  безопасный калькулятор.
+* **Завершение:** submit завершает эпизод, последующие действия ничего не меняют; награда в закрытом режиме
+  ровно 0.0 (и для идеального, и для невалидного ответа); граница «99 + submit»; обрыв на 100 действиях;
+  обрыв по времени.
+* **Оценка:** все 20 опубликованных тестов блока 3 через `score_episode` на каталоге эпизода с минимальным
+  файлом эталона (τ = 0). Тесты 1–17 проверяют точные значения; тесты 18–20 (31 вывод, 11
+  идентификаторов доказательств, объяснение из 1001 символа), а также суммы строкой и bool и полезная
+  нагрузка не в виде объекта проверяют результат ошибки структуры `return = -1` с полями `null`.
+* **Парные проверки:** копии в стиле жюри с переставленными строками главной книги, взаимно однозначной
+  заменой идентификаторов во всех файлах или с тем и другим — отдаются в порядке файла и оцениваются
+  одинаково, включая переотображённые исходные выводы.
+* **Изоляция:** проверка утечек во всех видимых агенту выходных данных: идентификаторы проблем, лексика
+  эталона и provenance, seed, путь к эпизоду и поля оценки.
+
+Команды:
 
 ```bash
-python -m pytest tests/integration/test_judge_adapter.py      # adapter tests
-python -m pytest tests                                         # full suite
-python judge_adapter.py --smoke                                # adapter smoke test (repo root)
+python -m pytest tests/integration/test_judge_adapter.py      # тесты адаптера
+python -m pytest tests                                         # полный набор
+python judge_adapter.py --smoke                                # smoke-тест адаптера (из корня репозитория)
 docker build -t ophanim . && docker run --rm --network none --entrypoint python ophanim judge_adapter.py --smoke
 ```
 
-(Locally set `PYTHONPATH=src` for `python -m ophanim …`; `judge_adapter.py` adds `src/` itself.)
+(Для `python -m ophanim …` локально задайте `PYTHONPATH=src`; `judge_adapter.py` добавляет `src/` сам.)
 
-## 6. Remaining compliance gaps (unchanged in Phase 1; see `p6_traceability_matrix.md`)
+## 6. Оставшиеся пробелы соответствия (на этапе 1 не менялись; см. `p6_traceability_matrix.md`)
 
-| gap | affects | phase |
+| пробел | что затрагивает | этап |
 |---|---|---|
-| ids normalised (case/whitespace) in matcher and tool lookups; must be exact | C11, C12, N1, pairs with case-differing ids | P6-C Phase 2 |
-| `type`/`currency` patterns, `affected_ids` and id-length limits, `amount ≥ 0` turn FPs into −1 | M06, N2, N4–N6, N8 | Phase 2 |
-| evidence universe excludes `invoice_id`/`payment_id` | N3 | Phase 2 |
-| default τ = 1. **Dependency:** Block-3 test 8 and M07 pass through `score_episode` only when the fixture's `truth.json` sets `tolerance_minor: 0` (verified with τ = 0 here). With our generated default (1), `10001` would match | Block 3 #8, M07, N9 | Phase 2 |
-| lexicographic tie-break (pairs only; scores unaffected) | M11, N11 | Phase 2 |
-| no refund red herring | D03 | Phase 3 |
-| partial allocation not requestable | D09–D11 | Phase 3 |
-| guarantees for split payments / FX-boundary documents not documented | D02, D05 | Phase 3 |
-| provenance format documentation | DC1, T1 | Phase 3 |
+| идентификаторы нормализуются (регистр, пробелы) в matcher и при поиске в инструментах; должны быть точными | C11, C12, N1, пары с идентификаторами, отличающимися регистром | P6-C, этап 2 |
+| шаблоны `type`/`currency`, лимиты `affected_ids` и длины идентификаторов, `amount ≥ 0` превращают FP в −1 | M06, N2, N4–N6, N8 | этап 2 |
+| универсум доказательств не включает `invoice_id`/`payment_id` | N3 | этап 2 |
+| τ по умолчанию = 1. **Зависимость:** тест 8 блока 3 и M07 проходят через `score_episode`, только если `truth.json` фикстуры задаёт `tolerance_minor: 0` (здесь проверено с τ = 0). С нашим значением по умолчанию (1) `10001` совпало бы | блок 3 №8, M07, N9 | этап 2 |
+| лексикографический tie-break (только пары; оценки не затрагиваются) | M11, N11 | этап 2 |
+| нет ложного следа «возврат» | D03 | этап 3 |
+| частичное распределение нельзя запросить | D09–D11 | этап 3 |
+| гарантии разделённых платежей и валютных документов у границы не описаны | D02, D05 | этап 3 |
+| документация формата provenance | DC1, T1 | этап 3 |
 
-**Observed risk (pre-existing, not changed):** the repository has no `.gitattributes` and this machine
-uses `core.autocrlf=true`. A fresh Windows checkout would therefore get CRLF data files, and the
-byte-identical regeneration check in `ophanim verify` would fail there. The stored files are LF, so a
-Linux checkout is unaffected. Proposed one-line fix (needs approval): `.gitattributes` with
-`* text=auto eol=lf`.
+**Замеченный риск (существовал раньше, на этом этапе не менялся):** в репозитории нет `.gitattributes`, а
+на этой машине `core.autocrlf=true`. Свежий checkout в Windows получил бы файлы данных с CRLF, и проверка
+побайтной регенерации в `ophanim verify` там бы не прошла. Сохранённые файлы в LF, поэтому checkout в Linux
+не затронут. Предложенное исправление в одну строку (требовало одобрения): `.gitattributes` с
+`* text=auto eol=lf`. Позднее этот файл добавлен в репозиторий.
 
-## 7. Deviations from / interpretations of the specification
+## 7. Отступления от спецификации и её толкования
 
-1. Directory layout uses `public/` and `evaluator/` subfolders. The definitions fix the files, not the
-   layout; the layout is documented in the README.
-2. `config` may also be a bare team configuration; mixing adapter keys with unknown keys raises
-   `ValueError`; `mode: "closed"` without `episode_dir` raises `ValueError` (a jury-side programming
-   error, never reachable by a policy).
-3. On truncation `info` is `{"truncation_reason", "final_answer": "empty"}`. These are public facts with
-   no hidden data.
-4. `generate_episode` keys generation with `OPHANIM_EVAL_SECRET` **if** that variable is set in the jury
-   process; otherwise generation is public and deterministic in (seed, config).
-5. A malformed envelope around `submit` is an invalid action (step consumed, episode continues). A
-   well-formed `submit` with an invalid findings structure terminates the episode (closed: reward 0,
-   error `invalid_submission`; scored as `return = -1` by `score_episode`).
-6. `score_episode` raises `ValueError` for a negative or non-integer `inspection_steps` (caller error).
-7. Open questions O1 (unknown extra fields → −1) and O2 (`episode_id` mismatch → −1) keep the current
-   behaviour, as proposed in `p6_official_compliance_audit.md`.
+1. Структура каталога использует подпапки `public/` и `evaluator/`. Определения фиксируют файлы, а не
+   структуру; структура описана в README.
+2. `config` может быть и просто конфигурацией команды; смешение ключей адаптера с неизвестными ключами
+   вызывает `ValueError`; `mode: "closed"` без `episode_dir` вызывает `ValueError` (ошибка программирования
+   на стороне жюри, политике недостижимая).
+3. При обрыве эпизода `info` — это `{"truncation_reason", "final_answer": "empty"}`. Это публичные факты
+   без скрытых данных.
+4. `generate_episode` подписывает генерацию `OPHANIM_EVAL_SECRET`, **если** эта переменная задана в
+   процессе жюри; иначе генерация публичная и детерминирована по (seed, config).
+5. Неправильная оболочка вокруг `submit` — невалидное действие (шаг потрачен, эпизод продолжается).
+   Правильно оформленный `submit` с невалидной структурой выводов завершает эпизод (закрытый режим:
+   награда 0, ошибка `invalid_submission`; `score_episode` оценивает его как `return = -1`).
+6. `score_episode` вызывает `ValueError` при отрицательном или нецелом `inspection_steps` (ошибка
+   вызывающей стороны).
+7. Открытые вопросы O1 (неизвестные лишние поля → −1) и O2 (несовпадение `episode_id` → −1) сохраняют
+   текущее поведение, как предложено в `p6_official_compliance_audit.md`.

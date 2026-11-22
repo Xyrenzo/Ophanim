@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="216" viewBox="0 0 1200 216" font-family="'Segoe UI', Inter, 'Helvetica Neue', Arial, 'DejaVu Sans', sans-serif">
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#0B1020"/><stop offset="1" stop-color="#161B3D"/>
+  </linearGradient>
+  <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+    <path d="M32 0H0V32" fill="none" stroke="#FFFFFF" stroke-opacity=".035"/>
+  </pattern>
+  <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#7C6CF6"/><stop offset="1" stop-color="#14B8A6"/>
+  </linearGradient>
+</defs>
+<rect width="1200" height="216" rx="18" fill="url(#bg)"/><rect width="1200" height="216" rx="18" fill="url(#grid)"/>
+<path d="M120 74H1080" stroke="url(#ring)" stroke-width="2.5" stroke-dasharray="2 8" stroke-linecap="round"/>
+<circle cx="120" cy="74" r="30" fill="#0B1020" stroke="#7C6CF6" stroke-width="2.5"/><text x="120" y="83" text-anchor="middle" font-size="24" font-weight="800" fill="#FFFFFF">1</text><text x="120" y="138" text-anchor="middle" font-size="17" font-weight="700" fill="#FFFFFF">Financial DNA</text><text x="120" y="164" text-anchor="middle" font-size="13.5" fill="#94A3B8">профиль, валюта,</text><text x="120" y="184" text-anchor="middle" font-size="13.5" fill="#94A3B8">смещение UTC, месяц</text>
+<circle cx="360" cy="74" r="30" fill="#0B1020" stroke="#14B8A6" stroke-width="2.5"/><text x="360" y="83" text-anchor="middle" font-size="24" font-weight="800" fill="#FFFFFF">2</text><text x="360" y="138" text-anchor="middle" font-size="17" font-weight="700" fill="#FFFFFF">Скрытая история</text><text x="360" y="164" text-anchor="middle" font-size="13.5" fill="#94A3B8">поставщики, счета,</text><text x="360" y="184" text-anchor="middle" font-size="13.5" fill="#94A3B8">платежи, курсы</text>
+<circle cx="600" cy="74" r="30" fill="#0B1020" stroke="#7C6CF6" stroke-width="2.5"/><text x="600" y="83" text-anchor="middle" font-size="24" font-weight="800" fill="#FFFFFF">3</text><text x="600" y="138" text-anchor="middle" font-size="17" font-weight="700" fill="#FFFFFF">Правильные книги</text><text x="600" y="164" text-anchor="middle" font-size="13.5" fill="#94A3B8">сбалансированные проводки,</text><text x="600" y="184" text-anchor="middle" font-size="13.5" fill="#94A3B8">самопроверка, снимок</text>
+<circle cx="840" cy="74" r="30" fill="#0B1020" stroke="#14B8A6" stroke-width="2.5"/><text x="840" y="83" text-anchor="middle" font-size="24" font-weight="800" fill="#FFFFFF">4</text><text x="840" y="138" text-anchor="middle" font-size="17" font-weight="700" fill="#FFFFFF">Причинные ошибки</text><text x="840" y="164" text-anchor="middle" font-size="13.5" fill="#94A3B8">4 типа и сценарии S1, S2,</text><text x="840" y="184" text-anchor="middle" font-size="13.5" fill="#94A3B8">точная сумма искажения</text>
+<circle cx="1080" cy="74" r="30" fill="#0B1020" stroke="#7C6CF6" stroke-width="2.5"/><text x="1080" y="83" text-anchor="middle" font-size="24" font-weight="800" fill="#FFFFFF">5</text><text x="1080" y="138" text-anchor="middle" font-size="17" font-weight="700" fill="#FFFFFF">Представление</text><text x="1080" y="164" text-anchor="middle" font-size="13.5" fill="#94A3B8">случайные ID и имена,</text><text x="1080" y="184" text-anchor="middle" font-size="13.5" fill="#94A3B8">порядок, формат времени</text>
+</svg>

@@ -1,64 +1,74 @@
-# Architecture
+# Архитектура
 
 ```
-                       EVALUATOR PROCESS (trusted)                                AGENT PROCESS (untrusted)
- ┌──────────────────────────────────────────────────────────────────────┐        ┌──────────────────────────┐
- │ generator/                                                            │        │ agent_runtime.py          │
- │   history ─► posting ─► self-check ─► [clean snapshot] ─► injectors   │        │   policies/ (baselines)   │
- │   ─► presentation ─► PublicEpisode  +  SealedEpisode(truth, provenance)│        │   or any program speaking │
- │                                                                        │ JSON  │   the JSON-lines protocol │
- │ env/  OphanimEnv(reset/step) ── Toolbox(public tables only) ◄─────────┼─lines─►│                          │
- │        └─ Judge(sealed truth) ── matcher ── reward                    │ stdio  └──────────────────────────┘
- │ evaluator/ verifier (uses audit/), runner, process_runner, evaluation │
- │ audit/  independent stdlib-only auditor (public files + policy only)  │
- └──────────────────────────────────────────────────────────────────────┘
+ ПРОЦЕСС ОЦЕНЩИКА (доверенный)                                          ПРОЦЕСС АГЕНТА (недоверенный)
+ +------------------------------------------------------------------+   +----------------------------+
+ | generator/                                                        |   | agent_runtime.py            |
+ |   history -> posting -> self-check -> [снимок чистых книг]        |   |   policies/ (базовые)       |
+ |   -> injectors -> presentation -> PublicEpisode                    |   |   или любая программа,      |
+ |   + SealedEpisode(truth, provenance)                               |   |   говорящая на протоколе    |
+ |                                                                    |   |   JSON lines                |
+ | env/  OphanimEnv(reset/step) -- Toolbox (только публичные таблицы) |<->|                            |
+ |        +- Judge (закрытый эталон) -- matcher -- reward             |   +----------------------------+
+ | evaluator/  verifier (через audit/), runner, process_runner,       |    JSON lines через stdin/stdout
+ |             evaluation                                             |
+ | audit/  независимый аудитор на stdlib (публичные файлы и policy)   |
+ +------------------------------------------------------------------+
 ```
 
-| package | role | may import |
+| пакет | роль | что может импортировать |
 |---|---|---|
-| `ophanim.rng` | SHA-256 counter-mode RNG, named sub-streams, optional secret key | stdlib |
-| `ophanim.money`, `timeutil` | integer minor units, Decimal conversion, fixed UTC offsets | stdlib |
-| `ophanim.schemas` | strict Pydantic models: config, actions, findings, truth | pydantic |
-| `ophanim.generator` | hidden history, postings, causal error injection, presentation | everything except `audit` |
-| `ophanim.audit` | independent reconciliation of the public records, evidence sufficiency, format checks | **stdlib + itself only** (AST-enforced) |
-| `ophanim.env` | reset/step contract, tools, calculator, task text | generator (at reset), evaluator.judge |
-| `ophanim.evaluator` | matcher, reward, judge, verifier, oracle, runners, metamorphic checks, evaluation report | everything |
-| `ophanim.policies` | agent-side baselines | **never evaluator or generator** (AST-enforced) |
-| `ophanim.agent_runtime` | agent-side stdio loop for closed evaluation | policies |
+| `ophanim.rng` | генератор SHA-256 в режиме счётчика, именованные подпотоки, необязательный секретный ключ | stdlib |
+| `ophanim.money`, `timeutil` | целые минимальные единицы, пересчёт через Decimal, фиксированные смещения от UTC | stdlib |
+| `ophanim.schemas` | строгие модели Pydantic: конфигурация, действия, выводы, эталон | pydantic |
+| `ophanim.generator` | скрытая история, проводки, причинное внесение ошибок, представление | всё, кроме `audit` |
+| `ophanim.audit` | независимая сверка публичных записей, достаточность доказательств, проверка форматов | **только stdlib и сам себя** (проверяется AST-тестом) |
+| `ophanim.env` | контракт `reset`/`step`, инструменты, калькулятор, текст задачи | generator (при `reset`), evaluator.judge |
+| `ophanim.evaluator` | matcher, награда, судья, верификатор, oracle, раннеры, метаморфные проверки, отчёт оценки | всё |
+| `ophanim.policies` | базовые политики на стороне агента | **никогда evaluator и generator** (проверяется AST-тестом) |
+| `ophanim.agent_runtime` | цикл агента через stdin/stdout для закрытой оценки | policies |
+| `ophanim.adapter` | точки входа для жюри (`generate_episode`, `make_env`, `score_episode`); реэкспортируются `judge_adapter.py` | env, generator, evaluator, audit (чтение публичных файлов эпизода) |
 
-## Reproducibility design
+## Как устроена воспроизводимость
 
-* No use of Python's `random` module (only `random.random()` is version-stable). All randomness comes from
-  `DeterministicRng`: block *i* = SHA-256(key ‖ i). Golden values are pinned in tests and the suite runs
-  on Python 3.11 and 3.14; a hash of 10 complete episodes is identical on both.
-* Independent named streams: `content` (economics), `carriers` (scenario documents), `errors` (which
-  documents get errors), `presentation` (ids, names, order; keyed by the config hash and salts). The same
-  seed with and without errors is the same company; presentation-only changes give metamorphic variants.
-* Files are written with `\n` line endings and fixed key order → byte-identical on Windows and Linux.
-* Identical `(seed, config, ENV_VERSION, secret, actions)` reproduce identical records, observations and
-  rewards (tested at step level and for whole trajectories).
+* Модуль `random` из Python не используется: между версиями стабилен только `random.random()`. Вся
+  случайность идёт из `DeterministicRng`: блок *i* = SHA-256(ключ ‖ i). Эталонные значения зафиксированы в
+  тестах; набор тестов проходит на Python 3.11 и 3.14, хеш 10 полных эпизодов на обеих версиях одинаков.
+* Независимые именованные потоки: `content` (экономика), `carriers` (документы сценариев), `errors` (какие
+  документы получают ошибки), `presentation` (идентификаторы, имена, порядок; зависит от хеша конфигурации и
+  от «солей»). Один и тот же seed с ошибками и без них даёт одну и ту же компанию; изменения только в
+  представлении дают метаморфные варианты.
+* Файлы записываются с окончаниями строк `\n` и фиксированным порядком ключей, поэтому они побайтно
+  совпадают в Windows и Linux.
+* Одинаковые `(seed, config, ENV_VERSION, секрет, действия)` дают одинаковые записи, наблюдения и награды
+  (проверяется и по отдельным шагам, и по целым траекториям).
 
-## Why an independent auditor?
+## Зачем нужен независимый аудитор
 
-The generator could be wrong in ways its own checks would not catch. `ophanim.audit` re-implements the
-published policy from `policy.json` without importing any generator code, and the verifier requires that:
+Генератор может ошибаться так, что его собственные проверки этого не заметят. `ophanim.audit` заново
+реализует опубликованную учётную политику из `policy.json`, не импортируя код генератора, а верификатор
+требует, чтобы:
 
-* the clean pre-mutation books show **zero** discrepancies and zero anomalies;
-* the mutated books show **exactly** the declared issues (type, ids, amount, currency);
-* each allowed evidence set, on its own, proves its issue and amount.
+* в чистых книгах до внесения ошибок было **ноль** расхождений и ноль аномалий;
+* в изменённых книгах были **ровно** заявленные проблемы (тип, идентификаторы, сумма, валюта);
+* каждый допустимый набор доказательств сам по себе доказывал свою проблему и сумму.
 
-The same auditor drives the scripted reference auditor policy, which solves every episode through the
-agent tools in ~20 steps — evidence that the hidden truth is always recoverable from accessible records.
+На том же аудиторе построена заранее написанная политика reference auditor. Она решает каждый эпизод через
+инструменты агента примерно за 20 шагов, а значит, скрытый эталон всегда восстанавливается по доступным
+записям.
 
-## Environment contract
+## Контракт окружения
 
-* `reset(seed, config) -> (observation, info)`; `options=` is accepted as a Gymnasium alias.
-  Observation: task text, public manifest, policy, tool specs, `remaining_steps`, time budget.
-  Info: env/schema version and mode only.
-* `step(action) -> (observation, reward, terminated, truncated, info)`. Actions are flat JSON objects:
-  `list_records(table, cursor, limit≤50)`, `get_record(table, id)`, `get_document(doc_id)`,
-  `calculator(expression)`, `submit(findings)`. Observation: `{ok, result, error{code,message}, remaining_steps}`.
-* 100 steps including submit; 60 s; unknown actions/ids give a bounded error and consume a step;
-  stepping after the end returns `episode_finished` with reward 0.
-* The class does not inherit `gymnasium.Env` (allowed by the case); it follows the same semantics:
-  `terminated` = submit (MDP end), `truncated` = step/time limit.
+* `reset(seed, config) -> (observation, info)`; `options=` принимается как псевдоним в стиле Gymnasium.
+  Наблюдение: текст задачи, публичный манифест, учётная политика, описание инструментов,
+  `remaining_steps`, бюджет времени. `info`: версии окружения и схемы и режим — больше ничего.
+* `step(action) -> (observation, reward, terminated, truncated, info)`. Нативные действия — плоские
+  JSON-объекты: `list_records(table, cursor, limit≤50)`, `get_record(table, id)`, `get_document(doc_id)`,
+  `calculator(expression)`, `submit(findings)`. Наблюдение: `{ok, result, error{code,message},
+  remaining_steps}`.
+* 100 шагов вместе с `submit`, 60 секунд. Неизвестные действия и идентификаторы дают ограниченную ошибку и
+  тратят шаг; шаг после завершения эпизода возвращает `episode_finished` с наградой 0.
+* Класс не наследует `gymnasium.Env` (кейс это допускает), но следует той же семантике: `terminated` —
+  `submit` (конец MDP), `truncated` — исчерпан лимит шагов или времени.
+* Адаптер жюри (`src/ophanim/adapter.py`) переводит официальную оболочку `{"name", "args"}` в нативные
+  действия и приводит наблюдения к официальной форме `{result, error, remaining_steps}` (см. README).

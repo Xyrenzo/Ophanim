@@ -1,109 +1,117 @@
-# `provenance.json` format (ENV_VERSION 0.3.0)
+# Формат `provenance.json` (ENV_VERSION 0.3.0)
 
-**Purpose.** Provenance is the evaluator-only record of *how* an episode was made: the generation inputs, the
-mapping from internal keys to public ids, the legitimate red herrings, the documents planted for scenarios,
-every injected error as a before/after transformation, and the complete clean books before any mutation.
-It makes every truth issue independently checkable (official check block 2, condition 1: "before the
-error is injected the books are consistent; the provenance history and the source documents allow
-independent verification").
+**Назначение.** Provenance — запись о том, *как* был создан эпизод; она доступна только оценщику. В ней
+хранятся входные параметры генерации, соответствие внутренних ключей публичным идентификаторам, законные
+ложные следы, документы, подготовленные для сценариев, каждая внесённая ошибка в виде преобразования
+«до/после» и полные чистые книги до любых изменений. Благодаря этому каждую проблему эталона можно
+проверить независимо (официальные проверки, блок 2, условие 1: «до внесения ошибки книги согласованы;
+история provenance и исходные документы позволяют выполнить независимую проверку»).
 
-**Location and ownership.** `<episode_dir>/evaluator/provenance.json`, written by
-`ophanim.generator.episode.generate_episode` (through `judge_adapter.generate_episode`) together with
-`evaluator/truth.json`. It belongs to the evaluator/jury.
+**Где лежит и кому принадлежит.** `<episode_dir>/evaluator/provenance.json`. Файл записывает
+`ophanim.generator.episode.generate_episode` (через `judge_adapter.generate_episode`) вместе с
+`evaluator/truth.json`. Он принадлежит оценщику и жюри.
 
-**Never exposed to the agent.**
-* The closed-mode environment never reads the `evaluator/` folder, and no tool can access files.
-* The seed, the configuration, the red-herring labels and the before/after rows would reveal or allow
-  reconstruction of the answer.
-* Tests enforce this: leak scans of every observation and trajectory, a closed episode run with
-  `evaluator/` deleted, and AST rules that keep agent code from importing the generator or evaluator.
+**Агенту никогда не показывается.**
 
-## Top-level fields
+* Окружение в закрытом режиме никогда не читает каталог `evaluator/`, а ни один инструмент не имеет
+  доступа к файлам.
+* Seed, конфигурация, метки ложных следов и строки «до/после» раскрыли бы ответ или позволили бы его
+  восстановить.
+* Это закреплено тестами: проверки утечек в каждом наблюдении и каждой траектории, прогон закрытого эпизода
+  с удалённым `evaluator/` и AST-правила, не позволяющие коду агента импортировать генератор или оценщик.
 
-| field | type | content |
+## Поля верхнего уровня
+
+| поле | тип | содержимое |
 |---|---|---|
-| `schema_version` | string | public data schema version (`"1.0"`) |
-| `env_version` | string | `ENV_VERSION` of the code that generated the episode (`"0.3.0"`) |
-| `episode_id` | string | same as `manifest.json` / `truth.json` |
-| `generation` | object | `seed` (int), `secret_used` (bool: generation keyed with `OPHANIM_EVAL_SECRET`), `config` (the fully expanded `EpisodeConfig`, including defaults such as `allocation_mode`) |
-| `company` | object | `profile` (Financial-DNA profile name), `base_currency`, `offset_minutes` (company UTC offset), `period` (`[start, end]` ISO dates, inclusive) |
-| `id_map` | object | internal key → public id. Keys: `S..` supplier → `entity_id`; `I....` invoice → `invoice_id`; `P....` payment → `payment_id`; `R.....` ledger row → `row_id`; `doc:I....` / `doc:P....` → `doc_id`. Covers the union of the clean and the mutated books |
-| `distractors` | list | legitimate red herrings (see below); internal keys only |
-| `scenario_carriers` | list | correct documents planted *before* the clean snapshot so that a scenario has a guaranteed carrier: `{"scenario", "payment", "invoices"}`. `scenario` ∈ `fx_partial_payment_boundary`, `fx_invoice_unapplied_payment`, `allocation_missing`, `allocation_partial` |
-| `injections` | list | one entry per truth issue (see below) |
-| `pre_mutation` | object | `validation_problems` (list; always empty for a generated episode, because the clean books must satisfy every accounting equality) and `tables` (`ledger`, `invoices`, `payments`, `fx`: the complete clean public tables, in public ids, before any error was injected) |
+| `schema_version` | string | версия схемы публичных данных (`"1.0"`) |
+| `env_version` | string | `ENV_VERSION` кода, создавшего эпизод (`"0.3.0"`) |
+| `episode_id` | string | тот же, что в `manifest.json` и `truth.json` |
+| `generation` | object | `seed` (int), `secret_used` (bool: генерация подписана `OPHANIM_EVAL_SECRET`), `config` (полностью развёрнутый `EpisodeConfig`, включая значения по умолчанию, например `allocation_mode`) |
+| `company` | object | `profile` (имя профиля Financial DNA), `base_currency`, `offset_minutes` (смещение компании от UTC), `period` (`[start, end]` — даты ISO, включительно) |
+| `id_map` | object | внутренний ключ → публичный идентификатор. Ключи: `S..` поставщик → `entity_id`; `I....` счёт → `invoice_id`; `P....` платёж → `payment_id`; `R.....` строка главной книги → `row_id`; `doc:I....` / `doc:P....` → `doc_id`. Охватывает объединение чистых и изменённых книг |
+| `distractors` | list | законные ложные следы (см. ниже); только внутренние ключи |
+| `scenario_carriers` | list | правильные документы, заложенные *до* снимка чистых книг, чтобы у сценария гарантированно был носитель: `{"scenario", "payment", "invoices"}`. `scenario` — одно из `fx_partial_payment_boundary`, `fx_invoice_unapplied_payment`, `allocation_missing`, `allocation_partial` |
+| `injections` | list | по одной записи на каждую проблему эталона (см. ниже) |
+| `pre_mutation` | object | `validation_problems` (список; у сгенерированного эпизода всегда пуст, потому что чистые книги обязаны выполнять все бухгалтерские равенства) и `tables` (`ledger`, `invoices`, `payments`, `fx`: полные чистые публичные таблицы в публичных идентификаторах до внесения ошибок) |
 
 ### `distractors[]`
 
-Each entry is `{"kind", "note", "invoices"?, "payments"?}` with internal keys:
+Каждая запись — `{"kind", "note", "invoices"?, "payments"?}` с внутренними ключами:
 
-| kind | meaning |
+| kind | значение |
 |---|---|
-| `recurring_same_amount` | monthly recurring invoices with the same amount (different vendor_ref) |
-| `repeat_order_same_amount` | same supplier and amount, different vendor_ref and date |
-| `vendor_ref_collision` | two different suppliers use the same invoice number |
-| `reversed_duplicate` | a duplicate capture fully reversed in the period (net zero) |
-| `split_payment` | one invoice settled by two payments, both applied (D02; guaranteed at distractors normal/high) |
-| `partial_payment` | an invoice partly paid; the payment fully applied |
-| `batch_payment` | one payment settling several invoices |
-| `unidentified_payment` | a payment without remittance, correctly parked in Suspense |
-| `correct_refund` | `payments = [refunded payment, refund]`: the supplier returned an unidentified payment in full (D03; guaranteed at distractors normal/high) |
-| `boundary_utc_date` | a foreign-currency in-period invoice whose UTC date lies in the adjacent month (D05) |
+| `recurring_same_amount` | ежемесячные регулярные счета с одинаковой суммой (разный `vendor_ref`) |
+| `repeat_order_same_amount` | тот же поставщик и сумма, другие `vendor_ref` и дата |
+| `vendor_ref_collision` | два разных поставщика используют один номер счёта |
+| `reversed_duplicate` | дубль, полностью сторнированный в периоде (чистый эффект нулевой) |
+| `split_payment` | один счёт оплачен двумя платежами, оба распределены (D02; гарантирован при `distractors` normal/high) |
+| `partial_payment` | счёт оплачен частично; платёж распределён полностью |
+| `batch_payment` | один платёж закрывает несколько счетов |
+| `unidentified_payment` | платёж без расшифровки, правильно учтённый в Suspense |
+| `correct_refund` | `payments = [возвращаемый платёж, возврат]`: поставщик полностью вернул платёж без расшифровки (D03; гарантирован при `distractors` normal/high) |
+| `boundary_utc_date` | счёт в иностранной валюте, относящийся к периоду, у которого дата UTC попадает в соседний месяц (D05) |
 
 ### `injections[]`
 
 `{"issue_id", "type", "scenario", "cause", "details"}`:
-* `issue_id` equals the `issue_id` in `truth.json`.
-* `type` is one of the four error types.
-* `scenario` is `"single"` or the interacting-scenario name.
-* `cause` is a human-readable causal explanation with internal keys.
-* `details` depends on the type; all keys in it are internal:
 
-| type | `details` keys |
+* `issue_id` совпадает с `issue_id` в `truth.json`;
+* `type` — один из четырёх типов ошибок;
+* `scenario` — `"single"` или имя взаимодействующего сценария;
+* `cause` — понятное человеку причинное объяснение с внутренними ключами;
+* `details` зависит от типа; все ключи внутри него внутренние:
+
+| тип | ключи `details` |
 |---|---|
-| `duplicate_invoice` | `original`, `copy`, `rows_added` (the copy's posting) |
-| `payment_allocation` | `payment`, `invoice`, `allocation_kind` (`missing` \| `partial`), `rows_before`, `rows_after` (the payment's posting) |
-| `fx_rate` (invoice) | `invoice`, `wrong_rate_date`, `wrong_rate_cause`, `rows_before`, `rows_after` |
-| `fx_rate` (payment) | `payment`, `wrong_rate_date`, `wrong_rate_cause`, `rows_before`, `rows_after` |
-| `period_attribution` (invoice) | `invoice`, `local_date`, `utc_date`, `rows_added` |
-| `period_attribution` (payment) | `payment`, `invoice`, `local_date`, `utc_date`, `rows_added` |
+| `duplicate_invoice` | `original`, `copy`, `rows_added` (проводка копии) |
+| `payment_allocation` | `payment`, `invoice`, `allocation_kind` (`missing` \| `partial`), `rows_before`, `rows_after` (проводка платежа) |
+| `fx_rate` (счёт) | `invoice`, `wrong_rate_date`, `wrong_rate_cause`, `rows_before`, `rows_after` |
+| `fx_rate` (платёж) | `payment`, `wrong_rate_date`, `wrong_rate_cause`, `rows_before`, `rows_after` |
+| `period_attribution` (счёт) | `invoice`, `local_date`, `utc_date`, `rows_added` |
+| `period_attribution` (платёж) | `payment`, `invoice`, `local_date`, `utc_date`, `rows_added` |
 
-Row snapshots are `{"row", "account", "debit_minor", "credit_minor", "invoice", "payment", "role"}`.
-`row`, `invoice` and `payment` hold internal keys; use `id_map` to translate them. `role` is the internal
-posting role, one of:
+Снимки строк имеют вид `{"row", "account", "debit_minor", "credit_minor", "invoice", "payment", "role"}`.
+В `row`, `invoice` и `payment` лежат внутренние ключи; перевести их в публичные позволяет `id_map`.
+`role` — внутренняя роль проводки, одна из:
+
 * `expense`, `ap`, `ap_clear`, `bank`, `suspense`, `suspense_refund`, `fx`;
 * `reversal_ap`, `reversal_expense`.
 
-## Relationship to `truth.json`
+## Связь с `truth.json`
 
-`truth.json` states *what* is wrong in public terms: `issue_id`, `type`, `affected_ids`,
-`expected_amount_minor`, `currency`, `allowed_evidence_sets`, `scenario`, plus the file-level
+`truth.json` говорит, *что* не так, в публичных терминах: `issue_id`, `type`, `affected_ids`,
+`expected_amount_minor`, `currency`, `allowed_evidence_sets`, `scenario`, а на уровне файла —
 `tolerance_minor`.
 
-Provenance states *how* each issue arose. Every `truth.issues[*].issue_id` appears exactly once in
-`provenance.injections`. A clean episode has an empty truth and empty `injections`, and still carries its
-red herrings.
+Provenance говорит, *как* возникла каждая проблема. Каждый `truth.issues[*].issue_id` встречается в
+`provenance.injections` ровно один раз. У чистого эпизода пустой эталон и пустой `injections`, но ложные
+следы в нём всё равно есть.
 
-## How evaluator code consumes it
+## Как его использует код оценщика
 
-* `evaluator/verifier.py` reconciles `pre_mutation.tables` with the independent auditor and requires zero
-  discrepancies and zero anomalies. It then reconciles the published tables and requires exactly the
-  truth issues.
-* `evaluator/metamorphic.py` uses `id_map` to map ids between two presentations of the same episode.
-* `adapter.load_sealed_episode` loads it alongside `truth.json`; scoring itself uses only `truth.json`.
-* Tests read `distractors`, `scenario_carriers` and `injections` to check red herrings and causal details.
+* `evaluator/verifier.py` сверяет `pre_mutation.tables` независимым аудитором и требует ноль расхождений и
+  ноль аномалий. Затем он сверяет опубликованные таблицы и требует ровно проблемы эталона.
+* `evaluator/metamorphic.py` через `id_map` отображает идентификаторы между двумя представлениями одного
+  эпизода.
+* `adapter.load_sealed_episode` загружает файл вместе с `truth.json`; сама оценка использует только
+  `truth.json`.
+* Тесты читают `distractors`, `scenario_carriers` и `injections`, чтобы проверить ложные следы и причинные
+  детали.
 
-## Paired checks (jury id replacement)
+## Парные проверки (замена идентификаторов жюри)
 
-When ids are replaced in a jury copy, these provenance values must be replaced consistently:
-* the **values** of `id_map`;
-* every id inside `pre_mutation.tables`.
+Когда жюри заменяет идентификаторы в своей копии эпизода, в provenance согласованно нужно заменить:
 
-All other references in provenance are internal keys, which are not public ids and need no replacement.
+* **значения** `id_map`;
+* все идентификаторы внутри `pre_mutation.tables`.
 
-## Versioning and compatibility
+Все остальные ссылки в provenance — внутренние ключи; это не публичные идентификаторы, и заменять их не
+нужно.
 
-The file is regenerated byte-identically from (seed, config, secret, `ENV_VERSION`). A change to its fields
-or meaning requires an `ENV_VERSION` bump. The `scenario_carriers` field was added in 0.3.0. Consumers
-should ignore unknown keys, and must not depend on the order of `distractors`, which follows generation
-order.
+## Версии и совместимость
+
+Файл побайтно воспроизводится из (seed, config, секрет, `ENV_VERSION`). Изменение его полей или их смысла
+требует повышения `ENV_VERSION`. Поле `scenario_carriers` добавлено в 0.3.0. Потребители должны
+игнорировать неизвестные ключи и не должны полагаться на порядок `distractors`: он следует порядку
+генерации.

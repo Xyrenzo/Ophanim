@@ -1,82 +1,107 @@
-# OPHANIM — design note
+# OPHANIM — проектная записка
 
-## What it is
+## Что это
 
-A reinforcement-learning environment in which an agent audits the accounts-payable books of a fictional
-company for one month and submits evidence-backed findings. The environment produces the data, hides the
-answer, exposes narrow read-only tools, and scores the answer with one deterministic matcher and the
-official reward. It never trains a model; it provides the interactions a policy could learn from.
+Среда обучения с подкреплением, в которой агент проверяет книги кредиторской задолженности вымышленной
+компании за один месяц и отправляет выводы, подкреплённые доказательствами. Среда сама создаёт данные,
+скрывает ответ, даёт агенту узкие инструменты только для чтения и оценивает ответ одним детерминированным
+matcher и официальной формулой награды. Модель в ней не обучается: среда поставляет взаимодействия, на
+которых политику можно было бы обучать.
 
-## How an episode is made
+## Как создаётся эпизод
 
-1. **Financial DNA.** A seed picks one of six business profiles (retail, trading, software,
-   manufacturing, logistics, consulting), a base currency (ten currencies, including 0- and 3-decimal
-   ones), a fixed company UTC offset and a month.
-2. **Consistent hidden history.** Suppliers, invoices (this month and open ones from last month),
-   payments (full, split, partial, batch, unidentified) and daily FX rates, plus legitimate red herrings.
-3. **Correct books.** A posting engine turns documents into balanced base-currency ledger rows; a
-   self-check asserts the accounting equalities. The clean books are snapshotted into provenance.
-4. **Causal errors.** Each error is a realistic mistake applied as a transformation of the correct books:
-   a supplier invoice captured twice; a remittance line parked in Suspense; a document converted at the
-   rate of the wrong date; a document from the adjacent month assigned to this period because the system
-   used the UTC date. Every injected issue records its exact misstatement (base-currency minor units), the
-   affected documents, the allowed evidence sets and a before/after provenance entry. Two interacting
-   scenarios combine FX and allocation errors on linked documents so that one error changes the correct
-   amount of the other.
-5. **Presentation.** Random public ids, names, record order and timestamp representation come from a
-   separate random stream, which is what makes metamorphic variants possible.
+1. **Financial DNA.** Seed выбирает один из шести профилей бизнеса (retail, trading, software,
+   manufacturing, logistics, consulting), базовую валюту (десять валют, в том числе с 0 и 3 знаками после
+   запятой), фиксированное смещение компании от UTC и месяц.
+2. **Согласованная скрытая история.** Поставщики, счета (этого месяца и неоплаченные прошлого), платежи
+   (полные, разделённые, частичные, пакетные, без расшифровки, возвраты от поставщиков) и ежедневные
+   курсы валют, а также законные ложные следы (red herrings).
+3. **Правильные книги.** Движок проводок превращает документы в сбалансированные строки главной книги в
+   базовой валюте; самопроверка подтверждает бухгалтерские равенства. Снимок чистых книг сохраняется в
+   provenance.
+4. **Причинные ошибки.** Каждая ошибка — реалистичный сбой, применённый как преобразование правильных
+   книг: счёт поставщика учтён дважды; строка расшифровки платежа оставлена в Suspense; документ пересчитан
+   по курсу не той даты; документ соседнего месяца отнесён к этому периоду, потому что система взяла дату
+   UTC. Для каждой внесённой проблемы записываются точная сумма искажения (в минимальных единицах базовой
+   валюты), затронутые документы, допустимые наборы доказательств и запись «до/после» в provenance. Два
+   взаимодействующих сценария сочетают ошибки курса и распределения на связанных документах так, что одна
+   ошибка меняет правильную сумму другой.
+5. **Представление.** Случайные публичные идентификаторы, имена, порядок записей и форма записи времени
+   берутся из отдельного потока случайных чисел. Благодаря этому возможны метаморфные варианты эпизода.
 
-## Why the answer can be trusted
+## Почему ответу можно доверять
 
-An **independent auditor** (`ophanim.audit`) — standard library only, no generator code, AST-enforced —
-re-implements the published policy from `policy.json`. For every generated episode the verifier requires:
-zero discrepancies in the clean books, exactly the declared issues after mutation (nothing missing,
-nothing extra, no anomalies), and that each allowed evidence set alone proves its issue and amount.
-A scripted agent built on the same auditor solves every episode through the tools in ~20 steps, which
-shows the truth is recoverable from accessible records and that no unavailable fact is ever required.
+**Независимый аудитор** (`ophanim.audit`) использует только стандартную библиотеку и не содержит кода
+генератора (это проверяется AST-тестом). Он заново реализует опубликованную учётную политику из
+`policy.json`. Для каждого сгенерированного эпизода верификатор требует:
 
-## Why the reward is hard to game
+* ноль расхождений в чистых книгах;
+* ровно заявленные проблемы после внесения ошибок (ничего не пропущено, ничего лишнего, без аномалий);
+* каждый допустимый набор доказательств сам по себе доказывает свою проблему и её сумму.
 
-Findings are matched one-to-one on exact type, exact id set, exact amount (τ = 0 by default), exact currency and a
-complete evidence set of existing ids; explanations are ignored; repeats are false positives; malformed
-input is −1. The tests in `tests/adversarial` reproduce each attack from the case (silence, false
-accusations, duplicates, mark-everything, guessed ids, fabricated evidence, wrong currency, invalid input,
-repeated submission, time-outs, inspection cost, persuasive text) against the real environment.
+Заранее написанный агент на основе того же аудитора решает каждый эпизод через инструменты примерно за 20
+шагов. Значит, эталон восстанавливается по доступным записям, и недоступные факты для ответа никогда не
+нужны.
 
-## Why the hidden data stays hidden
+## Почему награду трудно обмануть
 
-Tools see only public tables; errors are fixed strings; in closed mode rewards are withheld; agents run as
-separate processes with a scrubbed environment and an empty working directory; closed-run generation is
-keyed with a secret so the open-source generator cannot be used to brute-force hidden seeds; evaluator
-outputs are written only after all agents have finished.
+Выводы сопоставляются с проблемами взаимно однозначно, по точному совпадению типа, множества
+идентификаторов, суммы (по умолчанию τ = 0) и валюты; кроме того, нужен полный набор доказательств из
+существующих идентификаторов. Объяснения не читаются, повторы считаются FP, структурно невалидный ответ
+даёт -1. Тесты в `tests/adversarial` воспроизводят на настоящем окружении каждую атаку из кейса: молчание,
+ложные обвинения, дубли, «пометить всё», угаданные идентификаторы, выдуманные доказательства, неверную
+валюту, невалидный ввод, повторную отправку, исчерпание времени, стоимость шагов проверки и убедительный
+текст.
 
-## Reproducibility
+## Почему скрытые данные остаются скрытыми
 
-A SHA-256 counter-mode RNG with named sub-streams replaces Python's `random` module (whose helpers may
-change between versions). Golden values are pinned and the suite runs on Python 3.11 and 3.14; complete
-episodes hash identically on both. Published train/dev data regenerates byte-for-byte from `configs/`.
+Инструменты видят только публичные таблицы; тексты ошибок фиксированы; в закрытом режиме награда не
+сообщается. Агенты работают в отдельных процессах с очищенным окружением и пустым рабочим каталогом.
+Генерация закрытого прогона подписывается секретом, поэтому открытый генератор нельзя использовать для
+перебора скрытых seed. Файлы оценщика записываются только после завершения всех агентов.
 
-## Key trade-offs
+## Воспроизводимость
 
-* **Accounts payable only** — enough for all four mandatory types; keeps the model small and verifiable.
-* **Fixed UTC offsets, no DST** — removes OS tz-database differences; period errors still require
-  UTC-vs-local reasoning (half-hour and negative offsets included).
-* **Strict schema** — a lowercase currency code or a string amount is −1. Strictness is predictable and
-  closes parsing loopholes, at the cost of being unforgiving to sloppy agents.
-* **Evidence must cite row_id / doc_id / FX key** — invoice_id is not accepted as evidence. One clear rule,
-  no alias table to exploit.
-* **Pydantic only at run time** — no NumPy/NetworkX; the "investigation graph" is the explicit
-  invoice ↔ posting ↔ payment ↔ FX linkage inside the injector and the auditor, never exposed to the agent.
+Вместо модуля `random`, вспомогательные функции которого могут меняться между версиями Python,
+используется генератор SHA-256 в режиме счётчика с именованными подпотоками. Эталонные значения
+зафиксированы в тестах, набор тестов проходит на Python 3.11 и 3.14, полные эпизоды дают на обеих версиях
+одинаковый хеш. Опубликованные данные train/dev побайтно повторяются из `configs/`.
 
-## Limitations (honest)
+## Основные компромиссы
 
-* Process isolation is not an OS sandbox; a hostile agent shares the filesystem (closed-run truth is never
-  on disk during the run; open train/dev truth is, by design).
-* The official formula scores silence and wild accusations equally (−1) on erroneous books; with many
-  issues, saving steps can outweigh one missed issue (see `reward_design.md`).
-* A rule-based auditor with the published policy solves the episodes: difficulty is reasoning under a step
-  budget and red herrings, not hidden information. LLM-agent difficulty was not measured.
-* Ledger sizes are at the lower end of the suggested range (≈150–430 rows); the largest episodes slightly
-  exceed 200 documents.
-* No model was trained; no learning improvement is claimed.
-* Reward and environment are a software exercise, not a professional audit opinion.
+* **Только кредиторская задолженность.** Этого достаточно для всех четырёх обязательных типов ошибок, а
+  модель остаётся небольшой и проверяемой.
+* **Фиксированные смещения от UTC, без летнего времени.** Это убирает расхождения между базами часовых
+  поясов разных ОС. Ошибки периода всё равно требуют различать UTC и местное время (есть смещения на
+  полчаса и отрицательные смещения).
+* **Строгая схема.** Структурные ошибки — нет обязательного поля, неверный тип значения JSON (например,
+  сумма строкой, дробным числом или логическим значением), лишнее поле, превышение лимитов — делают весь
+  ответ невалидным: награда -1. Смысловые расхождения, например код валюты в нижнем регистре или с
+  пробелом, неизвестный тип или неверная сумма, структурной ошибкой не считаются: такой вывод просто не
+  совпадает ни с одной проблемой и считается FP. Строгость предсказуема и закрывает лазейки при разборе
+  ввода, хотя и не прощает небрежности агенту.
+* **Доказательства — только существующие доступные идентификаторы.** Допустимые наборы доказательств в
+  эталоне состоят из `doc_id`, `row_id` строк главной книги и ключей курса `"YYYY-MM-DD:SRC:TGT"`.
+  `invoice_id` и `payment_id` тоже можно указывать: инструменты их возвращают, поэтому они принимаются как
+  дополнительные доказательства, но допустимый набор сами по себе не заменяют. `entity_id` через
+  инструменты получить нельзя, и как доказательство он не принимается. Правило одно и простое, таблицы
+  псевдонимов, которую можно было бы обойти, нет.
+* **Во время выполнения — только Pydantic.** Без NumPy и NetworkX. «Граф расследования» — это явные
+  связи между счетом, проводкой, платежом и курсом внутри модуля внесения ошибок и аудитора; агенту он
+  не показывается.
+
+## Ограничения
+
+* Изоляция процессов — не песочница ОС: враждебный агент имеет общий доступ к файловой системе. Эталон
+  закрытого прогона во время прогона на диске не лежит; эталон открытых train/dev лежит на диске по
+  замыслу.
+* На книгах с ошибками официальная формула оценивает молчание и массовые ложные обвинения одинаково (-1).
+  При большом числе проблем экономия шагов может перевесить одну пропущенную проблему (см.
+  `reward_design.md`).
+* Аудитор на правилах с опубликованной учётной политикой решает эпизоды: сложность — в рассуждении при
+  ограниченном бюджете шагов и в ложных следах, а не в скрытой информации. Насколько эпизоды сложны для
+  агента на основе LLM, не измерялось.
+* Размеры главной книги — у нижней границы рекомендованного диапазона: в опубликованных эпизодах от 190
+  до 442 строк. Самые большие эпизоды немного превышают 200 документов (до 205).
+* Модель не обучалась; улучшения от обучения не заявляются.
+* Награда и среда — программная модель, а не профессиональное аудиторское заключение.

@@ -1,195 +1,207 @@
-# P6.3 — Algorithm review
+# P6.3 — обзор алгоритмов
 
-Citations refer to `p6_references.md`; every cited item was checked against its primary page during P6.
-"Measured" means measured on this repository (`p6_repository_audit.md` §9). Statements marked
-**hypothesis** are predictions to be tested in P8–P11, not results.
+Ссылки ведут на `p6_references.md`; каждый источник на этапе P6 сверен с первоисточником. «Измерено»
+значит измерено на этом репозитории (`p6_repository_audit.md`, §9). Утверждения с пометкой **гипотеза** —
+прогнозы для проверки на этапах P8–P11, а не результаты.
 
-All recommendations are subject to `p6_architecture_constraints.md`, which records the binding contract
-from the official check definitions:
-* the agent interface is the `judge_adapter` envelope;
-* ids are exact and amounts use τ = 0;
-* learning happens in train mode only;
-* Gymnasium is not required.
+Все рекомендации подчинены `p6_architecture_constraints.md`, где зафиксирован обязательный контракт из
+официальных определений проверок:
 
-No framework is selected before that interface; the frameworks below are judged as optional wrappers
-around it.
+* интерфейс агента — оболочка `judge_adapter`;
+* идентификаторы точные, суммы сравниваются с τ = 0;
+* обучение идёт только в режиме train;
+* Gymnasium не требуется.
 
-The review is driven by four measured properties of Ophanim (`p6_problem_formulation.md` §3):
-(1) acquisition has little headroom under the official reward (full scan = 12–22 steps on medium);
-(2) the terminal action is a set of exact structured findings (pointer arguments, ±1 minor unit);
-(3) the reward is sparse, clipped and flat at −1 for every policy without a true positive;
-(4) "submit nothing" earns −0.5 on the closed suite.
+До этого интерфейса никакой фреймворк не выбирается; фреймворки ниже рассматриваются как необязательные
+обёртки над ним.
 
-## A. Behaviour cloning (BC) and DAgger
+Обзор опирается на четыре измеренных свойства Ophanim (`p6_problem_formulation.md`, §3):
+(1) при официальной награде у сбора информации мало запаса (полный обход = 12–22 шага на medium);
+(2) завершающее действие — множество точных структурированных выводов (аргументы-указатели, точные суммы;
+на этапе P6 допуск был ±1 минимальная единица, с ENV 0.2.0 τ = 0);
+(3) награда редкая, обрезанная и ровно −1 для каждой политики без true positive;
+(4) «ничего не отправлять» даёт −0.5 на закрытом наборе.
 
-**Mechanism.** Supervised learning of `π(a | o)` from expert demonstrations (ALVINN, Pomerleau 1988).
-Ross & Bagnell (2010) show that i.i.d. imitation "leads to compounding errors and a regret bound that
-grows quadratically in the time horizon"; DAgger (Ross, Gordon & Bagnell 2011) iteratively aggregates
-states visited by the learner, labelled by the expert, with no-regret guarantees under the learner's own
-state distribution.
+## A. Клонирование поведения (BC) и DAgger
+
+**Механизм.** Обучение с учителем `π(a | o)` по демонстрациям эксперта (ALVINN, Pomerleau 1988). Ross &
+Bagnell (2010) показывают, что подражание на независимых примерах «leads to compounding errors and a
+regret bound that grows quadratically in the time horizon»; DAgger (Ross, Gordon & Bagnell 2011)
+итеративно собирает состояния, которые посещает ученик, размечает их экспертом и даёт гарантии no-regret
+при распределении состояний самого ученика.
 
 **Ophanim.**
-* *Reference auditor as demonstrator.* Its acquisition actions are a deterministic function of table
-  sizes (`policies/reference_auditor.py` L34–L47): imitating them teaches a counter, not a strategy. Its
-  submission is a correct, observation-consistent label for finding construction. → Use it for the
-  **submission** sub-policy only.
-* *Teaching tool selection without fixed patterns* requires **diverse demonstrators**: randomised table
-  order, targeted FX lookups via constructible keys, early-stop variants, partial scans — all
-  observation-consistent. Diversity must be measured (action-sequence entropy), not assumed.
-* *Queryable expert (DAgger).* The published rules can label any learner state: for submission, apply
-  the rules to the learner's revealed records `K_t`; for acquisition, a rule such as "next unread page /
-  next needed FX key". So DAgger is implementable without privileged information.
-* *Privileged teachers.* A teacher that knows where the errors are acts on information the student
-  cannot see — the problem analysed by Warrington et al. (2021) ("the expert does not know what the
-  trainee cannot see"; their A2D trains the expert for the student) and named the *imitation gap* by
-  Weihs et al. (2021, ADVISOR). Learning by Cheating (Chen et al. 2019) works when the student can observe
-  what it needs; in Ophanim a privileged teacher is admissible **only** if it first reads every record it
-  relies on. The **oracle never qualifies** (it submits ids it never revealed).
-* *Incorrect demonstrations.* Score every demonstration on the training split; filter or weight by
-  outcome; use simple-reconciliation outputs as labelled hard negatives (225 FP measured on the closed
-  suite show exactly which red herrings fool shallow rules).
 
-**Verdict.** First learning stage (P8), on a factorised policy (§G): BC for submission decisions,
-BC+DAgger for acquisition with diverse demonstrators.
+* *Reference auditor как демонстратор.* Его действия сбора информации — детерминированная функция размеров
+  таблиц (`policies/reference_auditor.py` L34–L47): подражание им учит счётчику, а не стратегии. Его ответ —
+  правильная, согласованная с наблюдениями метка для построения выводов. → Использовать его только для
+  подполитики **ответа**.
+* *Обучение выбору инструментов без фиксированных шаблонов* требует **разнообразных демонстраторов**:
+  случайный порядок таблиц, точечные запросы курсов по построенным ключам, варианты с ранней остановкой,
+  частичные обходы — всё согласовано с наблюдениями. Разнообразие нужно измерять (энтропия
+  последовательности действий), а не предполагать.
+* *Эксперт, которого можно спрашивать (DAgger).* Опубликованные правила позволяют разметить любое
+  состояние ученика: для ответа — применить правила к раскрытым учеником записям `K_t`; для сбора
+  информации — правило вроде «следующая непрочитанная страница / следующий нужный ключ курса». Значит,
+  DAgger реализуем без привилегированной информации.
+* *Привилегированные учителя.* Учитель, который знает, где ошибки, действует на основе информации, которую
+  ученик не видит, — эту проблему анализируют Warrington et al. (2021) («the expert does not know what the
+  trainee cannot see»; их A2D обучает эксперта под ученика), а Weihs et al. (2021, ADVISOR) называют её
+  *imitation gap*. Learning by Cheating (Chen et al. 2019) работает, когда ученик может наблюдать то, что ему
+  нужно; в Ophanim привилегированный учитель допустим, **только** если он сначала читает каждую запись, на
+  которую опирается. **Oracle не подходит никогда** (он отправляет идентификаторы, которые не раскрывал).
+* *Неверные демонстрации.* Оценивать каждую демонстрацию на обучающей выборке; фильтровать или взвешивать
+  по результату; выводы простой сверки использовать как размеченные трудные отрицательные примеры (225 FP,
+  измеренные на закрытом наборе, показывают, какие именно ложные следы обманывают поверхностные правила).
+
+**Вердикт.** Первая стадия обучения (P8) на факторизованной политике (§G): BC для решений об ответе,
+BC+DAgger для сбора информации с разнообразными демонстраторами.
 
 ## B. PPO
 
-**Mechanism.** Clipped surrogate objective allowing several minibatch epochs per batch of on-policy data
-(Schulman et al. 2017), usually with GAE advantages (Schulman et al. 2015). Results depend strongly on
-implementation choices (Engstrom et al. 2020; Andrychowicz et al. 2020); Huang et al. (2022) catalogue 37
-implementation details including MultiDiscrete and LSTM specifics. Masking invalid actions in policy
-gradients is theoretically justified and matters more as the invalid set grows (Huang & Ontañón 2020).
+**Механизм.** Обрезанная суррогатная цель, позволяющая несколько эпох мини-батчей на каждый батч данных
+текущей политики (Schulman et al. 2017), обычно с оценками преимущества GAE (Schulman et al. 2015).
+Результаты сильно зависят от деталей реализации (Engstrom et al. 2020; Andrychowicz et al. 2020); Huang et
+al. (2022) перечисляют 37 деталей реализации, включая особенности MultiDiscrete и LSTM. Маскирование
+недопустимых действий в градиенте политики теоретически обосновано и тем важнее, чем больше множество
+недопустимых действий (Huang & Ontañón 2020).
 
-**Ophanim.** Compatible once actions are factorised: categorical heads for tool/table, pointer or
-per-candidate Bernoulli heads with masks for ids, a categorical "valuation convention" head (§G).
-On-policy sample cost is affordable: an episode is generated in 21–43 ms (measured, P5).
-Main risk: property (3). **Hypothesis H-collapse:** PPO from a random initialisation converges to
-immediate empty submission (−0.5 on the closed mix), because only the clean/erroneous split produces
-return variance. Mitigations: BC initialisation, curriculum, research-only auxiliary losses.
+**Ophanim.** Совместим, если действия факторизованы: категориальные головы для инструмента и таблицы,
+головы-указатели или бернуллиевские головы по кандидатам с масками для идентификаторов, категориальная
+голова «соглашения об оценке» (§G). Стоимость данных текущей политики приемлема: эпизод генерируется за
+21–43 мс (измерено, P5). Главный риск — свойство (3). **Гипотеза H-collapse:** PPO со случайной
+инициализации сходится к немедленной пустой отправке (−0.5 на закрытом наборе), потому что дисперсию
+дохода даёт только разделение на чистые эпизоды и эпизоды с ошибками. Меры: инициализация через BC,
+учебная программа (curriculum), вспомогательные функции потерь только для исследований.
 
-**Verdict.** Primary RL algorithm (P9), initialised from BC; PPO-from-scratch is a required control.
+**Вердикт.** Основной алгоритм RL (P9) с инициализацией из BC; PPO с нуля — обязательный контроль.
 
-## C. DQN / QR-DQN and parameterised-action variants
+## C. DQN / QR-DQN и варианты для параметризованных действий
 
-**Mechanism.** DQN learns Q-values with replay and target networks for discrete actions (Mnih et al. 2015);
-QR-DQN learns return quantiles (Dabney et al. 2017). For discrete actions with *continuous* parameters:
-PAMDP methods (Hausknecht & Stone 2015), P-DQN (Xiong et al. 2018), MP-DQN (Bester et al. 2019). For
-variable action sets described by text, DRRN scores (state, action) embedding pairs (He et al. 2016).
-DRQN adds recurrence for partial observability (Hausknecht & Stone 2015).
+**Механизм.** DQN обучает Q-значения с буфером воспроизведения и целевыми сетями для дискретных действий
+(Mnih et al. 2015); QR-DQN обучает квантили дохода (Dabney et al. 2017). Для дискретных действий с
+*непрерывными* параметрами: методы PAMDP (Hausknecht & Stone 2015), P-DQN (Xiong et al. 2018), MP-DQN
+(Bester et al. 2019). Для переменных множеств действий, описанных текстом, DRRN оценивает пары эмбеддингов
+(состояние, действие) (He et al. 2016). DRQN добавляет рекуррентность для частичной наблюдаемости
+(Hausknecht & Stone 2015).
 
-**Ophanim.** SB3's DQN supports Discrete actions only (verified). Ophanim's parameters are pointers into a
-growing id set, not continuous vectors, so P-DQN/MP-DQN do not apply directly; the DRRN pattern (score each
-admissible candidate) does. The terminal action is a *set*: per-candidate Q-values factorise a joint,
-non-additive F1 reward, which value-based methods do not represent without further assumptions.
+**Ophanim.** DQN в SB3 поддерживает только действия Discrete (проверено). Параметры в Ophanim — указатели
+в растущее множество идентификаторов, а не непрерывные векторы, поэтому P-DQN/MP-DQN напрямую не
+применимы; применим шаблон DRRN (оценить каждого допустимого кандидата). Завершающее действие — *множество*:
+Q-значения по кандидатам раскладывают совместную неаддитивную награду F1, а методы на основе ценности не
+представляют её без дополнительных допущений.
 
-**Verdict.** Comparator, not first: (i) DQN/QR-DQN on a small discrete macro-action acquisition head;
-(ii) a DRRN-style candidate scorer for submission. Addresses RQ2.
+**Вердикт.** Для сравнения, не первым: (i) DQN/QR-DQN на небольшой дискретной голове макродействий сбора
+информации; (ii) оценщик кандидатов в стиле DRRN для ответа. Отвечает на RQ2.
 
-## D. Recurrent PPO
+## D. Рекуррентный PPO
 
-**Mechanism.** LSTM/GRU policies carry a hidden state across steps; DRQN shows recurrence helps under
-partial observability (Hausknecht & Stone 2015). sb3-contrib provides RecurrentPPO (MlpLstmPolicy,
-CnnLstmPolicy, MultiInputLstmPolicy; Dict actions not supported — verified). Hidden state must be reset at
-every episode boundary.
+**Механизм.** Политики LSTM/GRU переносят скрытое состояние между шагами; DRQN показывает, что
+рекуррентность помогает при частичной наблюдаемости (Hausknecht & Stone 2015). В sb3-contrib есть
+RecurrentPPO (MlpLstmPolicy, CnnLstmPolicy, MultiInputLstmPolicy; действия Dict не поддерживаются —
+проверено). Скрытое состояние нужно сбрасывать на каждой границе эпизода.
 
-**Ophanim.** Property P1: the revealed-record set is a sufficient statistic, so an explicit record store
-removes the need for recurrence for *optimality*. Recurrence is still a legitimate design to compare
-(learned vs explicit memory). Long sequences (≤100 steps, ~150 KB observations) make purely recurrent
-encodings of raw JSON expensive.
+**Ophanim.** Свойство P1: раскрытое множество записей — достаточная статистика, поэтому явное хранилище
+записей снимает потребность в рекуррентности для *оптимальности*. Рекуррентность всё же законный вариант
+для сравнения (обучаемая и явная память). Длинные последовательности (до 100 шагов, наблюдения около 150
+КБ) делают чисто рекуррентное кодирование сырого JSON дорогим.
 
-**Verdict.** Ablation (RQ3), not first.
+**Вердикт.** Абляция (RQ3), не первым.
 
 ## E. Decision Transformer
 
-**Mechanism.** Return-conditioned, causally masked Transformer over (return-to-go, state, action)
-sequences (Chen et al. 2021). Paster, McIlraith & Ba (2022) show that such return-conditioned methods fail
-when returns are driven by luck rather than actions. Hugging Face provides `DecisionTransformerModel` for
-vector states (verified).
+**Механизм.** Трансформер с причинной маской, обусловленный доходом, над последовательностями (доход до
+конца, состояние, действие) (Chen et al. 2021). Paster, McIlraith & Ba (2022) показывают, что такие методы
+отказывают, когда доход определяется удачей, а не действиями. В Hugging Face есть
+`DecisionTransformerModel` для векторных состояний (проверено).
 
-**Ophanim.** Dynamics are deterministic per episode, but achievable return varies across episodes, and
-returns are bimodal (≈ −1 or ≈ 0.96 for scripted policies), giving little coverage of intermediate
-returns. Scripted data has one dominant acquisition pattern. Observations are large JSON records that
-need a learned encoder before any sequence model.
+**Ophanim.** Динамика в каждом эпизоде детерминирована, но достижимый доход меняется между эпизодами, а
+доходы бимодальны (≈ −1 или ≈ 0.96 у заранее написанных политик), поэтому промежуточные значения дохода
+почти не покрыты. В заранее написанных данных один доминирующий шаблон сбора информации. Наблюдения —
+большие записи JSON, которым нужен обучаемый кодировщик ещё до любой модели последовательностей.
 
-**Verdict.** Not first; optional P11 study once a diverse trajectory corpus exists.
+**Вердикт.** Не первым; необязательное исследование на P11, когда появится разнообразный корпус траекторий.
 
-## F. Offline RL (CQL, IQL) and off-policy evaluation
+## F. Offline RL (CQL, IQL) и оценка политики вне её данных
 
-**Mechanism.** CQL regularises Q so it lower-bounds the policy's value (Kumar et al. 2020); IQL avoids
-querying out-of-distribution actions by expectile regression on dataset actions and extracts a policy by
-advantage-weighted BC (Kostrikov, Nair & Levine 2021). D4RL (Fu et al. 2020) and the OPE benchmarks
-(Fu et al. 2021) standardise datasets and evaluation.
+**Механизм.** CQL регуляризует Q так, чтобы оно было нижней оценкой ценности политики (Kumar et al. 2020);
+IQL избегает запросов к действиям вне распределения с помощью экспектильной регрессии на действиях из
+данных и извлекает политику через BC со взвешиванием по преимуществу (Kostrikov, Nair & Levine 2021). D4RL
+(Fu et al. 2020) и бенчмарки OPE (Fu et al. 2021) стандартизируют наборы данных и оценку.
 
-**Ophanim.** Offline RL is motivated by expensive or unsafe interaction. Ophanim's simulator is cheap and
-exact, so online RL and exact on-simulator evaluation are available; OPE adds estimation error without
-need. Offline RL becomes relevant only to reuse expensive logs (e.g. LLM-agent trajectories).
+**Ophanim.** Offline RL оправдан, когда взаимодействие дорого или небезопасно. Симулятор Ophanim дешёвый и
+точный, поэтому доступны онлайн-RL и точная оценка на симуляторе; OPE без нужды добавляет ошибку оценки.
+Offline RL становится актуален только для повторного использования дорогих журналов (например, траекторий
+LLM-агентов).
 
-**Verdict.** Low priority; revisit only with an LLM-trajectory corpus (P12).
+**Вердикт.** Низкий приоритет; вернуться только при наличии корпуса траекторий LLM (P12).
 
-## G. Neuro-symbolic agents
+## G. Нейросимвольные агенты
 
-**Mechanism.** Combining learned components with symbolic reasoning (survey: d'Avila Garcez & Lamb 2020).
+**Механизм.** Сочетание обучаемых компонентов с символьными рассуждениями (обзор: d'Avila Garcez & Lamb
+2020).
 
-**Ophanim.** The task demands exact arithmetic (±1 minor unit), exact id sets and exact evidence; neural
-regression cannot guarantee these. The natural split:
+**Ophanim.** Задача требует точной арифметики (τ = 0), точных множеств идентификаторов и точных
+доказательств; нейросетевая регрессия гарантировать этого не может. Естественное разделение:
 
-| keep deterministic (symbolic primitives) | learn |
+| оставить детерминированным (символьные примитивы) | обучать |
 |---|---|
-| parsing timestamps, converting to an offset, local date | which date convention defines correctness (local vs UTC vs date-as-written; issue vs due) |
-| money conversion with exponents and the published rounding | which documents/postings to compare (candidate selection) |
-| FX lookup by (date, currency); posting-group extraction by id | which discrepancy type, if any, a candidate represents |
-| grouping/summing rows by key; structural links (refs, ids) | when to stop reading; which records to fetch |
-| assembling the evidence set the published task text specifies for a type | whether to submit a candidate (precision/recall trade-off) |
-| schema-valid finding serialisation | — |
+| разбор времени, перевод в смещение, местная дата | какое соглашение о дате определяет правильность (местная, UTC или «как записано»; дата выставления или оплаты) |
+| пересчёт денег с учётом количества знаков и опубликованного округления | какие документы и проводки сравнивать (выбор кандидатов) |
+| поиск курса по (дата, валюта); извлечение группы проводок по идентификатору | какой тип расхождения, если какой-то, представляет кандидат |
+| группировка и суммирование строк по ключу; структурные связи (ссылки, идентификаторы) | когда прекратить чтение; какие записи запрашивать |
+| сборка набора доказательств, который для типа задаёт опубликованный текст задачи | отправлять ли кандидата (баланс precision и recall) |
+| сериализация вывода, допустимая по схеме | — |
 
-**Trivialisation risk.** If the symbolic layer contains the end-to-end published procedure
-(`audit.reconcile`), nothing is left to learn. Rule: **primitives, not procedures** — enforced by import
-rules (agents may not import `ophanim.audit.reconcile`) and by ablations that remove primitives.
+**Риск тривиализации.** Если символьный слой содержит опубликованную процедуру целиком
+(`audit.reconcile`), учить нечего. Правило: **примитивы, а не процедуры** — закрепляется правилами импорта
+(агентам нельзя импортировать `ophanim.audit.reconcile`) и абляциями, которые убирают примитивы.
 
-**Verdict.** Recommended agent architecture family (details in `p6_agent_architecture.md`).
+**Вердикт.** Рекомендуемое семейство архитектур агента (подробности — в `p6_agent_architecture.md`).
 
-## H. LLM tool-using agents
+## H. LLM-агенты с инструментами
 
-**Mechanism.** ReAct interleaves reasoning traces and tool actions (Yao et al. 2022); Toolformer teaches
-an LM which API to call and with which arguments (Schick et al. 2023); WebShop is an analogous
-tool/web environment where the best agent reached 29 % success vs 59 % for humans (Yao et al. 2022).
+**Механизм.** ReAct чередует цепочки рассуждений и действия с инструментами (Yao et al. 2022); Toolformer
+учит языковую модель, какой API вызывать и с какими аргументами (Schick et al. 2023); WebShop — похожая
+среда с инструментами и вебом, где лучший агент достиг 29 % успеха против 59 % у людей (Yao et al. 2022).
 
-**Ophanim.** LLM agents can use the existing JSON-lines agent protocol (`agent_runtime.py`) with exactly
-the same tools — no new privilege. Constraints: a medium full scan is ≈150 KB of JSON (measured; order
-10⁴–10⁵ tokens by a rough bytes-per-token heuristic, not measured); the 60 s episode budget limits the
-number of model calls; the official evaluation forbids network and paid APIs, so hosted LLMs can only run
-in a **non-official research track** (local models are allowed if they meet the limits); sampling
-non-determinism must be controlled and recorded (model id, decoding parameters). Contamination: the
-published rules and code may be known to a model (legitimate public knowledge), but secret-keyed episodes
-cannot be.
+**Ophanim.** LLM-агенты могут пользоваться существующим протоколом агента на JSON lines (`agent_runtime.py`)
+с теми же самыми инструментами — без новых привилегий. Ограничения: полный обход medium — около 150 КБ JSON
+(измерено; по грубой эвристике байтов на токен это порядка 10⁴–10⁵ токенов, не измерено); бюджет эпизода в
+60 с ограничивает число вызовов модели; официальная оценка запрещает сеть и платные API, поэтому облачные
+LLM можно запускать только в **неофициальной исследовательской ветке** (локальные модели допустимы, если
+укладываются в лимиты); недетерминизм сэмплирования нужно контролировать и записывать (идентификатор модели,
+параметры декодирования). Загрязнение данных: опубликованные правила и код модель может знать (это законное
+публичное знание), а эпизоды с секретным ключом — нет.
 
-**Verdict.** Research track in P12, reported separately from the official benchmark.
+**Вердикт.** Исследовательская ветка на P12, отчёт отдельно от официального бенчмарка.
 
-## Comparison
+## Сравнение
 
-| family | action-space fit | sparse-reward handling | data / compute | complexity | role |
+| семейство | соответствие пространству действий | работа с редкой наградой | данные и вычисления | сложность | роль |
 |---|---|---|---|---|---|
-| BC / DAgger | good (any factorised policy) | not needed (supervised) | cheap demos | low | **first (P8)** |
-| PPO (+masks, factorised) | good with adapter | weak from scratch (H-collapse); good from BC | cheap simulator | medium | **primary RL (P9)** |
-| DQN / QR-DQN / DRRN | macro actions or candidate scoring | replay helps; set reward awkward | cheap | medium | comparator (RQ2) |
-| Recurrent PPO | as PPO | as PPO | higher | medium-high | ablation (RQ3) |
-| Decision Transformer | needs encoders | needs return coverage | diverse corpus | high | optional (P11) |
-| Offline RL (CQL/IQL) | as DQN/actor-critic | dataset-limited | logs | high | low priority |
-| Neuro-symbolic | best: exact fields by construction | combines with BC/PPO | cheap | medium | **architecture family** |
-| LLM tool agents | native (JSON tools) | in-context | expensive, slow | low code / high cost | research track (P12) |
+| BC / DAgger | хорошее (любая факторизованная политика) | не нужна (обучение с учителем) | дешёвые демонстрации | низкая | **первым (P8)** |
+| PPO (с масками, факторизованный) | хорошее с адаптером | слабая с нуля (H-collapse); хорошая после BC | дешёвый симулятор | средняя | **основной RL (P9)** |
+| DQN / QR-DQN / DRRN | макродействия или оценка кандидатов | буфер помогает; награда-множество неудобна | дёшево | средняя | для сравнения (RQ2) |
+| Рекуррентный PPO | как PPO | как PPO | выше | средняя–высокая | абляция (RQ3) |
+| Decision Transformer | нужны кодировщики | нужно покрытие доходов | разнообразный корпус | высокая | необязательно (P11) |
+| Offline RL (CQL/IQL) | как DQN или actor-critic | ограничена данными | журналы | высокая | низкий приоритет |
+| Нейросимвольный | лучшее: точные поля по построению | сочетается с BC/PPO | дёшево | средняя | **семейство архитектур** |
+| LLM-агенты с инструментами | естественное (инструменты на JSON) | в контексте | дорого, медленно | мало кода, высокая стоимость | исследовательская ветка (P12) |
 
-## Frameworks (verified facts, then recommendation)
+## Фреймворки (проверенные факты, затем рекомендация)
 
-| framework | verified facts relevant here | assessment |
+| фреймворк | проверенные факты, важные здесь | оценка |
 |---|---|---|
-| PyTorch | Windows and Linux supported; `torch` 2.15.0 on PyPI requires Python ≥ 3.11 | needed for neural policies; large; **optional extra only** |
-| Gymnasium | 1.4.0, Python ≥ 3.10, MIT; spaces include Text, Dict, Tuple, Sequence, Graph, OneOf | optional thin wrapper for library interoperability; not required by our own learners |
-| Stable-Baselines3 | 2.9.2, Python ≥ 3.10, requires PyTorch ≥ 2.8; PPO actions: Box/Discrete/MultiDiscrete/MultiBinary; DQN: Discrete only; single-level Dict observations | good for sanity baselines on fixed adapters; cannot express pointer or set actions natively |
-| sb3-contrib | "Experimental code"; MaskablePPO masks Discrete/MultiDiscrete/MultiBinary, no recurrent policies; RecurrentPPO has no Dict actions; QR-DQN available | MaskablePPO + MultiBinary over a padded candidate list is a cheap cross-check |
-| RLlib (Ray) | "Ray on Windows is currently in beta"; install with PyTorch | distributed machinery unnecessary at this scale; Windows beta → **not selected** |
-| CleanRL | "not a modular library and therefore it is not meant to be imported"; MIT; README lists Python < 3.11 | **adapt** its single-file PPO design (with attribution), do not depend on the package |
-| HF Transformers | provides `DecisionTransformerModel` for vector states | only if the DT or local-LLM tracks are pursued |
+| PyTorch | поддерживаются Windows и Linux; `torch` 2.15.0 на PyPI требует Python ≥ 3.11 | нужен для нейросетевых политик; большой; **только как необязательная зависимость** |
+| Gymnasium | 1.4.0, Python ≥ 3.10, MIT; есть пространства Text, Dict, Tuple, Sequence, Graph, OneOf | необязательная тонкая обёртка для совместимости с библиотеками; нашим собственным обучаемым агентам не нужен |
+| Stable-Baselines3 | 2.9.2, Python ≥ 3.10, требует PyTorch ≥ 2.8; действия PPO: Box/Discrete/MultiDiscrete/MultiBinary; DQN: только Discrete; наблюдения Dict только одного уровня | хорош для проверочных базовых решений на фиксированных адаптерах; действия-указатели и действия-множества напрямую не выражает |
+| sb3-contrib | «Experimental code»; MaskablePPO маскирует Discrete/MultiDiscrete/MultiBinary, без рекуррентных политик; у RecurrentPPO нет действий Dict; есть QR-DQN | MaskablePPO + MultiBinary над дополненным списком кандидатов — дешёвая перекрёстная проверка |
+| RLlib (Ray) | «Ray on Windows is currently in beta»; устанавливается вместе с PyTorch | распределённые механизмы на таком масштабе не нужны; Windows в бете → **не выбран** |
+| CleanRL | «not a modular library and therefore it is not meant to be imported»; MIT; README указывает Python < 3.11 | **адаптировать** его однофайловый PPO (с указанием авторства), не зависеть от пакета |
+| HF Transformers | есть `DecisionTransformerModel` для векторных состояний | только если продолжать ветки DT или локальных LLM |
 
-**Recommendation:** a minimal stack — PyTorch as an optional `[learning]` extra, an in-repo PPO derived
-from the CleanRL single-file design, optional SB3/sb3-contrib for cross-checks, Gymnasium only for an
-optional wrapper. The official evaluation image keeps its current single runtime dependency (Pydantic).
+**Рекомендация:** минимальный стек — PyTorch как необязательная зависимость `[learning]`, собственный PPO в
+репозитории по образцу однофайловой реализации CleanRL, необязательные SB3/sb3-contrib для перекрёстных
+проверок, Gymnasium только для необязательной обёртки. Образ официальной оценки сохраняет единственную
+текущую зависимость времени выполнения (Pydantic).

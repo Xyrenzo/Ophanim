@@ -1,97 +1,130 @@
-# Data model
+# Модель данных
 
-One episode = one fictional company, one reporting period (a calendar month), accounts payable only.
-All companies, people, invoices and money are synthetic.
+Один эпизод — одна вымышленная компания, один отчётный период (календарный месяц), только кредиторская
+задолженность. Все компании, люди, счета и деньги синтетические.
 
-## Files
+## Файлы
 
-Public files (what the agent can read through the tools):
+Публичные файлы (их агент может прочитать через инструменты):
 
-| file | content |
+| файл | содержимое |
 |---|---|
-| `manifest.json` | `schema_version`, `env_version`, `episode_id`, `company_name`, `company_profile`, `base_currency`, `period_start`, `period_end`, `timezone`, `record_counts`, `document_count`, `rounding` (mode, currency exponents, formats) |
-| `policy.json` | accounting date rule, reporting-period boundaries, FX rule, rounding rule, chart of accounts, posting rules, allocation and duplicate rules, `tolerance_minor` |
-| `ledger.csv` | exactly `row_id,timestamp,account,debit_minor,credit_minor,currency,entity_id,invoice_id,payment_id` |
-| `invoices.jsonl` | `doc_id, invoice_id, entity_id, issued_at, due_at, currency, total_minor, line_items` + `vendor_ref`, `entity_name` |
-| `payments.jsonl` | `doc_id, payment_id, timestamp, currency, amount_minor, invoice_refs` + `entity_id`, `entity_name` |
-| `fx.csv` | exactly `date,source_currency,target_currency,rate` |
+| `manifest.json` | `schema_version`, `env_version`, `episode_id`, `company_name`, `company_profile`, `base_currency`, `period_start`, `period_end`, `timezone`, `record_counts`, `document_count`, `rounding` (режим, количество знаков валют, форматы) |
+| `policy.json` | правило учётной даты, границы отчётного периода, правило курса, правило округления, план счетов, правила проводок, правила распределения платежей и выявления дублей, `tolerance_minor` |
+| `ledger.csv` | ровно `row_id,timestamp,account,debit_minor,credit_minor,currency,entity_id,invoice_id,payment_id` |
+| `invoices.jsonl` | `doc_id, invoice_id, entity_id, issued_at, due_at, currency, total_minor, line_items`, а также `vendor_ref`, `entity_name` |
+| `payments.jsonl` | `doc_id, payment_id, timestamp, currency, amount_minor, invoice_refs, direction, refund_of`, а также `entity_id`, `entity_name` |
+| `fx.csv` | ровно `date,source_currency,target_currency,rate` |
 
-Evaluator-only files (never reachable from the agent tools): `truth.json` (`issue_id, type, affected_ids,
-expected_amount_minor, currency, allowed_evidence_sets`, plus `scenario`) and `provenance.json` (seed,
-config, id map, red herrings, every injected transformation with before/after rows, and the complete
-pre-mutation public dataset).
+`document_count` в манифесте равен числу счетов плюс число платежей.
 
-## Value formats
+Файлы только для оценщика (инструментам агента недоступны):
 
-* **Money**: integers in minor units. Exponents are published per currency
-  (`USD 2, EUR 2, GBP 2, CHF 2, KZT 2, CNY 2, AED 2, SGD 2, JPY 0, KWD 3`).
-* **FX rates**: decimal strings (`"0.002061538"`), `1 source unit = rate target units`; target is always
-  the base currency. One rate per calendar day for every foreign currency of the profile.
-* **Time**: ISO-8601 with an explicit offset. Ledger and payment timestamps are written in UTC by default;
-  invoice timestamps in the supplier's own offset. Company time zones are fixed offsets (no DST).
-* **Missing references are explicit nulls**: JSON `null`; the literal `null` in CSV. A payment without
-  remittance information has `invoice_refs: null`.
-* `invoice_refs` is a list of `{"invoice_id", "amount_minor"}` remittance lines (amounts in the payment
-  currency, which equals the invoice currency).
+* `truth.json` — проблемы эталона: `issue_id, type, affected_ids, expected_amount_minor, currency,
+  allowed_evidence_sets` и `scenario`, а на уровне файла — `tolerance_minor`;
+* `provenance.json` — seed, конфигурация, таблица соответствия идентификаторов, ложные следы, каждое
+  внесённое преобразование со строками «до/после» и полный публичный набор данных до внесения ошибок.
+  Формат описан в `provenance_format.md`.
 
-## Accounting rules (from `policy.json`)
+## Форматы значений
 
-* **Accounting date** = local calendar date, in the company offset, of the source document timestamp
-  (`issued_at` for invoices, `timestamp` for payments).
-* **Period**: a posting belongs to the period iff its source document's accounting date lies in
-  `[period_start, period_end]`.
-* **FX**: use the rate dated on the accounting date.
-* **Rounding**: `convert(x) = round_half_up(x / 10**exp(src) * rate, exp(base))`, applied once per document
-  amount or remittance line.
-* **Postings** (all rows in base currency, every posting balances):
-  * invoice: `Dr expense / Cr 2000 AP` = convert(total, invoice rate);
-  * payment with remittance: one `Dr 2000 AP` row per line at the *invoice's* rate, `Cr 1000 Bank` at the
-    *payment's* rate, the difference to `7900 FX gain/loss`;
-  * payment without remittance: `Dr 2090 Suspense / Cr 1000 Bank` (correct treatment);
-  * reversal: mirror image of an invoice posting.
+* **Деньги** — целые числа в минимальных единицах валюты. Количество знаков опубликовано для каждой
+  валюты: `USD 2, EUR 2, GBP 2, CHF 2, KZT 2, CNY 2, AED 2, SGD 2, JPY 0, KWD 3`.
+* **Курсы** — десятичные строки (`"0.002061538"`): `1 единица исходной валюты = rate единиц целевой`.
+  Целевая валюта всегда базовая. Для каждой иностранной валюты профиля публикуется один курс на
+  календарный день.
+* **Время** — ISO-8601 с явным смещением. Время в главной книге и в платежах по умолчанию записано в UTC,
+  время счетов — в собственном смещении поставщика. Часовые пояса компаний — фиксированные смещения без
+  летнего времени.
+* **Отсутствующая ссылка — явный `null`:** в JSON это `null`, в CSV — литерал `null`. У платежа без
+  расшифровки `invoice_refs: null`.
+* `invoice_refs` — список строк расшифровки платежа (remittance) вида `{"invoice_id", "amount_minor"}`;
+  суммы указаны в валюте платежа, которая совпадает с валютой счёта.
+* `direction` — направление платежа: `"outbound"` (компания платит поставщику) или `"inbound"` (поставщик
+  возвращает деньги компании).
+* `refund_of` — `payment_id` возвращаемого платежа у возврата (`direction = "inbound"`); у всех остальных
+  платежей явный `null`. У возврата `invoice_refs: null`.
 
-## Error types (what the truth describes)
+## Правила учёта (из `policy.json`)
 
-Every amount is the **absolute misstatement of the ledger in base-currency minor units**.
+* **Учётная дата** — местная календарная дата в смещении компании для времени исходного документа
+  (`issued_at` у счетов, `timestamp` у платежей).
+* **Период:** проводка относится к периоду тогда и только тогда, когда учётная дата её исходного документа
+  лежит в `[period_start, period_end]`.
+* **Курс:** берётся курс на учётную дату.
+* **Округление:** `convert(x) = round_half_up(x / 10**exp(src) * rate, exp(base))`, применяется один раз к
+  каждой сумме документа или строке расшифровки.
+* **Проводки** (все строки в базовой валюте, каждая проводка сбалансирована):
+  * счёт: `Дт расходы / Кт 2000 AP` = convert(total, курс счёта);
+  * платёж с расшифровкой: по одной строке `Дт 2000 AP` на каждую строку расшифровки по курсу *счёта*,
+    `Кт 1000 Bank` по курсу *платежа*, разница — на `7900 FX gain/loss`;
+  * платёж без расшифровки: `Дт 2090 Suspense / Кт 1000 Bank` (это правильный учёт);
+  * возврат (`direction = "inbound"`, `refund_of` указывает на возвращаемый платёж): `Дт 1000 Bank` по
+    курсу возврата / `Кт 2090 Suspense` на сумму, с которой возвращаемый платёж был учтён в Suspense;
+    разница — на `7900`. Это правильный учёт;
+  * сторно: зеркальное отражение проводки счёта; полностью сторнированный счёт не даёт чистого эффекта.
 
-| type | causal transformation | `affected_ids` | expected amount | allowed evidence sets |
+## Типы ошибок (что описывает эталон)
+
+Каждая сумма — **абсолютное искажение главной книги в минимальных единицах базовой валюты**.
+
+| тип | причинное преобразование | `affected_ids` | ожидаемая сумма | допустимые наборы доказательств |
 |---|---|---|---|---|
-| `duplicate_invoice` | the same supplier invoice (same entity, vendor_ref, content) is captured and posted twice | both invoice ids | AP booked for one copy | both doc_ids + the AP or expense row of either copy (4 sets) |
-| `payment_allocation` | a remittance line is not applied to its invoice; the money is parked in Suspense (single-line payment: *missing*; multi-line: *partial*) | payment id + invoice id | the line converted at the invoice's policy rate (AP left uncleared) | payment doc, invoice doc, the Suspense row, the AP rows of the other lines, FX key of the invoice date if foreign |
-| `fx_rate` | a foreign posting converted at the rate of the wrong date (UTC date, due date, 1-3 day stale, month start) | invoice id or payment id | \|booked − correct\| of AP credit (invoice) or Bank credit (payment), always ≥ 3 | doc, AP/expense row or Bank row, FX key of the correct date |
-| `period_attribution` | a document of the adjacent month posted into this period because the period was derived from the UTC date | invoice id or payment id | AP credit or Bank credit as booked | doc + AP/expense row or Bank row |
+| `duplicate_invoice` | один и тот же счёт поставщика (та же организация, `vendor_ref`, содержимое) принят и проведён дважды | оба `invoice_id` | AP, начисленная по одной копии | оба `doc_id` и строка AP или расходов любой из копий (4 набора) |
+| `payment_allocation` | строка расшифровки не применена к своему счёту, деньги оставлены в Suspense (платёж из одной строки — *отсутствующее* распределение, из нескольких — *частичное*) | `payment_id` и `invoice_id` | строка, пересчитанная по учётному курсу счёта (AP осталась непогашенной) | документ платежа, документ счёта, строка Suspense, строки AP остальных строк расшифровки, ключ курса на дату счёта, если валюта иностранная |
+| `fx_rate` | валютная проводка пересчитана по курсу не той даты (дата UTC, дата оплаты, курс 1–3-дневной давности, начало месяца) | `invoice_id` или `payment_id` | \|начислено − правильно\| для кредита AP (счёт) или кредита Bank (платёж), всегда не меньше 3 | документ, строка AP/расходов или строка Bank, ключ курса правильной даты |
+| `period_attribution` | документ соседнего месяца проведён в этом периоде, потому что период определён по дате UTC | `invoice_id` или `payment_id` | кредит AP или кредит Bank в начисленном виде | документ и строка AP/расходов или строка Bank |
 
-Reporting precedence: a posting outside the period is reported only as `period_attribution`.
+Приоритет при сообщении: проводка вне периода описывается только как `period_attribution`.
 
-### Interacting scenarios
+В эталоне допустимые наборы доказательств состоят из `doc_id`, `row_id` и ключей курса. Как
+дополнительные доказательства принимаются любые существующие идентификаторы, которые возвращают
+инструменты, в том числе `invoice_id` и `payment_id`; `entity_id` не принимается (подробно — в
+`reward_design.md`).
 
-* **S1 `fx_partial_payment_boundary`** — a two-line foreign payment at the period boundary whose UTC date
-  falls in the adjacent month. The bank leg is converted at the UTC-date rate (`fx_rate`) **and** one line
-  is parked in Suspense at that wrong rate (`payment_allocation`). The correct allocation amount uses the
-  invoice's policy rate; the Suspense amount is provably different (test-enforced).
-* **S2 `fx_invoice_unapplied_payment`** — a foreign invoice booked at a wrong-date rate (`fx_rate`) **and**
-  its payment's remittance line left unapplied (`payment_allocation`). The shortcut "AP left open = booked
-  AP" is wrong by exactly the FX error (test-enforced).
+### Взаимодействующие сценарии
 
-### Legitimate red herrings (present in clean books)
+* **S1 `fx_partial_payment_boundary`** — валютный платёж из двух строк у границы периода, дата UTC которого
+  попадает в соседний месяц. Банковская часть пересчитана по курсу даты UTC (`fx_rate`), **и** одна строка
+  оставлена в Suspense по этому же неверному курсу (`payment_allocation`). Правильная сумма распределения
+  считается по учётному курсу счёта; сумма в Suspense от неё заведомо отличается (проверяется тестом).
+* **S2 `fx_invoice_unapplied_payment`** — валютный счёт учтён по курсу не той даты (`fx_rate`), **и**
+  строка расшифровки его оплаты не распределена (`payment_allocation`). Короткий путь «непогашенная AP =
+  начисленная AP» неверен ровно на величину ошибки курса (проверяется тестом).
 
-Recurring monthly invoices with equal amounts; repeat orders (same supplier and amount, different
-vendor_ref); the same vendor_ref used by two different suppliers; a duplicate capture fully reversed in the
-period; split payments; partial payments; one payment for several invoices; payments without remittance in
-Suspense; documents whose UTC date differs from their accounting date, including at the period boundary.
+### Законные ложные следы (встречаются и в чистых книгах)
 
-## Generation pipeline
+Регулярные ежемесячные счета с одинаковой суммой; повторные заказы (тот же поставщик и сумма, другой
+`vendor_ref`); один `vendor_ref` у двух разных поставщиков; дубль, полностью сторнированный в периоде;
+разделённые платежи; частичные платежи; один платёж за несколько счетов; платежи без расшифровки в
+Suspense; корректный возврат поставщиком такого платежа; документы, у которых дата UTC отличается от
+учётной даты, в том числе у границы периода.
 
-1. profile ("Financial DNA": retail, trading, software, manufacturing, logistics, consulting) and period;
-2. consistent hidden history (suppliers, invoices, payments, FX) with red herrings;
-3. correct postings; generator self-check of the accounting equalities;
-4. snapshot of the clean books (kept in provenance);
-5. causal error injection (truth + provenance);
-6. presentation: random public ids, names, order, timestamp representation;
-7. public dataset + sealed evaluator bundle.
+## Конвейер генерации
 
-Every generated episode is then checked by the **independent verifier** (see `security_model.md` and
-`evaluation_protocol.md`).
+1. профиль («Financial DNA»: retail, trading, software, manufacturing, logistics, consulting) и период;
+2. согласованная скрытая история (поставщики, счета, платежи, курсы) с ложными следами;
+3. правильные проводки и самопроверка бухгалтерских равенств в генераторе;
+4. снимок чистых книг (сохраняется в provenance);
+5. причинное внесение ошибок (эталон и provenance);
+6. представление: случайные публичные идентификаторы, имена, порядок, форма записи времени;
+7. публичный набор данных и закрытый пакет оценщика.
 
-Episode sizes (medium default): 244–355 ledger rows, 122–163 documents; small 149–231 rows; large
-336–429 rows, 167–208 documents; 0–12 issues.
+После этого каждый сгенерированный эпизод проверяет **независимый верификатор** (см. `security_model.md`
+и `evaluation_protocol.md`).
+
+## Размеры эпизодов
+
+Измерено на 20 опубликованных эпизодах `data/train` и `data/dev` (ENV 0.3.0):
+
+| размер | эпизодов | строк главной книги | документов (счета + платежи) | строк `fx.csv` |
+|---|---:|---:|---:|---:|
+| `small` | 2 | 190–193 | 88–89 | 182 |
+| `medium` (по умолчанию) | 13 | 251–338 | 127–161 | 180–450 |
+| `large` | 5 | 369–442 | 183–205 | 364–455 |
+
+Всего в опубликованных эпизодах от 0 до 10 проблем на эпизод (53 проблемы); конфигурация допускает от 0
+до 12. Платежей 1 328, из них 19 возвратов (`direction = "inbound"`).
+
+Диапазоны относятся только к опубликованным эпизодам. Эпизоды, сгенерированные с другими seed, могут
+немного выходить за эти границы.

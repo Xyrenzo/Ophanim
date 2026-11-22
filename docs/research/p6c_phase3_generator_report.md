@@ -1,134 +1,146 @@
-# P6-C Phase 3 — Generator compliance: report
+# P6-C, этап 3 — соответствие генератора: отчёт
 
-Branch `feat/p6-c-compliance` (Phase 2 committed as `60b9f8d`); nothing committed in this phase.
+Ветка `feat/p6-c-compliance` (этап 2 закоммичен как `60b9f8d`); на момент отчёта изменения этапа не
+закоммичены (позже — коммит `6b5af0d`, влит в `main` слиянием `36147e3`).
 
-## 1. Baseline (re-run before editing)
+## 1. Исходное состояние (перепроверено до правок)
 
-Working tree clean; `git log`: `60b9f8d p6-c p2`, `6dadbed p6-c p1`, `f16b130`.
-**619 passed** on Python 3.11.15 and **619 passed** on Python 3.14.3.
+Рабочее дерево чистое; `git log`: `60b9f8d p6-c p2`, `6dadbed p6-c p1`, `f16b130`.
+**619 passed** на Python 3.11.15 и **619 passed** на Python 3.14.3.
 
-## 2. Requirement interpretation (official definitions take precedence)
+## 2. Толкование требования (официальные определения важнее)
 
-The official D-matrix makes **D01–D05 clean episodes with an empty truth**:
-"D01-D05 | Пять чистых компаний | … D03: корректный возврат … Во всех truth пуст". A *correct* refund is
-therefore a legitimate red herring that must **not** be reported. The phase brief asked for the refund's
-truth to "describe the actual causal error"; that would contradict the official D03, so it was not done.
-Instead, the refund's correctness is verified *independently* by the public-data auditor, and a negative
-control proves that an inconsistent refund is detected. No new error type was introduced.
+Официальная D-матрица делает **D01–D05 чистыми эпизодами с пустым эталоном**:
+«D01-D05 | Пять чистых компаний | … D03: корректный возврат … Во всех truth пуст». Значит, *корректный*
+возврат — законный ложный след, о котором **не** нужно сообщать. Постановка задачи этапа просила, чтобы
+эталон возврата «описывал фактическую причинную ошибку»; это противоречило бы официальному D03, поэтому
+так сделано не было. Вместо этого корректность возврата *независимо* проверяет аудитор публичных данных, а
+отрицательный контроль доказывает, что некорректный возврат обнаруживается. Нового типа ошибки не
+добавлено.
 
-## 3. Plan → implementation
+## 3. План → реализация
 
-| requirement | implementation | tests |
+| требование | реализация | тесты |
 |---|---|---|
-| **D03** correct refund | `Payment.direction` (`outbound`/`inbound`) and `Payment.refund_of`. `HistoryBuilder._plant_refund` uses its own random stream. The supplier returns, in full, an earlier unidentified payment (no remittance, parked in Suspense). `posting.post_refund`: `Dr 1000 Bank` = convert(amount, rate(refund date)) / `Cr 2090 Suspense` = the amount the refunded payment parked / difference to `7900`. Guaranteed at `distractors` normal/high, absent at low. Refund and refunded payment are protected from error injection. Payments render `direction` and `refund_of` (explicit null unless a refund). `policy.json` gains the `refund` posting rule. `validate_world`, `audit/reconcile.py` and `audit/formats.py` verify refunds independently | 13 tests incl. 4 tamper controls |
-| **D09–D11** allocation mode | `EpisodeConfig.allocation_mode: "auto" \| "missing" \| "partial"` (default `auto` = previous behaviour). Explicit modes plant one correct carrier per requested error before the clean snapshot: a 1-line payment (missing) or a 2-line payment (partial). The injector enforces the shape (`required_kind`) and raises `GenerationError` otherwise; there is no fallback | 20 tests |
-| **D02** split payment | `_guarantee_split_payment`: at normal/high, if no split occurred, plant an invoice settled by two applied payments (sum = total). Measured: splits already occurred naturally in 60/60 default episodes | 17 tests |
-| **D05** FX/period boundary | the boundary red-herring invoice (in period in company time, UTC date in the adjacent month) now always comes from a **foreign-currency** supplier, so its correct FX rate is the company-time date's rate | 8 tests |
-| provenance | `scenario_carriers` added to provenance (smallest change, so planted carriers are traceable); `docs/provenance_format.md` written from real output; a test pins every documented key | 1 test |
-| tooling | `build-data` wrote `index.json` with platform line endings, which led to a stale-index mistake during this phase (§6); it now writes LF | regeneration check |
+| **D03** корректный возврат | `Payment.direction` (`outbound`/`inbound`) и `Payment.refund_of`. `HistoryBuilder._plant_refund` использует собственный поток случайных чисел. Поставщик полностью возвращает более ранний платёж без расшифровки (учтённый в Suspense). `posting.post_refund`: `Дт 1000 Bank` = convert(amount, курс на дату возврата) / `Кт 2090 Suspense` = сумма, с которой возвращаемый платёж был учтён в Suspense / разница на `7900`. Гарантирован при `distractors` normal/high, отсутствует при low. Возврат и возвращаемый платёж защищены от внесения ошибок. Платежи выводят `direction` и `refund_of` (явный null, если это не возврат). В `policy.json` добавлено правило проводки `refund`. `validate_world`, `audit/reconcile.py` и `audit/formats.py` независимо проверяют возвраты | 13 тестов, включая 4 контрольных на подмену |
+| **D09–D11** режим распределения | `EpisodeConfig.allocation_mode: "auto" \| "missing" \| "partial"` (по умолчанию `auto` = прежнее поведение). Явные режимы до снимка чистых книг закладывают по одному правильному носителю на каждую запрошенную ошибку: платёж из 1 строки (missing) или из 2 строк (partial). Модуль внесения ошибок требует нужную форму (`required_kind`) и иначе вызывает `GenerationError`; отката к случайному выбору нет | 20 тестов |
+| **D02** разделённый платёж | `_guarantee_split_payment`: при normal/high, если разделения не случилось, закладывается счёт, оплаченный двумя распределёнными платежами (сумма = итог счёта). Измерено: разделения и так естественно возникали в 60/60 эпизодах по умолчанию | 17 тестов |
+| **D05** граница курса и периода | счёт — ложный след у границы (в периоде по времени компании, дата UTC в соседнем месяце) теперь всегда от поставщика с **иностранной валютой**, поэтому правильный курс для него — курс даты по времени компании | 8 тестов |
+| provenance | в provenance добавлено `scenario_carriers` (минимальное изменение, чтобы заложенные носители можно было отследить); `docs/provenance_format.md` написан по реальному выводу; тест закрепляет каждый документированный ключ | 1 тест |
+| инструменты | `build-data` записывал `index.json` с окончаниями строк платформы, что привело на этом этапе к ошибке с устаревшим индексом (§6); теперь пишет LF | проверка регенерации |
 
-## 4. Designs
+## 4. Устройство
 
-**Refund accounting (D03).** The refund participates in the existing model:
-* currency equals the refunded payment's currency;
-* amount equals the full refunded amount, in exact minor units;
-* the refund date is strictly after the original, both inside the period in company time;
-* the Bank side uses the refund date's policy rate, and the Suspense side clears the historical parked
-  amount, with any FX difference posted to 7900;
-* `invoice_refs` is null, there is no AP effect, and the posting balances.
+**Учёт возврата (D03).** Возврат встроен в существующую модель:
 
-Evidence reachable through the tools:
-* the refund document (`get_document`);
-* the refunded payment (`get_record payments refund_of`);
-* every ledger row of both;
-* the FX rate of the refund date.
+* валюта совпадает с валютой возвращаемого платежа;
+* сумма равна всей возвращаемой сумме в точных минимальных единицах;
+* дата возврата строго позже исходного платежа, обе даты внутри периода по времени компании;
+* сторона Bank использует учётный курс на дату возврата, а сторона Suspense закрывает исторически учтённую
+  сумму; курсовая разница проводится на 7900;
+* `invoice_refs` равен null, влияния на AP нет, проводка сбалансирована.
 
-The independent auditor checks:
-* that the refunded payment exists and is outbound without remittance;
-* the same entity, currency and amount;
-* the chronological order;
-* that the Suspense cleared equals the Suspense parked.
+Доказательства, доступные через инструменты:
 
-Any violation is an anomaly. Tamper tests (Suspense amount, unknown `refund_of`, amount mismatch,
-refund dated earlier) are all detected.
+* документ возврата (`get_document`);
+* возвращаемый платёж (`get_record payments refund_of`);
+* все строки главной книги обоих;
+* курс на дату возврата.
 
-**Allocation modes (D09–D11).**
-* `missing` → the only remittance line is unapplied: applied = 0, unapplied = payment amount.
-* `partial` → one of two lines is unapplied: 0 < applied < amount and applied + unapplied = amount,
-  exactly, in the payment currency's minor units. The other line's AP row stays in the ledger.
+Независимый аудитор проверяет:
 
-Truth, provenance (`allocation_kind`) and evidence come from the actual mutation. Measured over 30 seeds:
-explicit `missing` produced missing 90/90 times; explicit `partial` produced partial 210/210 times.
+* что возвращаемый платёж существует, исходящий и без расшифровки;
+* ту же организацию, валюту и сумму;
+* хронологический порядок;
+* что закрытая сумма Suspense равна учтённой.
 
-## 5. Verification results (executed)
+Любое нарушение — аномалия. Тесты на подмену (сумма Suspense, неизвестный `refund_of`, несовпадение суммы,
+возврат с более ранней датой) обнаруживаются все.
 
-| check | result |
+**Режимы распределения (D09–D11).**
+
+* `missing` → единственная строка расшифровки не применена: применено = 0, не применено = сумма платежа.
+* `partial` → одна из двух строк не применена: 0 < применено < сумма и применено + не применено = сумма,
+  точно, в минимальных единицах валюты платежа. Строка AP другой строки остаётся в главной книге.
+
+Эталон, provenance (`allocation_kind`) и доказательства берутся из фактического изменения. Измерено на 30
+seed: явный `missing` дал отсутствующее распределение 90 раз из 90; явный `partial` — частичное 210 раз из
+210.
+
+## 5. Результаты проверки (выполнено)
+
+| проверка | результат |
 |---|---|
-| ad-hoc sweep: 300 episodes (30 seeds × 10 configs incl. both modes, 12-issue mixes, low/high distractors) | 0 independent-verification failures; 270 refunds (exactly 1 per normal/high episode, 0 at low) |
-| new tests `tests/integration/test_generator_compliance.py` | **68 passed** |
-| full suite, Python 3.11.15 | **687 passed** (619 + 68) |
-| full suite, Python 3.14.3 | **687 passed** |
-| existing tests | all 619 unchanged and passing (no test weakened) |
-| D03 (clean + refund, 8 seeds + tool access + scoring) | pass: truth empty, 0 findings, 0 anomalies, `score_episode([])` F1 = 1 |
-| D09 / D10 / D11 (missing, partial, end-to-end through the adapter with tool-fetched evidence) | pass |
-| D02 (16 seed × config combinations + guarantee path) | pass |
-| D05 (8 seeds through the tools) | pass: foreign boundary invoice; AP = conversion at the company-time date's rate ≠ conversion at the UTC date's rate; pair direction SRC→BASE; clean scoring |
-| `ophanim verify` | PASS: 20/20 episodes verified, 20/20 byte-identical regeneration, 727 trajectory lines, 0 leaks; closed evaluation 20/20 data, 20/20 metamorphic, 20/20 reproducibility |
-| Docker offline, Linux, Python 3.11.15, `--network none --cpus 2 --memory 4g` | full `ophanim verify` PASS (**687 passed** inside the container; data 20/20 verified and regenerated identically; 0 leaks; 20/20/20 closed evaluation); `judge_adapter.py --smoke` ok |
+| отдельная проверка: 300 эпизодов (30 seed × 10 конфигураций, включая оба режима, смеси из 12 проблем, ложные следы low/high) | 0 ошибок независимой верификации; 270 возвратов (ровно 1 на эпизод normal/high, 0 при low) |
+| новые тесты `tests/integration/test_generator_compliance.py` | **68 passed** |
+| полный набор, Python 3.11.15 | **687 passed** (619 + 68) |
+| полный набор, Python 3.14.3 | **687 passed** |
+| существующие тесты | все 619 без изменений и проходят (ни один тест не ослаблен) |
+| D03 (чистый эпизод с возвратом, 8 seed, доступ через инструменты и оценка) | проходит: эталон пуст, 0 выводов, 0 аномалий, `score_episode([])` F1 = 1 |
+| D09 / D10 / D11 (missing, partial, сквозной прогон через адаптер с доказательствами, полученными инструментами) | проходят |
+| D02 (16 комбинаций seed × конфигурация и путь гарантии) | проходит |
+| D05 (8 seed через инструменты) | проходит: валютный счёт у границы; AP = пересчёт по курсу даты по времени компании ≠ пересчёт по курсу даты UTC; направление пары SRC→BASE; чистая оценка |
+| `ophanim verify` | PASS: 20/20 эпизодов проверено, 20/20 побайтная регенерация, 727 строк траекторий, 0 утечек; закрытая оценка — 20/20 данные, 20/20 метаморфные пары, 20/20 воспроизводимость |
+| Docker без сети, Linux, Python 3.11.15, `--network none --cpus 2 --memory 4g` | полный `ophanim verify` PASS (**687 passed** внутри контейнера; данные 20/20 проверены и перегенерированы идентично; 0 утечек; закрытая оценка 20/20/20); `judge_adapter.py --smoke` ok |
 
-Baseline returns on the closed suite changed because the episodes changed (ENV 0.3.0):
+Средние награды базовых политик на закрытом наборе изменились, потому что изменились эпизоды (ENV 0.3.0).
+Цифры получены прогоном `ophanim verify`, то есть со встроенным локальным секретом (см.
+`docs/results.md`, раздел 3):
 
-| policy | mean return |
+| политика | средняя награда |
 |---|---:|
-| random explorer | −0.709 |
-| simple reconciliation | −0.650 (it also falls for the foreign-currency refund red herring) |
-| mark-everything | −1.000 |
+| случайный исследователь | −0.709 |
+| простая сверка | −0.650 (она ещё и попадается на ложный след с валютным возвратом) |
+| пометить всё | −1.000 |
 | reference auditor | +0.961 |
 | oracle | 1.000 |
 
-`docs/results.md` is explicitly labelled ENV 0.1.0 and was not rewritten.
+На момент этого отчёта `docs/results.md` был явно помечен как ENV 0.1.0 и не переписывался. Позднее он
+обновлён до ENV 0.3.0.
 
-## 6. Data regeneration and versioning
+## 6. Перегенерация данных и версии
 
-`ENV_VERSION` 0.2.0 → **0.3.0**. Data was regenerated with `ophanim build-data` from unchanged seeds and
-suites. The diff is broad by construction:
-* new documents (refunds, guaranteed splits, foreign boundary invoices) shift the sequential public-id
-  stream, so ids are re-drawn;
-* the configuration gained `allocation_mode`, so the config digest changes and with it every `episode_id`;
-* all 20 `payments.jsonl` files gain `direction`/`refund_of`;
-* 19 of 20 episodes gain a refund (the exception is `dev-01`, distractors `low`);
-* trajectories grew from 698 to 727 lines.
+`ENV_VERSION` 0.2.0 → **0.3.0**. Данные перегенерированы командой `ophanim build-data` из неизменных seed и
+наборов. Изменения широкие по самой природе:
 
-Integrity is established by regeneration, not by diff size: `ophanim verify` regenerates every published
-episode byte-identically and independently verifies all 20.
+* новые документы (возвраты, гарантированные разделения, валютные счета у границы) сдвигают
+  последовательный поток публичных идентификаторов, поэтому идентификаторы вытягиваются заново;
+* в конфигурации появилось `allocation_mode`, поэтому меняется хеш конфигурации, а с ним и каждый
+  `episode_id`;
+* во всех 20 файлах `payments.jsonl` появились `direction`/`refund_of`;
+* 19 из 20 эпизодов получили возврат (исключение — `dev-01`, `distractors` low);
+* траектории выросли с 698 до 727 строк.
 
-**A mistake made and fixed during this phase.** After the first regeneration I restored the two
-`index.json` files from git to remove line-ending noise, as in Phase 2. This time their `episode_id`
-values *had* changed, so the restored files were stale (20/20 entries). A consistency check caught it.
-The root cause, CRLF output from `build-data` on Windows, was fixed (`index.json` is now written with LF)
-and the data regenerated. Final check: 0 stale entries, 0 CR bytes, and the `index.json` diff is exactly
-the 20 new `episode_id` lines.
+Целостность подтверждается регенерацией, а не размером изменений: `ophanim verify` побайтно
+перегенерирует каждый опубликованный эпизод и независимо проверяет все 20.
 
-The official 20-episode suite configuration (`configs/eval/official_suite.json`) is unchanged.
+**Ошибка, допущенная и исправленная на этом этапе.** После первой регенерации два файла `index.json` были
+восстановлены из git, чтобы убрать шум с окончаниями строк, как на этапе 2. Но на этот раз значения
+`episode_id` *изменились*, поэтому восстановленные файлы оказались устаревшими (20/20 записей). Это поймала
+проверка согласованности. Первопричина — вывод CRLF у `build-data` в Windows — устранена (`index.json`
+теперь пишется с LF), данные перегенерированы. Итоговая проверка: 0 устаревших записей, 0 байтов CR, а
+изменения `index.json` — ровно 20 новых строк `episode_id`.
 
-## 7. Remaining gaps / notes
+Конфигурация официального набора из 20 эпизодов (`configs/eval/official_suite.json`) не изменилась.
 
-* All D-matrix generator items identified by the P6 audit (D02, D03, D05, D09–D11, DC1/T1 provenance
-  documentation) are now addressed and tested.
-* Still interpretations (unchanged): O1 (unknown extra fields → −1), O2 (`episode_id` mismatch → −1).
-* `docs/results.md` reports ENV 0.1.0 measurements; refresh it from `ophanim evaluate` before submission if
-  current numbers are wanted.
-* No official run by the jury has happened. "Pass" above means the intended behaviour was verified by
-  our own tests and the independent auditor. It is not a jury verdict. Full Blocks 1–4 compliance is not
-  claimed.
+## 7. Оставшиеся пробелы и замечания
 
-## 8. Commands
+* Все пункты D-матрицы по генератору, найденные аудитом P6 (D02, D03, D05, D09–D11, документация
+  provenance DC1/T1), закрыты и покрыты тестами.
+* Толкования без изменений: O1 (неизвестные лишние поля → −1), O2 (несовпадение `episode_id` → −1).
+* `docs/results.md` содержал измерения ENV 0.1.0; его нужно было обновить по `ophanim evaluate` перед
+  отправкой. Это сделано позже (результаты ENV 0.3.0, исторический раздел ENV 0.1.0 сохранён).
+* Официального прогона жюри не было. «Проходит» выше означает, что задуманное поведение подтверждено нашими
+  собственными тестами и независимым аудитором. Это не вердикт жюри. Полного соответствия блокам 1–4 не
+  заявляется.
+
+## 8. Команды
 
 ```bash
-python -m pytest tests                                            # full suite (PYTHONPATH=src via pyproject)
-python -m pytest tests/integration/test_generator_compliance.py   # Phase 3 tests
-PYTHONPATH=src python -m ophanim build-data                       # regenerate data/ (deterministic)
-PYTHONPATH=src python -m ophanim verify                           # one-command verification
+python -m pytest tests                                            # полный набор (PYTHONPATH=src задан в pyproject)
+python -m pytest tests/integration/test_generator_compliance.py   # тесты этапа 3
+PYTHONPATH=src python -m ophanim build-data                       # перегенерировать data/ (детерминированно)
+PYTHONPATH=src python -m ophanim verify                           # проверка одной командой
 docker build -t ophanim . && docker run --rm --network none --cpus 2 --memory 4g ophanim
 docker run --rm --network none --entrypoint python ophanim judge_adapter.py --smoke
 ```
